@@ -28,7 +28,7 @@ if os.path.exists(folder):
 os.makedirs(folder)
 
 for tensor in model.graph.initializer:
-    arr = numpy_helper.to_array(tensor).astype(np.float32)
+    arr = numpy_helper.to_array(tensor).astype(np.float16)
     
     filename = f"./bins/{cleanName(tensor.name)}.bin"
     arr.tofile(filename)

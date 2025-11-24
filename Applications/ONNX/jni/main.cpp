@@ -38,7 +38,7 @@ int main() {
             << std::endl;
   try {
     std::string path =
-      "../../../../Applications/ONNX/python/qwen3/qwen3_model.onnx";
+      "/workspace/nntrainer/Applications/ONNX/python/qwen3/qwen3_model.onnx";
     model->load(path, ml::train::ModelFormat::MODEL_FORMAT_ONNX);
   } catch (const std::exception &e) {
     std::cerr << "Error during load: " << e.what() << "\n";
@@ -48,6 +48,16 @@ int main() {
   std::cout << "--------------------------------------Load Model "
                "Done--------------------------------------"
             << std::endl;
+
+// Set FP16 tensor type BEFORE compilation for mixed precision
+#ifdef ENABLE_FP16
+  std::cout << "--------------------------------------Converting model to "
+               "FP16--------------------------------------"
+            << std::endl;
+  model->setProperty({"model_tensor_type=FP16-FP16"});
+  model->setProperty({"loss_scale=17768"});
+#endif
+
   try {
     model->compile(ml::train::ExecutionMode::INFERENCE);
   } catch (const std::exception &e) {
@@ -74,18 +84,45 @@ int main() {
                "Done--------------------------------------"
             << std::endl;
 
-  std::string weight_path = "../../../../Applications/ONNX/python/qwen3/bins/";
+  std::string weight_path = "/workspace/nntrainer/Applications/ONNX/python/qwen3/bins/";
   try {
     model->load(weight_path, ml::train::ModelFormat::MODEL_FORMAT_BIN);
+#ifdef ENABLE_FP16
+    std::cout << "--------------------------------------FP32 weights loaded and "
+                 "automatically converted to FP16--------------------------------------"
+              << std::endl;
+#else
+    std::cout << "--------------------------------------Loading weights "
+                 "Done--------------------------------------"
+              << std::endl;
+#endif
   } catch (std::exception &e) {
     std::cerr << "Error during loading weights: " << e.what() << "\n";
     return 1;
   }
 
-  std::cout << "--------------------------------------Loading weights "
-               "Done--------------------------------------"
-            << std::endl;
+  // Convert input data to FP16 if model is using FP16
+#ifdef ENABLE_FP16
+  _FP16 *input = new _FP16[1];
+  _FP16 *sin = new _FP16[128];
+  _FP16 *cos = new _FP16[128];
+  _FP16 *epsilon = new _FP16[1];
 
+  input[0] = static_cast<_FP16>(52);
+
+  for (int i = 0; i < 128; i++) {
+    sin[i] = static_cast<_FP16>(0);
+    cos[i] = static_cast<_FP16>(1);
+  }
+  epsilon[0] = static_cast<_FP16>(1e-6);
+
+  std::vector<_FP16 *> in;
+
+  in.push_back(epsilon);
+  in.push_back(sin);
+  in.push_back(cos);
+  in.push_back(input);
+#else
   float *input = new float[1];
   float *sin = new float[128];
   float *cos = new float[128];
@@ -105,8 +142,22 @@ int main() {
   in.push_back(sin);
   in.push_back(cos);
   in.push_back(input);
+#endif
 
-  auto ans = model->inference(1, in);
+  // The inference API expects float* regardless of tensor type
+  // NNTrainer handles the conversion internally
+  std::vector<float *> float_in;
+#ifdef ENABLE_FP16
+  // Convert FP16 inputs back to float for the API
+  float_in.push_back(reinterpret_cast<float *>(epsilon));
+  float_in.push_back(reinterpret_cast<float *>(sin));
+  float_in.push_back(reinterpret_cast<float *>(cos));
+  float_in.push_back(reinterpret_cast<float *>(input));
+#else
+  float_in = in;
+#endif
+
+  auto ans = model->inference(1, float_in);
 
   std::cout << "-------------------------------------------Inference "
                "Done--------------------------------------------"

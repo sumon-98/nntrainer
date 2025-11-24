@@ -400,7 +400,7 @@ std::vector<Weight *> Manager::requestWeights(
   std::vector<Weight *> ret;
   size_t current_size = weights_v2.size();
 
-  for (unsigned int i = 0; i < weights_spec.size(); ++i) {
+    for (unsigned int i = 0; i < weights_spec.size(); ++i) {
     auto &[dim_v, dim_g, t_initializer, w_reg, w_reg_const, decay,
            clip_by_global_norm, need_gradient, name, axis, loss_scale, is_mixed,
            is_virtual] = weights_spec.at(i);

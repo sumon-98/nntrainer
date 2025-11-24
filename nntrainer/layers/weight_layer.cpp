@@ -40,6 +40,24 @@ void WeightLayer::finalize(InitLayerContext &context) {
   const auto &weight_dim = std::get<props::TensorDimension>(weight_props).get();
   const auto &weight_dtype = std::get<props::TensorDataType>(weight_props);
   const auto &weight_name = std::get<props::WeightName>(weight_props);
+  std::string data_type_str;
+  switch (weight_dim.getDataType()) {
+    case TensorDim::DataType::FP32:
+      data_type_str = "FP32";
+      break;
+    case TensorDim::DataType::FP16:
+      data_type_str = "FP16";
+      break;
+    default:
+      data_type_str = "Unknown";
+      break;
+  }
+
+  std::cout << "[Finalize] Weight Layer" << std::endl;
+  std::cout << "Name: " << context.getName() << std::endl;
+  std::cout << "Dim: " << weight_dim << std::endl;
+  std::cout << "Data Type: " << data_type_str << std::endl;
+  
 
   std::vector<TensorDim> output_dims(1);
 
@@ -61,8 +79,38 @@ void WeightLayer::exportTo(Exporter &exporter,
 }
 
 void WeightLayer::setProperty(const std::vector<std::string> &values) {
+  std::cout << "[Set Property] Weight Layer props: " << std::endl;
   auto remain_props = loadProperties(values, weight_props);
+  if (!remain_props.empty()) {
+    std::string msg = "[WeightLayer] Unknown Layer Properties count " +
+                      std::to_string(values.size());
+    throw exception::not_supported(msg);
+  }
+  std::string data_type_str;
+  switch (std::get<props::TensorDataType>(weight_props)) {
+    case TensorDim::DataType::FP32:
+      data_type_str = "FP32";
+      break;
+    case TensorDim::DataType::FP16:
+      data_type_str = "FP16";
+      break;
+    default:
+      data_type_str = "Unknown";
+      break;
+  }
+  std::cout << "[After LoadProps] DType: " << data_type_str << std::endl;
+  
+  // Check if TensorDimension property is set before accessing it
+  const auto &tensor_dim_prop = std::get<props::TensorDimension>(weight_props);
+  if (tensor_dim_prop.empty()) {
+    std::cout << "Dim: Not set yet" << std::endl;
+  } else {
+    std::cout << "Dim: " << tensor_dim_prop.get() << std::endl;
+  }
+  
+  std::cout << "[Remaining Props]" << std::endl;
   LayerImpl::setProperty(remain_props);
+  std::cout << "[Exit setProp]" << std::endl;
 }
 
 void WeightLayer::forwarding(RunLayerContext &context, bool training) {

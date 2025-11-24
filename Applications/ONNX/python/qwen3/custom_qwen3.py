@@ -38,15 +38,15 @@ class Qwen3RotaryEmbedding(nn.Module):
     @torch.no_grad()
     #@dynamic_rope_update  # power user: used with advanced RoPE types (e.g. dynamic rope)
     def forward(self, x, position_ids):
-        inv_freq_expanded = self.inv_freq[None, :, None].float().expand(position_ids.shape[0], -1, 1).to(x.device)
-        position_ids_expanded = position_ids[:, None, :].float()
+        inv_freq_expanded = self.inv_freq[None, :, None].to(x.dtype).expand(position_ids.shape[0], -1, 1).to(x.device)
+        position_ids_expanded = position_ids[:, None, :].to(x.dtype)
 
         device_type = x.device.type if isinstance(x.device.type, str) and x.device.type != "mps" else "cpu"
-        with torch.autocast(device_type=device_type, enabled=False):  # Force float32
-            freqs = (inv_freq_expanded.float() @ position_ids_expanded.float()).transpose(1, 2)
-            emb = torch.cat((freqs, freqs), dim=-1)
-            cos = emb.cos() * self.attention_scaling
-            sin = emb.sin() * self.attention_scaling
+        # Remove autocast to maintain FP16 precision throughout
+        freqs = (inv_freq_expanded @ position_ids_expanded).transpose(1, 2)
+        emb = torch.cat((freqs, freqs), dim=-1)
+        cos = emb.cos() * self.attention_scaling
+        sin = emb.sin() * self.attention_scaling
 
         return cos.to(dtype=x.dtype), sin.to(dtype=x.dtype)
 
@@ -163,7 +163,7 @@ class Qwen3Attention(nn.Module):
         attn_weights = query_states.reshape(1,1,16,128) * key_states.reshape(1,1,16,128)
         attn_weights = torch.sum(attn_weights, dim=3,keepdim=True)
         
-        attn_weights = nn.functional.softmax(attn_weights, dim=-1, dtype=torch.float32)  
+        attn_weights = nn.functional.softmax(attn_weights, dim=-1, dtype=query_states.dtype)  
         
         attn_output = value_states.reshape(1,1,16,128) * attn_weights
         
@@ -236,8 +236,9 @@ class Qwen3Model(PreTrainedModel):
         #hidden_states_new = self.embed_tokens(input_ids)
 
         # nn.embedding is replaced by gather op for easier tracing. Hence input is broadcasted to (1,1,1,self.config,hidden_size).   
-        input_ids = self.broadcast * input_ids
-        hidden_states = torch.gather(self.vocab_weights,0,input_ids)
+        # Ensure input_ids remains integer type for gather operation
+        input_ids_int = self.broadcast * input_ids
+        hidden_states = torch.gather(self.vocab_weights,0,input_ids_int)
              
         for decoder_layer in self.layers[:self.config.num_hidden_layers]:
             hidden_states = decoder_layer(

@@ -688,10 +688,13 @@ void NeuralNetwork::load(const std::string &file_path,
   for (auto iter = model_graph.cbegin(); iter != model_graph.cend(); iter++) {
     start_from = 0;
     auto weights = (*iter)->getRunContext().getWeights();
+    std::cout << "Layer: " << (*iter)->getName() << std::endl;
     for (auto weight : weights) {
       size_t size = weight->getVariable().getMemoryBytes();
       auto tensor_data_type = weight->getDim().getDataType();
       weight->getVariableRef().setFileOffset(start_from);
+      std::cout << "Size: " << size << " Data: " << weight->getDim() << std::endl;
+
       ///@todo instead of checking the data type,
       /// we may need to create a common parent class for
       /// quantized tensors, requiring qparam to be saved
@@ -744,9 +747,9 @@ void NeuralNetwork::load(const std::string &file_path,
         // futures.emplace_back(std::async(std::launch::async, [&, node] {
         if (1 || !MMAP_READ) {
           // append this to v and pass it
-          //  std::cout << "Weight layer name: " <<
-          //  (*iter)->getRunContext().getName() << "  \nPath: " << v[0] <<
-          //  std::endl;
+           std::cout << "Weight layer name: " <<
+           (*iter)->getRunContext().getName() << "  \nPath: " << v[0] <<
+           std::endl;
           std::string temp1 = v[0];
           std::string temp2;
           if (v.size() == 2)
@@ -760,6 +763,7 @@ void NeuralNetwork::load(const std::string &file_path,
               temp1.append(".bin");
             }
           }
+          std::cout << temp1 << std::endl;
           auto local_model_file = checkedOpenStream<std::ifstream>(
             (v.size() == 2) ? temp2 : temp1, std::ios::in | std::ios::binary);
           node->read(local_model_file, false, exec_mode, fsu_mode,
@@ -1742,8 +1746,8 @@ void NeuralNetwork::print(std::ostream &out, unsigned int flags,
   }
 
   if (flags & PRINT_GRAPH_INFO) {
-    unsigned int total_col_size = 180;
-    std::vector<unsigned int> column_size = {70, 20, 20, 70};
+    unsigned int total_col_size = 200;
+    std::vector<unsigned int> column_size = {70, 20, 15, 20, 55};
     auto print_graph_layer_info =
       [column_size](std::ostream &out, std::vector<std::string> layer_info) {
         const auto &trim_string = [](std::string str,
@@ -1761,7 +1765,7 @@ void NeuralNetwork::print(std::ostream &out, unsigned int flags,
 
     out << std::string(total_col_size, '=') << '\n';
     print_graph_layer_info(
-      out, {"Layer name", "Layer type", "Output dimension", "Input layer"});
+      out, {"Layer name", "Layer type", "Data type", "Output dimension", "Input layer"});
     out << std::string(total_col_size, '=') << '\n';
     if (compiled) {
       props::GenericShape dim_property;
@@ -1779,11 +1783,27 @@ void NeuralNetwork::print(std::ostream &out, unsigned int flags,
           iter->getInputConnections();
         std::string first_input_name =
           input_layer_names.empty() ? "" : input_layer_names[0];
+        
+        // Get data type from the first output dimension
+        std::string data_type_str = "";
+        auto weights = iter->getRunContext().getWeights();
+        for(auto weight: weights) {
+          std::cout << "########### Weight: " << weight->getDim() << std::endl;
+        }
+        if (!iter->getOutputDimensions().empty()) {
+          if(iter->getWeightDataType() == TensorDim::DataType::FP16) {
+            data_type_str = "FP16(#)"; 
+          } 
+          else if(iter->getWeightDataType() == TensorDim::DataType::FP32) {
+            data_type_str = "FP32";
+          }
+        }
+        
         print_graph_layer_info(
-          out, {iter->getName(), iter->getType(), first_dim, first_input_name});
+          out, {iter->getName(), iter->getType(), data_type_str, first_dim, first_input_name});
         for (unsigned int i = 1; i < input_layer_names.size(); ++i) {
           dim_property.set(iter->getInputDimensions()[i]);
-          print_graph_layer_info(out, {"", "", "", input_layer_names[i]});
+          print_graph_layer_info(out, {"", "", "", "", input_layer_names[i]});
         }
         out << std::string(total_col_size,
                            iter == model_graph.cend() - 1 ? '=' : '-')

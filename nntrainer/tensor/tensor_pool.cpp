@@ -67,6 +67,9 @@ Tensor *TensorPool::view(const std::string &name, const std::string &reference,
                          TensorLifespan lifespan, const size_t offset) {
   auto &spec = getSourceSpec(reference);
 
+  std::cout << "Spec tensor: " << spec.tensor->getName() << std::endl;
+  std::cout << "Spec: " << spec.tensor->getDim() << std::endl;
+  std::cout << "Dim: " << dim << std::endl;
   NNTR_THROW_IF(spec.tensor->getDataType() != dim.getDataType() ||
                   spec.tensor->getFormat() != dim.getFormat(),
                 std::invalid_argument)

@@ -39,6 +39,8 @@ static void suffixSpec(VarGradSpecV2 &spec, unsigned int idx) {
   }
 }
 
+
+// problem is here
 InitLayerContext::InitLayerContext(
   const std::vector<TensorDim> &dim, const std::vector<bool> &req_out_connected,
   bool is_inplace_, const std::string &n, const std::string &prefix_,
@@ -56,6 +58,28 @@ InitLayerContext::InitLayerContext(
   loss_scale(loss_scale_),
   mode(mode_),
   engine(engine_) {
+    std::cout << "Init context" << std::endl;
+    const auto &w_specs = getWeightsSpec();
+    for (auto i = 0u; i < w_specs.size(); ++i) {
+      // Debug statement to print weight data type
+      const TensorDim &weight_dim = std::get<0>(w_specs.at(i));
+      std::string data_type_str;
+      switch (weight_dim.getDataType()) {
+        case TensorDim::DataType::FP32:
+          data_type_str = "FP32";
+          break;
+        case TensorDim::DataType::FP16:
+          data_type_str = "FP16";
+          break;
+        default:
+          data_type_str = "Unknown";
+          break;
+      }
+      std::cout << "InitContext: Layer " << getName() 
+                << " - Weight " << std::get<8>(w_specs.at(i)) 
+                << " - Data Type: " << data_type_str 
+                << std::endl;
+    }
     // std::cout << "--------------------------------------------" << std::endl;
     // std::cout << name << std::endl;
     // std::cout << "Input dim: " << std::endl;
@@ -571,15 +595,22 @@ bool RunLayerContext::validate(bool skip_input, bool skip_label) {
    */
   bool ret = true;
 #ifdef DEBUG
+  std::cout << "[DEBUG] RunLayerContext::validate() called for layer: " << getName() << std::endl;
+  std::cout << "[DEBUG] skip_input: " << skip_input << ", skip_label: " << skip_label << std::endl;
+  
   std::function<bool(const Var_Grad *, bool)> matcher;
 
   if (tensor_map.empty() || !tensor_map[inputs[0]->getName()]) {
+    std::cout << "[DEBUG] Initializing tensor map..." << std::endl;
     auto filler = [this](const auto &vec) {
       for (auto const &val : vec) {
+        std::cout << "[DEBUG] Processing tensor: " << val->getName() << std::endl;
         if (val->getVariableRef().getTensorType().data_type ==
             TensorDim::DataType::FP32) {
           tensor_map[val->getName()] = val->getVariableRef().getData();
           tensor_map[val->getGradientName()] = val->getGradientRef().getData();
+          std::cout << "[DEBUG] Added FP32 tensor: " << val->getName() 
+                    << " with data ptr: " << val->getVariableRef().getData() << std::endl;
         } else if (val->getVariableRef().getTensorType().data_type ==
                    TensorDim::DataType::FP16) {
 #ifdef ENABLE_FP16
@@ -587,6 +618,7 @@ bool RunLayerContext::validate(bool skip_input, bool skip_label) {
             val->getVariableRef().template getData<_FP16>();
           tensor_map[val->getGradientName()] =
             val->getGradientRef().template getData<_FP16>();
+          std::cout << "[DEBUG] Added FP16 tensor: " << val->getName() << std::endl;
 #else
           throw std::invalid_argument("Error: enable-fp16 is not enabled");
 #endif
@@ -595,47 +627,92 @@ bool RunLayerContext::validate(bool skip_input, bool skip_label) {
     };
 
     /** fill the tensor map for the first validation */
+    std::cout << "[DEBUG] Processing weights (" << weights.size() << " tensors)" << std::endl;
     filler(weights);
+    std::cout << "[DEBUG] Processing inputs (" << inputs.size() << " tensors)" << std::endl;
     filler(inputs);
+    std::cout << "[DEBUG] Processing outputs (" << outputs.size() << " tensors)" << std::endl;
     filler(outputs);
+    std::cout << "[DEBUG] Processing tensors (" << tensors.size() << " tensors)" << std::endl;
     filler(tensors);
+    std::cout << "[DEBUG] Tensor map initialized with " << tensor_map.size() << " entries" << std::endl;
+  } else {
+    std::cout << "[DEBUG] Using existing tensor map with " << tensor_map.size() << " entries" << std::endl;
   }
 
   matcher = [this](const Var_Grad *val, bool skip_grad) -> bool {
-    if (val->getName().empty() ||
-        (val->hasGradient() && val->getGradientName().empty()))
+    std::cout << "[DEBUG] Validating tensor: " << val->getName() 
+              << ", hasGradient: " << val->hasGradient() 
+              << ", skip_grad: " << skip_grad << std::endl;
+    
+    if (val->getName().empty()) {
+      std::cout << "[DEBUG] VALIDATION FAILED: Empty tensor name" << std::endl;
       return false;
+    }
+    
+    if (val->hasGradient() && val->getGradientName().empty()) {
+      std::cout << "[DEBUG] VALIDATION FAILED: Empty gradient name for tensor: " << val->getName() << std::endl;
+      return false;
+    }
 
-    if (tensor_map.find(val->getName()) == tensor_map.end())
-      /**
-       * Disabled because of in-place input layer. Enable this later.
-       * tensor_map[val->getName()] != val->getVariableRef().getData())
-       */
+    if (tensor_map.find(val->getName()) == tensor_map.end()) {
+      std::cout << "[DEBUG] VALIDATION FAILED: Tensor name '" << val->getName() 
+                << "' not found in tensor map" << std::endl;
+      std::cout << "[DEBUG] Available tensor names: ";
+      for (const auto& pair : tensor_map) {
+        std::cout << pair.first << " ";
+      }
+      std::cout << std::endl;
       return false;
+    }
 
     if (skip_grad &&
-        (tensor_map.find(val->getGradientName()) == tensor_map.end()))
+        (tensor_map.find(val->getGradientName()) == tensor_map.end())) {
+      std::cout << "[DEBUG] VALIDATION FAILED: Gradient name '" << val->getGradientName() 
+                << "' not found in tensor map for tensor: " << val->getName() << std::endl;
       return false;
+    }
 
+    std::cout << "[DEBUG] Tensor validation PASSED for: " << val->getName() << std::endl;
     return true;
   };
 
   auto matcher_w = [this, &matcher](const std::vector<Weight *> &vec) {
-    return std::all_of(vec.begin(), vec.end(),
+    std::cout << "[DEBUG] Validating weights vector (" << vec.size() << " tensors)" << std::endl;
+    bool result = std::all_of(vec.begin(), vec.end(),
                        std::bind(matcher, std::placeholders::_1, false));
+    std::cout << "[DEBUG] Weights validation result: " << (result ? "PASSED" : "FAILED") << std::endl;
+    return result;
   };
 
   auto matcher_vw = [this, &matcher](const std::vector<Var_Grad *> &vec,
                                      bool skip_grad = false) {
-    return std::all_of(vec.begin(), vec.end(),
+    std::cout << "[DEBUG] Validating Var_Grad vector (" << vec.size() << " tensors), skip_grad: " << skip_grad << std::endl;
+    bool result = std::all_of(vec.begin(), vec.end(),
                        std::bind(matcher, std::placeholders::_1, skip_grad));
+    std::cout << "[DEBUG] Var_Grad validation result: " << (result ? "PASSED" : "FAILED") << std::endl;
+    return result;
   };
 
   /** match the tensor map from the next validations */
-  ret =
-    matcher_w(weights) & matcher_vw(tensors) & matcher_vw(outputs, skip_label);
-  if (!skip_input)
-    ret &= matcher_vw(inputs);
+  std::cout << "[DEBUG] Starting validation checks..." << std::endl;
+  bool weights_result = matcher_w(weights);
+  bool tensors_result = matcher_vw(tensors);
+  bool outputs_result = matcher_vw(outputs, skip_label);
+  bool inputs_result = true;
+  
+  if (!skip_input) {
+    inputs_result = matcher_vw(inputs);
+  }
+  
+  ret = weights_result & tensors_result & outputs_result & inputs_result;
+  
+  std::cout << "[DEBUG] Final validation results:" << std::endl;
+  std::cout << "[DEBUG]  Weights: " << (weights_result ? "PASSED" : "FAILED") << std::endl;
+  std::cout << "[DEBUG]  Tensors: " << (tensors_result ? "PASSED" : "FAILED") << std::endl;
+  std::cout << "[DEBUG]  Outputs: " << (outputs_result ? "PASSED" : "FAILED") << std::endl;
+  std::cout << "[DEBUG]  Inputs: " << (inputs_result ? "PASSED" : "FAILED") << std::endl;
+  std::cout << "[DEBUG]  Overall: " << (ret ? "PASSED" : "FAILED") << std::endl;
 #endif
 
   return ret;

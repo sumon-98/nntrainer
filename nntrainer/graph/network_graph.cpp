@@ -398,6 +398,7 @@ sharedConstTensors NetworkGraph::forwarding(
   for (auto iter = cbegin(); iter != cend() && !stop_cb(userdata); iter++) {
     auto &ln = *iter;
     PROFILE_TIME_START(profile_keys.at(ln->getType()));
+    std::cout << iter->getName() << std::endl;
     forwarding_op(*iter, training);
     PROFILE_TIME_END(profile_keys.at(ln->getType()));
   }
@@ -778,6 +779,27 @@ NetworkGraph::finalizeContext(const std::shared_ptr<LayerNode> &lnode,
   auto init_context = lnode->finalize(input_dims, getTensorType(), exec_mode);
   const auto &ct_engine = nntrainer::Engine::Global();
 
+  const auto &w_specs = init_context.getWeightsSpec();
+  for (auto i = 0u; i < w_specs.size(); ++i) {
+    // Debug statement to print weight data type
+    const TensorDim &weight_dim = std::get<0>(w_specs.at(i));
+    std::string data_type_str;
+    switch (weight_dim.getDataType()) {
+      case TensorDim::DataType::FP32:
+        data_type_str = "FP32";
+        break;
+      case TensorDim::DataType::FP16:
+        data_type_str = "FP16";
+        break;
+      default:
+        data_type_str = "Unknown";
+        break;
+    }
+    std::cout << "DEBUG: Layer " << lnode->getName() 
+              << " - Weight " << std::get<8>(w_specs.at(i)) 
+              << " - Data Type: " << data_type_str 
+              << std::endl;
+  }
   /**
    * Request manager for either a pre-allocated output as input or a newly
    * allocated output. This is necessary for manager to know when this
@@ -1217,6 +1239,7 @@ int NetworkGraph::initialize(ExecutionMode mode,
      * Initialize all the layers, allocate output tensors for each layer
      * init2and add optimizer related weights for the layer
      */
+    std::cout << "Layer Name: " << lnode->getName() << std::endl; 
     const std::vector<Var_Grad *> &outputs = finalizeContext(lnode, inputs);
 
     /** no need to update input_map for the last layer */
