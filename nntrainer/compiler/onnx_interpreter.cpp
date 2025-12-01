@@ -82,10 +82,12 @@ std::string ONNXInterpreter::extractTensorAttribute(
           int size = raw_tensor.size() / sizeof(float);
           oss << *vals;
         } else if (attr.t().data_type() == onnx::TensorProto_DataType_FLOAT16) {
-          const uint16_t *vals =
-            reinterpret_cast<const uint16_t*>(raw_tensor.data());
-          int size = raw_tensor.size() / sizeof(uint16_t);
-          oss << *vals;
+          const _FP16 *vals =
+            reinterpret_cast<const _FP16*>(raw_tensor.data());
+          int size = raw_tensor.size() / sizeof(_FP16);
+          std::cout << static_cast<float>(*vals) << std::endl;
+          oss << static_cast<float>(*vals);
+          std::cout << "Interpreter print: " << oss.str() << std::endl;
         }
         return oss.str();
       }

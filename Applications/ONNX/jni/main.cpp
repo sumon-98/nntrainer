@@ -102,27 +102,27 @@ int main() {
   }
 
   // Convert input data to FP16 if model is using FP16
-#ifdef ENABLE_FP16
-  _FP16 *input = new _FP16[1];
-  _FP16 *sin = new _FP16[128];
-  _FP16 *cos = new _FP16[128];
-  _FP16 *epsilon = new _FP16[1];
+// #ifdef ENABLE_FP16
+//   _FP16 *input = new _FP16[1];
+//   _FP16 *sin = new _FP16[128];
+//   _FP16 *cos = new _FP16[128];
+//   _FP16 *epsilon = new _FP16[1];
 
-  input[0] = static_cast<_FP16>(52);
+//   input[0] = static_cast<_FP16>(52);
 
-  for (int i = 0; i < 128; i++) {
-    sin[i] = static_cast<_FP16>(0);
-    cos[i] = static_cast<_FP16>(1);
-  }
-  epsilon[0] = static_cast<_FP16>(1e-6);
+//   for (int i = 0; i < 128; i++) {
+//     sin[i] = static_cast<_FP16>(0);
+//     cos[i] = static_cast<_FP16>(1);
+//   }
+//   epsilon[0] = static_cast<_FP16>(1e-6);
 
-  std::vector<_FP16 *> in;
+//   std::vector<_FP16 *> in;
 
-  in.push_back(epsilon);
-  in.push_back(sin);
-  in.push_back(cos);
-  in.push_back(input);
-#else
+//   in.push_back(epsilon);
+//   in.push_back(sin);
+//   in.push_back(cos);
+//   in.push_back(input);
+// #else
   float *input = new float[1];
   float *sin = new float[128];
   float *cos = new float[128];
@@ -142,26 +142,30 @@ int main() {
   in.push_back(sin);
   in.push_back(cos);
   in.push_back(input);
-#endif
+// #endif
 
   // The inference API expects float* regardless of tensor type
   // NNTrainer handles the conversion internally
   std::vector<float *> float_in;
-#ifdef ENABLE_FP16
-  // Convert FP16 inputs back to float for the API
-  float_in.push_back(reinterpret_cast<float *>(epsilon));
-  float_in.push_back(reinterpret_cast<float *>(sin));
-  float_in.push_back(reinterpret_cast<float *>(cos));
-  float_in.push_back(reinterpret_cast<float *>(input));
-#else
+// #ifdef ENABLE_FP16
+//   // Convert FP16 inputs back to float for the API
+//   float_in.push_back(reinterpret_cast<float *>(epsilon));
+//   float_in.push_back(reinterpret_cast<float *>(sin));
+//   float_in.push_back(reinterpret_cast<float *>(cos));
+//   float_in.push_back(reinterpret_cast<float *>(input));
+// #else
   float_in = in;
-#endif
+// #endif
 
   auto ans = model->inference(1, float_in);
 
   std::cout << "-------------------------------------------Inference "
                "Done--------------------------------------------"
             << std::endl;
+          
+  for(int i = 0; i < 151936;i++){
+    std::cout << ans[0][i] << " ";
+  }
 
   for (auto it : ans) {
     saveToRaw(it, 151936,

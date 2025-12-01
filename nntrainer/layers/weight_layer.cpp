@@ -37,11 +37,12 @@ void WeightLayer::finalize(InitLayerContext &context) {
     std::get<props::WeightInitializer>(*layer_impl_props);
   auto &weight_decay = std::get<props::WeightDecay>(*layer_impl_props);
 
-  const auto &weight_dim = std::get<props::TensorDimension>(weight_props).get();
+  auto &weight_dim = std::get<props::TensorDimension>(weight_props).get();
   const auto &weight_dtype = std::get<props::TensorDataType>(weight_props);
   const auto &weight_name = std::get<props::WeightName>(weight_props);
+  weight_dim.setDataType(weight_dtype);
   std::string data_type_str;
-  switch (weight_dim.getDataType()) {
+  switch (weight_dtype) {
     case TensorDim::DataType::FP32:
       data_type_str = "FP32";
       break;
@@ -115,10 +116,10 @@ void WeightLayer::setProperty(const std::vector<std::string> &values) {
 
 void WeightLayer::forwarding(RunLayerContext &context, bool training) {
   Tensor &weight = context.getWeight(weight_idx);
-  // std::cout << context.getName() << std::endl;
-  // std::cout << weight << std::endl;
+  std::cout << "Weight_layer_name: " << context.getName() << std::endl;
   Tensor &output = context.getOutput(SINGLE_INOUT_IDX);
   output.copy(weight);
+  std::cout << "IsValid: " << output.isValid() << std::endl;
 }
 
 void WeightLayer::calcDerivative(RunLayerContext &context) {

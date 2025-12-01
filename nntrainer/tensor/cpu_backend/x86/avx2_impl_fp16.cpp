@@ -55,6 +55,7 @@ void vcvt_f16_f32(unsigned int N, const _Float16 *input, float *output) {
     ++data;
     ++idx;
   }
+  std::cout << "Output: " << static_cast<float>(*output) << std::endl;
 }
 
 void vcvt_f32_f16(unsigned int N, const float *input, _Float16 *output) {

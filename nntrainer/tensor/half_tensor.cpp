@@ -84,6 +84,8 @@ void *HalfTensor::getData() const {
     return nullptr;
 
   data->validate();
+  // std::cout << "Half tensor getData: " << data << std::endl;
+  // std::cout << offset << std::endl;
   return data->getAddr<_FP16>() + offset;
 }
 
@@ -112,6 +114,7 @@ const void *HalfTensor::getAddress(unsigned int i) const {
 }
 
 const _FP16 &HalfTensor::getValue(unsigned int i) const {
+  std::cout << "Half tensor: " << i << std::endl;
   return ((_FP16 *)getData())[i];
 }
 
@@ -580,6 +583,7 @@ Tensor &HalfTensor::sum(unsigned int axis, Tensor &output, float alpha,
   default:
     throw std::out_of_range("Error: Dimension cannot exceed 3");
   }
+  // std::cout << "Sum layer output: " << output;
 
   return output;
 }
@@ -598,7 +602,8 @@ Tensor &HalfTensor::abs(Tensor &output) const {
 
 Tensor &HalfTensor::pow(float exponent, Tensor &output) const {
   auto f = [exponent](float in) {
-    return static_cast<_FP16>(powf(in, exponent));
+    float v = std::pow(in, exponent);
+    return static_cast<_FP16>((v > 65504.0) ? 65504.0:v);
   };
   apply(f, output);
   return output;
@@ -942,7 +947,8 @@ void HalfTensor::print(std::ostream &out) const {
   out << "data addr: " << data << '\n';
   out << dim;
 
-  if (len > 100) {
+  // if (len != 2048 && len!=2097152 && len > 100) {
+  if (len!= 2048 && len > 100) {
     out << '[' << (float)data[0] << ' ' << (float)data[1] << ' '
         << (float)data[2] << " ... " << (float)data[len - 3] << ' '
         << (float)data[len - 2] << ' ' << (float)data[len - 1] << ']'
@@ -959,7 +965,7 @@ void HalfTensor::print(std::ostream &out) const {
         for (unsigned int i = 0; i < height(); i++) {
           for (unsigned int j = 0; j < width(); j++) {
             out << std::setw(10) << std::setprecision(10)
-                << (float)data[getIndex(k, l, i, j)] << " ";
+                << (float)data[getIndex(k, l, i, j)] << "[" << k+l+i+j << "] " ;
           }
           out << std::endl;
         }

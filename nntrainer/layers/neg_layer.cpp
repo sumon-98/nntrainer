@@ -27,6 +27,7 @@ void NegLayer::finalize(InitLayerContext &context) {
 
 void NegLayer::forwarding_operation(const Tensor &input, Tensor &hidden) {
   input.neg(hidden);
+  std::cout << "IsValid: " << hidden.isValid() << std::endl;
 }
 
 void NegLayer::calcDerivative(RunLayerContext &context) {

@@ -51,6 +51,8 @@ void ReshapeLayer::forwarding(RunLayerContext &context, bool training) {
     context.getOutput(SINGLE_INOUT_IDX)
       .copyData(context.getInput(SINGLE_INOUT_IDX));
   }
+  std::cout << "Gather output: " << context.getOutput(SINGLE_INOUT_IDX) << std::endl;
+  std::cout << "IsValid: " << context.getOutput(SINGLE_INOUT_IDX).isValid() << std::endl;
 }
 
 void ReshapeLayer::calcDerivative(RunLayerContext &context) {

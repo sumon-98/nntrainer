@@ -197,6 +197,8 @@ void ConcatLayer::forwarding(RunLayerContext &context, bool training) {
   }
 
   output.reshape(out_dim);
+  std::cout << "Concat output: " << output << std::endl; 
+  std::cout << "IsValid: " << output.isValid() << std::endl;
 }
 
 void ConcatLayer::incremental_forwarding(RunLayerContext &context,

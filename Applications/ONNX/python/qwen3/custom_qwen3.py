@@ -238,7 +238,11 @@ class Qwen3Model(PreTrainedModel):
         # nn.embedding is replaced by gather op for easier tracing. Hence input is broadcasted to (1,1,1,self.config,hidden_size).   
         # Ensure input_ids remains integer type for gather operation
         input_ids_int = self.broadcast * input_ids
+        print(input_ids_int)
         hidden_states = torch.gather(self.vocab_weights,0,input_ids_int)
+        print(self.vocab_weights)
+        print(hidden_states)
+        exit()
              
         for decoder_layer in self.layers[:self.config.num_hidden_layers]:
             hidden_states = decoder_layer(

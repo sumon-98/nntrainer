@@ -28,6 +28,8 @@ void MultiplyLayer::finalize(InitLayerContext &context) {
 void MultiplyLayer::forwarding_operation(const Tensor &input0,
                                          const Tensor &input1, Tensor &hidden) {
   input0.multiply(input1, hidden);
+  std::cout << "Multiply output: " << hidden << std::endl;
+  std::cout << "IsValid: " << hidden.isValid() << std::endl;
 }
 
 void MultiplyLayer::calcDerivative(RunLayerContext &context) {

@@ -40,6 +40,9 @@ void MatMulLayer::finalize(InitLayerContext &context) {
 void MatMulLayer::forwarding_operation(const Tensor &input0,
                                        const Tensor &input1, Tensor &output) {
   input0.dot(input1, output);
+  std::cout << "Layer_name: " << output.getName() <<std::endl;
+  std::cout << "Layer_data: " << input0 << std::endl;
+  std::cout << "IsValid: " << output.isValid() << std::endl;
 }
 
 void MatMulLayer::calcDerivative(RunLayerContext &context) {

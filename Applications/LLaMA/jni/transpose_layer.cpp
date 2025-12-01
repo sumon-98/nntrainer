@@ -44,6 +44,7 @@ void TransposeLayer::forwarding(nntrainer::RunLayerContext &context,
   nntrainer::Tensor &out = context.getOutput(SINGLE_INOUT_IDX);
 
   in.transpose("1:0:2", out);
+  std::cout << "IsValid: " << out.isValid() << std::endl;
 }
 
 void TransposeLayer::calcDerivative(nntrainer::RunLayerContext &context) {

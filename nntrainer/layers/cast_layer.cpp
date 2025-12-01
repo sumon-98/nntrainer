@@ -33,6 +33,8 @@ void CastLayer::finalize(InitLayerContext &context) {
 void CastLayer::forwarding_operation(const Tensor &input, Tensor &output) {
   // Casting type is performed in copyData function
   output.copyData(input);
+  std::cout << "Cast output: " << input << output << std::endl;
+  std::cout << "IsValid: " << output.isValid() << std::endl;
 }
 
 void CastLayer::calcDerivative(RunLayerContext &context) {

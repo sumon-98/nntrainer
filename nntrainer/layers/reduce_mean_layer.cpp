@@ -42,6 +42,7 @@ void ReduceMeanLayer::finalize(InitLayerContext &context) {
 
 void ReduceMeanLayer::forwarding(RunLayerContext &context, bool training) {
   auto &reduce_axis = std::get<props::ReduceDimension>(reduce_mean_props);
+  std::cout << "Reduce mean axis: " << reduce_axis << std::endl;
   if (reduce_axis.empty()) {
     context.getInput(SINGLE_INOUT_IDX)
       .average({1, 2, 3}, context.getOutput(SINGLE_INOUT_IDX));
@@ -49,6 +50,8 @@ void ReduceMeanLayer::forwarding(RunLayerContext &context, bool training) {
     context.getInput(SINGLE_INOUT_IDX)
       .average(reduce_axis, context.getOutput(SINGLE_INOUT_IDX));
   }
+  std::cout << "Reduce Mean output: " << context.getInput(SINGLE_INOUT_IDX) << context.getOutput(SINGLE_INOUT_IDX) << std::endl;
+  std::cout << "IsValid: " << context.getOutput(SINGLE_INOUT_IDX).isValid() << std::endl;
 }
 
 void ReduceMeanLayer::calcDerivative(RunLayerContext &context) {

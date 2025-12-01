@@ -1071,6 +1071,7 @@ NeuralNetwork::inference(unsigned int batch_size,
 
   input_tensors.reserve(input.size());
   for (unsigned int idx = 0; idx < in_dim.size(); idx++) {
+    std::cout << in_dim[idx] << std::endl;
     in_dim[idx].batch(batch_size);
     input_tensors.emplace_back(MAKE_SHARED_TENSOR(Tensor::Map(
       input[idx], in_dim[idx].getDataLen() * sizeof(float), in_dim[idx], 0)));
