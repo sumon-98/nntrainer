@@ -71,6 +71,8 @@ void ActivationLayer::forwarding(RunLayerContext &context, bool training) {
   Tensor &hidden_ = context.getOutput(SINGLE_INOUT_IDX);
   Tensor &input_ = context.getInput(SINGLE_INOUT_IDX);
   acti_func.run_fn(input_, hidden_);
+  std::cout << "Activation output: " << input_ << hidden_;
+  std::cout << "IsValid: " << hidden_.isValid() << std::endl;
 }
 
 void ActivationLayer::calcDerivative(RunLayerContext &context) {

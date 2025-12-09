@@ -29,6 +29,8 @@ void AddLayer::finalize(InitLayerContext &context) {
 void AddLayer::forwarding_operation(const Tensor &input0, const Tensor &input1,
                                     Tensor &hidden) {
   input0.add(input1, hidden);
+  std::cout << "Add output: " << hidden << std::endl;
+  std::cout << "IsValid: " << hidden.isValid() << std::endl;
 }
 
 void AddLayer::calcDerivative(RunLayerContext &context) {

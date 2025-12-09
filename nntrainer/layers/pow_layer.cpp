@@ -29,6 +29,9 @@ void PowLayer::finalize(InitLayerContext &context) {
 void PowLayer::forwarding_operation(const Tensor &input, Tensor &hidden) {
   float exponent = std::get<props::Exponent>(pow_props).get();
   input.pow(exponent, hidden);
+  std::cout << "Pow output: " << input << exponent << " " << hidden << std::endl;
+  std::cout << "IsValid: " << input.isValid() << std::endl;
+  std::cout << "IsValid: " << hidden.isValid() << std::endl;
 }
 
 void PowLayer::calcDerivative(RunLayerContext &context) {

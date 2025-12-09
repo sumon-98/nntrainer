@@ -35,7 +35,15 @@ void MultiOutLayer::forwarding(RunLayerContext &context, bool training) {
     const Tensor &input_ = context.getInput(SINGLE_INOUT_IDX);
     for (unsigned int idx = 0; idx < context.getNumOutputs(); ++idx) {
       context.getOutput(idx).fill(input_);
+      std::cout << "Multiout output: " << context.getOutput(idx) << std::endl;
+      std::cout << "IsValid: " << context.getOutput(idx).isValid() << std::endl;
     }
+  }
+  const Tensor &input_ = context.getInput(SINGLE_INOUT_IDX);
+  std::cout << "IsValid: " << context.getInput(SINGLE_INOUT_IDX).isValid() << std::endl;
+  for (unsigned int idx = 0; idx < context.getNumOutputs(); ++idx) {
+    std::cout << "Multiout output: " << context.getOutput(idx) << std::endl;
+    std::cout << "IsValid: " << context.getOutput(idx).isValid() << std::endl;
   }
 }
 
@@ -66,6 +74,8 @@ void MultiOutLayer::incremental_forwarding(RunLayerContext &context,
       // batch size is 1
       Tensor output_step = output.getSharedDataTensor(output_step_dim, 0, true);
       output_step.fill(input_step);
+      std::cout << "Multiout output: " << context.getOutput(idx) << std::endl;
+      std::cout << "IsValid: " << context.getOutput(idx).isValid() << std::endl;
     }
   }
 }

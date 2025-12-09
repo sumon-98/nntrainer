@@ -527,6 +527,7 @@ public:
         "[Tensor::Map] empty tensor dim is not allowed");
     }
 
+    // std::cout << d.getDataLen() << " " << sizeof(T) << " " << offset << " " << bytes << std::endl;
     if (d.getDataLen() * sizeof(T) + offset > bytes) {
       throw std::invalid_argument(
         "Creating shared tensor of size bigger than tensor memory.");

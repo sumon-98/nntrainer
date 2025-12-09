@@ -416,8 +416,8 @@ public:
         for (unsigned int i = 0; i < run_context.getNumWeights(); ++i) {
           /// @note shared weights are only be read at the first acecss
           if (run_context.isGradientFirstAccess(i)) {
-            // std::cout << "$$$$$$$$$$$$$$$$$$$$$$$$$$$$$" << std::endl;
-            // std::cout << run_context.getName() << std::endl;
+            std::cout << "$$$$$$$$$$$$$$$$$$$$$$$$$$$$$" << std::endl;
+            std::cout << run_context.getName() << std::endl;
             run_context.getWeight(i).read(file, start_offset, read_from_offset,
                                           file_fd);
             if (run_context.isMixedPrecision(i) && trainable &&

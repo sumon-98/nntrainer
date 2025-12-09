@@ -38,8 +38,11 @@ void ReduceSumLayer::finalize(InitLayerContext &context) {
 
 void ReduceSumLayer::forwarding(RunLayerContext &context, bool training) {
   auto &reduce_axis = std::get<props::ReduceDimension>(reduce_sum_props);
+  std::cout << "Reduce axis: " << reduce_axis << std::endl;
   context.getInput(SINGLE_INOUT_IDX)
-    .sum(reduce_axis, context.getOutput(SINGLE_INOUT_IDX));
+    .sum(reduce_axis, context.getOutput(SINGLE_INOUT_IDX), 1.0);
+  std::cout << "Reduce sum output: " << context.getInput(SINGLE_INOUT_IDX) << context.getOutput(SINGLE_INOUT_IDX);
+  std::cout << "IsValid: " << context.getOutput(SINGLE_INOUT_IDX).isValid() << std::endl;
 }
 
 void ReduceSumLayer::calcDerivative(RunLayerContext &context) {

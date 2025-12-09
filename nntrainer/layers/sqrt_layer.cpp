@@ -28,6 +28,8 @@ void SQRTLayer::finalize(InitLayerContext &context) {
 
 void SQRTLayer::forwarding_operation(const Tensor &input, Tensor &hidden) {
   input.sqrt(hidden);
+  std::cout << "sqrt layer: " << hidden << std::endl;
+  std::cout << "IsValid: " << hidden.isValid() << std::endl;
 }
 
 void SQRTLayer::calcDerivative(RunLayerContext &context) {

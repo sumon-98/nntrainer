@@ -68,7 +68,7 @@ bool isFileExist(std::string file_name) {
 
 template <typename T>
 static void checkFile(const T &file, const char *error_msg) {
-  // std::cout << file.bad() << " " << file.eof() << " " << file.good() << " " << file.fail() << std::endl;
+  std::cout << file.bad() << " " << file.eof() << " " << file.good() << " " << file.fail() << std::endl;
   if (file.bad() || file.eof() || !file.good() || file.fail()) {
     throw std::runtime_error(error_msg);
   }

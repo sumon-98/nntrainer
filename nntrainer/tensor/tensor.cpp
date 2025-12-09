@@ -793,7 +793,11 @@ Tensor &Tensor::average(unsigned int axis, Tensor &output) const {
   if (axis_size == 1)
     output.copy(*this);
   else
+  {
+    std::cout << axis << "\n" << axis_size << std::endl;
+
     this->sum(axis, output, 1.0 / ((float)axis_size));
+  }
 
   return output;
 }

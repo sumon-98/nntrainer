@@ -185,6 +185,24 @@ void sgemv(const unsigned int TStorageOrder, bool TransA, const unsigned int M,
            const unsigned int lda, const float *X, const unsigned int incX,
            const float beta, float *Y, const unsigned int incY) {
 #ifdef USE_BLAS
+  std::cout << "A vector: " << std::endl;
+  for(int i = 0; i < M*N; i++) {
+    std::cout << A[i] << " ";
+  }
+  std::cout << std::endl;
+
+  std::cout << "X vector: " << std::endl;
+  for(int i = 0; i < N; i++) {
+    std::cout << X[i] << " ";
+  }
+  std::cout << std::endl;
+
+  std::cout << "Y vector: " << std::endl;
+  for(int i = 0; i < M; i++) {
+    std::cout << Y[i] << " ";
+  }
+  std::cout << std::endl;
+
   __cblas_sgemv(TStorageOrder, TransA, M, N, alpha, A, lda, X, incX, beta, Y,
                 incY);
 #else

@@ -61,35 +61,24 @@ class Qwen3RMSNorm(nn.Module):
         self.weight = nn.Parameter(torch.ones(hidden_size))
 
     def forward(self, hidden_states,eps):
-        # print(input_dtype)
-        # print(hidden_states.tolist())
-        # hidden_states = torch.clamp(hidden_states, max=255, min=-255)
-        # s = 255.0 / torch.max(hidden_states)
-        # scaled_hidden_states = hidden_states * s
-        # power_h = scaled_hidden_states * scaled_hidden_states
-        # print(power_h.tolist())
-        # variance = power_h.mean(3,keepdim=True) / (s*s)
-
         input_dtype = hidden_states.dtype
-        hidden_states_fp32 = hidden_states.float()
-        variance = hidden_states_fp32.pow(2).mean(3,keepdim=True) 
-        # variance = hidden_states.pow(2).mean(3,keepdim=True) 
-        std_dev = torch.sqrt(variance + eps)
-        hidden_states = hidden_states * torch.pow(std_dev, -1)
-        return hidden_states.to(input_dtype) * self.weight
-
-        # variance = hidden_states.pow(2).mean(3,keepdim=True)
-        # if isinstance(eps, torch.Tensor):
-        #     eps_tensor = eps.to(dtype=hidden_states.dtype)
-        # else:
-        #     eps_tensor = torch.tensor(eps, dtype=hidden_states.dtype, device=hidden_states.device)
-        # # Clamp variance to prevent underflow in FP16 sqrt operations
-        # # This prevents sqrt of very small numbers that can cause precision loss
-        # variance = torch.clamp(variance, min=1e-10)
-        # std_dev = torch.sqrt(variance + eps_tensor)
-        # std_dev = torch.clamp(std_dev, min=1e-7)
-        # hidden_states = hidden_states / std_dev
-        # return hidden_states * self.weight
+        # hidden_states_fp32 = hidden_states.float()
+        # variance = hidden_states_fp32.pow(2).mean(3,keepdim=True)
+        # std_dev = torch.sqrt(variance + eps.float())
+        # hidden_states_fp32 = hidden_states_fp32 * torch.pow(std_dev, -1)
+        # return hidden_states_fp32.to(input_dtype) * self.weight
+        variance = hidden_states.pow(2).mean(3,keepdim=True)
+        if isinstance(eps, torch.Tensor):
+            eps_tensor = eps.to(dtype=hidden_states.dtype)
+        else:
+            eps_tensor = torch.tensor(eps, dtype=hidden_states.dtype, device=hidden_states.device)
+        # Clamp variance to prevent underflow in FP16 sqrt operations
+        # This prevents sqrt of very small numbers that can cause precision loss
+        variance = torch.clamp(variance, min=1e-10)
+        std_dev = torch.sqrt(variance + eps_tensor)
+        std_dev = torch.clamp(std_dev, min=1e-7)
+        hidden_states = hidden_states / std_dev
+        return hidden_states * self.weight
 
 
 class Qwen3MLP(nn.Module):
@@ -202,7 +191,7 @@ class Qwen3Attention(nn.Module):
         print(attn_weights)
         attn_weights = torch.sum(attn_weights, dim=3,keepdim=True)
         print(attn_weights)
-        # attn_weights = torch.clamp(attn_weights, min=-50.0, max=50.0)
+        attn_weights = torch.clamp(attn_weights, min=-50.0, max=50.0)
         
         attn_weights = nn.functional.softmax(attn_weights, dim=-1, dtype=query_states.dtype)  
         print(attn_weights)
@@ -334,6 +323,6 @@ class NNTrainerQwen3ForCausalLM(PreTrainedModel):
         logits = self.lm_head(hidden_states)
         print("Logits")
         print(logits)
-        # exit()
+        exit()
         
         return logits

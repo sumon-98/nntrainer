@@ -27,6 +27,7 @@ void NegativeLayer::finalize(InitLayerContext &context) {
 
 void NegativeLayer::forwarding_operation(const Tensor &input, Tensor &hidden) {
   input.multiply(-1, hidden);
+  std::cout << "IsValid: " << hidden.isValid() << std::endl;
 }
 
 void NegativeLayer::calcDerivative(RunLayerContext &context) {

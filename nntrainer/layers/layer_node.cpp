@@ -674,6 +674,10 @@ InitLayerContext LayerNode::finalize(const std::vector<TensorDim> &input_dims,
     tensor_type[1] = to_string(std::get<props::WeightDtype>(*layer_node_props));
   }
 
+  for(auto it: tensor_type) {
+    std::cout << "Tensor Type: " << it << std::endl;
+  }
+
   std::vector<bool> out_info;
   out_info.reserve(output_connections.size());
   std::transform(output_connections.begin(), output_connections.end(),
@@ -685,6 +689,7 @@ InitLayerContext LayerNode::finalize(const std::vector<TensorDim> &input_dims,
     out_info.push_back(true);
   }
 
+  // Init context is here
   auto context = InitLayerContext(
     actual_input_dims, out_info, getInPlaceType() != InPlaceType::NONE,
     getName(), scope, max_norm, tensor_type, loss_scale, mode, compute_engine);

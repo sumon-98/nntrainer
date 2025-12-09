@@ -604,6 +604,39 @@ Tensor &FloatTensor::sum(unsigned int axis, Tensor &output, float alpha,
       unsigned int n = dim[3];
       Tensor ones(1, 1, 1, n, getTensorType());
       ones.setValue(alpha);
+      std::cout << "Ones vector: " << ones;
+
+      // ADD VALIDATION CODE HERE
+      std::cout << "DEBUG: sum(axis=3) - m=" << m << ", n=" << n << std::endl;
+      std::cout << "DEBUG: data ptr=" << (void*)data << std::endl;
+      std::cout << "DEBUG: ones ptr=" << (void*)ones.getData<float>() << std::endl;
+      std::cout << "DEBUG: output ptr=" << (void*)output.getData<float>() << std::endl;
+      std::cout << "DEBUG: input dim=" << dim << std::endl;
+      std::cout << "DEBUG: output dim=" << output.getDim() << std::endl;
+      // std::cout << "DEBUG: storage_order=" << dim.getStorageOrder() << std::endl;
+      std::cout << "DEBUG: contiguous=" << contiguous << std::endl;
+      std::cout << "DEBUG: input size=" << size() << std::endl;
+      std::cout << "DEBUG: output size=" << output.size() << std::endl;
+
+      // Validate pointers
+      if (!data) {
+        std::cerr << "ERROR: Input data pointer is null!" << std::endl;
+        throw std::runtime_error("Null data pointer in sum operation");
+      }
+      if (!ones.getData<float>()) {
+        std::cerr << "ERROR: Ones data pointer is null!" << std::endl;
+        throw std::runtime_error("Null ones pointer in sum operation");
+      }
+      if (!output.getData<float>()) {
+        std::cerr << "ERROR: Output data pointer is null!" << std::endl;
+        throw std::runtime_error("Null output pointer in sum operation");
+      }
+
+      // Validate dimensions
+      if (m * n != size()) {
+        std::cerr << "ERROR: Dimension mismatch! m*n=" << (m*n) << " != size=" << size() << std::endl;
+        throw std::runtime_error("Dimension mismatch in sum operation");
+      }
 
       if (dim.getStorageOrder() == TStorageOrder::ROW_MAJOR) {
         sgemv((unsigned int)dim.getStorageOrder(), false, m, n, 1, data, n,
@@ -1433,7 +1466,7 @@ void FloatTensor::print(std::ostream &out) const {
   out << dim;
   // out << "Size: " << len << "\n";
 
-  if (len > 100) {
+  if (len != 1024 && len > 100) {
     out << '[' << data[0] << ' ' << data[1] << ' ' << data[2] << " ... "
         << data[len - 3] << ' ' << data[len - 2] << ' ' << data[len - 1] << ']'
         << std::endl;

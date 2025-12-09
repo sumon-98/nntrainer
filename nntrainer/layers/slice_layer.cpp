@@ -52,11 +52,15 @@ void SliceLayer::forwarding_operation(const Tensor &input, Tensor &output) {
           unsigned int c_idx = (axis == 1) ? c + start : c;
           unsigned int h_idx = (axis == 2) ? h + start : h;
           unsigned int w_idx = (axis == 3) ? w + start : w;
-          output.setValue(b, c, h, w, input.getValue(b, c_idx, h_idx, w_idx));
+          output.setValue(b, c, h, w, input.getValue<_FP16>(b, c_idx, h_idx, w_idx));
         }
       }
     }
   }
+  std::cout << "IsValid input: " << input.isValid() << std::endl;
+  std::cout << "IsValid: " << output.isValid() << std::endl;
+  std::cout << input << output;
+  std::cout << "--------------------------------------------------------" << std::endl;
 }
 
 void SliceLayer::calcDerivative(RunLayerContext &context) {

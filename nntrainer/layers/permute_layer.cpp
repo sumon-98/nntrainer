@@ -72,6 +72,7 @@ void PermuteLayer::forwarding(RunLayerContext &context, bool training) {
   Tensor &input_ = context.getInput(SINGLE_INOUT_IDX);
 
   input_.transpose(direction_str, hidden_);
+  std::cout << "IsValid: " << hidden_.isValid() << std::endl;
 }
 
 void PermuteLayer::calcDerivative(RunLayerContext &context) {
