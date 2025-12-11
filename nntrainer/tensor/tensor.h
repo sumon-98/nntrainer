@@ -520,7 +520,12 @@ public:
   template <typename T = float>
   static Tensor Map(T *buf, unsigned int bytes, const TensorDim &d,
                     size_t offset = 0) {
+    // commented out as weight layers are treated as inputs, need to bypass it
+#ifndef ENABLE_ONNX_INTERPRETER
     if (d.getDataLen() == 0 || buf == nullptr) {
+#else
+    if (d.getDataLen() == 0) {
+#endif
       throw std::invalid_argument(
         "[Tensor::Map] empty tensor dim is not allowed");
     }
