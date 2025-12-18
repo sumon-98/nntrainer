@@ -38,15 +38,17 @@ class Qwen3RotaryEmbedding(nn.Module):
     @torch.no_grad()
     #@dynamic_rope_update  # power user: used with advanced RoPE types (e.g. dynamic rope)
     def forward(self, x, position_ids):
+        # inv_freq_expanded = self.inv_freq[None, :, None].to(x.dtype).expand(position_ids.shape[0], -1, 1).to(x.device)
         inv_freq_expanded = self.inv_freq[None, :, None].float().expand(position_ids.shape[0], -1, 1).to(x.device)
+        # position_ids_expanded = position_ids[:, None, :].to(x.dtype)
         position_ids_expanded = position_ids[:, None, :].float()
 
         device_type = x.device.type if isinstance(x.device.type, str) and x.device.type != "mps" else "cpu"
-        with torch.autocast(device_type=device_type, enabled=False):  # Force float32
-            freqs = (inv_freq_expanded.float() @ position_ids_expanded.float()).transpose(1, 2)
-            emb = torch.cat((freqs, freqs), dim=-1)
-            cos = emb.cos() * self.attention_scaling
-            sin = emb.sin() * self.attention_scaling
+        # Remove autocast to maintain FP16 precision throughout
+        freqs = (inv_freq_expanded @ position_ids_expanded).transpose(1, 2)
+        emb = torch.cat((freqs, freqs), dim=-1)
+        cos = emb.cos() * self.attention_scaling
+        sin = emb.sin() * self.attention_scaling
 
         return cos.to(dtype=x.dtype), sin.to(dtype=x.dtype)
 
@@ -59,11 +61,36 @@ class Qwen3RMSNorm(nn.Module):
         self.weight = nn.Parameter(torch.ones(hidden_size))
 
     def forward(self, hidden_states,eps):
+        # print(input_dtype)
+        # print(hidden_states.tolist())
+        # hidden_states = torch.clamp(hidden_states, max=255, min=-255)
+        # s = 255.0 / torch.max(hidden_states)
+        # scaled_hidden_states = hidden_states * s
+        # power_h = scaled_hidden_states * scaled_hidden_states
+        # print(power_h.tolist())
+        # variance = power_h.mean(3,keepdim=True) / (s*s)
+
         input_dtype = hidden_states.dtype
-        variance = hidden_states.pow(2).mean(3,keepdim=True)
+        hidden_states_fp32 = hidden_states.float()
+        variance = hidden_states_fp32.pow(2).mean(3,keepdim=True) 
+        # variance = hidden_states.pow(2).mean(3,keepdim=True) 
         std_dev = torch.sqrt(variance + eps)
         hidden_states = hidden_states * torch.pow(std_dev, -1)
         return hidden_states.to(input_dtype) * self.weight
+
+        # variance = hidden_states.pow(2).mean(3,keepdim=True)
+        # if isinstance(eps, torch.Tensor):
+        #     eps_tensor = eps.to(dtype=hidden_states.dtype)
+        # else:
+        #     eps_tensor = torch.tensor(eps, dtype=hidden_states.dtype, device=hidden_states.device)
+        # # Clamp variance to prevent underflow in FP16 sqrt operations
+        # # This prevents sqrt of very small numbers that can cause precision loss
+        # variance = torch.clamp(variance, min=1e-10)
+        # std_dev = torch.sqrt(variance + eps_tensor)
+        # std_dev = torch.clamp(std_dev, min=1e-7)
+        # hidden_states = hidden_states / std_dev
+        # return hidden_states * self.weight
+
 
 class Qwen3MLP(nn.Module):
     def __init__(self, config):
@@ -143,17 +170,28 @@ class Qwen3Attention(nn.Module):
     ):
         
         q_hidden_shape = (1,1,self.config.num_attention_heads,self.head_dim)
+        print(q_hidden_shape)
         kv_hidden_shape = (1,1,self.config.num_key_value_heads,self.head_dim)  
+        print(kv_hidden_shape)
                
         query_states = self.q_norm(self.q_proj(hidden_states).view(q_hidden_shape),eps).transpose(1,2)
+        print(query_states)
         key_states = self.k_norm(self.k_proj(hidden_states).view(kv_hidden_shape),eps).transpose(1,2)
+        print(key_states)
         value_states = self.v_proj(hidden_states).view(kv_hidden_shape).transpose(1,2)
+        print(value_states)
                
         query_states, key_states = apply_rotary_pos_emb(query_states, key_states, cos, sin)
+        print(query_states, key_states)
             
         key_states = repeat_kv(key_states, self.num_key_value_groups)
+        print(key_states)
         value_states = repeat_kv(value_states, self.num_key_value_groups)
+        print(value_states)
         
+        # query_states_fp32 = query_states.float()
+        # key_states_fp32 = key_states.float()
+        # value_states_fp32 = value_states.float()
         #attn_weights = torch.matmul(query_states, key_states.transpose(2, 3))
         
         #The above line is replaced by mul operation and reducesum.
@@ -161,18 +199,27 @@ class Qwen3Attention(nn.Module):
         #This only working in the case single token inference. 
                
         attn_weights = query_states.reshape(1,1,16,128) * key_states.reshape(1,1,16,128)
+        print(attn_weights)
         attn_weights = torch.sum(attn_weights, dim=3,keepdim=True)
+        print(attn_weights)
+        # attn_weights = torch.clamp(attn_weights, min=-50.0, max=50.0)
         
-        attn_weights = nn.functional.softmax(attn_weights, dim=-1, dtype=torch.float32)  
+        attn_weights = nn.functional.softmax(attn_weights, dim=-1, dtype=query_states.dtype)  
+        print(attn_weights)
         
         attn_output = value_states.reshape(1,1,16,128) * attn_weights
+        print(attn_output)
+        # attn_output = attn_output.half()
         
         # Line above replaces the below two. 
         # attn_output = torch.matmul(attn_weights, value_states)
         # attn_output = attn_output.transpose(1, 2).contiguous()   
               
         attn_output = attn_output.reshape(1, 1, 1, self.config.hidden_size).contiguous()
+        print(attn_output)
         attn_output = self.o_proj(attn_output)
+        print("Attention")
+        print(attn_output)
         return attn_output
 
 class Qwen3DecoderLayer(nn.Module):
@@ -209,6 +256,8 @@ class Qwen3DecoderLayer(nn.Module):
         hidden_states = self.post_attention_layernorm(hidden_states,eps)
         hidden_states = self.mlp(hidden_states)
         hidden_states = residual + hidden_states
+        print("Decoder layer")
+        print(hidden_states)
         return hidden_states
 
 class Qwen3Model(PreTrainedModel):
@@ -236,9 +285,15 @@ class Qwen3Model(PreTrainedModel):
         #hidden_states_new = self.embed_tokens(input_ids)
 
         # nn.embedding is replaced by gather op for easier tracing. Hence input is broadcasted to (1,1,1,self.config,hidden_size).   
-        input_ids = self.broadcast * input_ids
-        hidden_states = torch.gather(self.vocab_weights,0,input_ids)
+        # Ensure input_ids remains integer type for gather operation
+        input_ids_int = self.broadcast * input_ids
+        print("Input ids")
+        print(input_ids_int)
+        hidden_states = torch.gather(self.vocab_weights,0,input_ids_int)
+        print("Hidden states gather")
+        print(hidden_states)
              
+        i = 1
         for decoder_layer in self.layers[:self.config.num_hidden_layers]:
             hidden_states = decoder_layer(
                 hidden_states.reshape(1,1,1,self.config.hidden_size),
@@ -246,8 +301,12 @@ class Qwen3Model(PreTrainedModel):
                 sin,
                 eps
             )
+            print("-------------------------------------------------------Layer: ", i)
+            i = i + 1
 
         hidden_states = self.norm(hidden_states,eps)
+        print("Hidden states")
+        print(hidden_states)
         return hidden_states
         
 
@@ -273,5 +332,8 @@ class NNTrainerQwen3ForCausalLM(PreTrainedModel):
         )
                 
         logits = self.lm_head(hidden_states)
+        print("Logits")
+        print(logits)
+        # exit()
         
         return logits

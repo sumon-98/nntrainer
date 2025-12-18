@@ -47,19 +47,19 @@ void GatherLayer::forwarding_operation(const Tensor &input, const Tensor &index,
     for (unsigned int i = 0; i < index.getDim().channel(); ++i) {
       for (unsigned int j = 0; j < index.getDim().height(); ++j) {
         for (unsigned int k = 0; k < index.getDim().width(); ++k) {
-          auto selected = (size_t)index.getValue(b, i, j, k);
+          auto selected = (size_t)index.getValue<_FP16>(b, i, j, k);
           if (selected >= input.getDim()[axis]) {
             throw std::invalid_argument("The index value is out of range.");
           }
           switch (axis) {
           case 1:
-            output.setValue(b, i, j, k, input.getValue(b, selected, j, k));
+            output.setValue(b, i, j, k, input.getValue<_FP16>(b, selected, j, k));
             break;
           case 2:
-            output.setValue(b, i, j, k, input.getValue(b, i, selected, k));
+            output.setValue(b, i, j, k, input.getValue<_FP16>(b, i, selected, k));
             break;
           case 3:
-            output.setValue(b, i, j, k, input.getValue(b, i, j, selected));
+            output.setValue(b, i, j, k, input.getValue<_FP16>(b, i, j, selected));
           default:
             break;
           }

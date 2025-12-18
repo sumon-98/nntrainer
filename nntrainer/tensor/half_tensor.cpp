@@ -598,7 +598,9 @@ Tensor &HalfTensor::abs(Tensor &output) const {
 
 Tensor &HalfTensor::pow(float exponent, Tensor &output) const {
   auto f = [exponent](float in) {
-    return static_cast<_FP16>(powf(in, exponent));
+    float v = std::pow(in, exponent);
+    return static_cast<_FP16>(v);
+    // return static_cast<_FP16>((v > 65504.0) ? 65504.0:v);
   };
   apply(f, output);
   return output;
