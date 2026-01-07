@@ -60,3 +60,11 @@ executable('nntrainer_onnx_qwen3_multi_token',
   install: get_option('install-app'),
   install_dir: application_install_dir
 )
+
+fc_model_executable = executable('nntrainer_onnx_fc_model',
+  fc_model_sources,
+  include_directories: [include_directories('.')],
+  dependencies: onnx_example_dependencies,
+  install: get_option('install-app'),
+  install_dir: application_install_dir
+)

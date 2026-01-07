@@ -387,13 +387,25 @@ std::string ONNXInterpreter::cleanName(std::string name) {
   return name;
 }
 
+void ONNXInterpreter::setDimParamMap(
+  const std::unordered_map<std::string, int> &map) {
+  dimParamMap = map;
+}
+
 std::string ONNXInterpreter::transformDimString(onnx::TensorShapeProto shape) {
   std::string dim = "";
   for (int i = 0; i < shape.dim_size(); ++i) {
     if (shape.dim()[i].has_dim_param()) {
-      throw std::runtime_error("Dynamic dimensions are not supported");
+      std::string symbolicName = shape.dim()[i].dim_param();
+      auto it = dimParamMap.find(symbolicName);
+      if (it == dimParamMap.end()) {
+        throw std::runtime_error("Dynamic dimension " + symbolicName +
+                                 " not provided.");
+      }
+      dim += std::to_string(it->second);
+    } else {
+      dim += std::to_string(shape.dim()[i].dim_value());
     }
-    dim += std::to_string(shape.dim()[i].dim_value());
     if (i < shape.dim_size() - 1) {
       dim += ":";
     }

@@ -150,6 +150,11 @@ public:
   //  */
   std::string transformDimString(onnx::TensorProto initializer);
 
+  /**
+   * @brief Set the mapping from symbolic dimension names to static values.
+   */
+  void setDimParamMap(const std::unordered_map<std::string, int> &map);
+
 private:
   std::unordered_map<std::string, NodeHandler>
     NodeHandlers;              // node handlers function map
@@ -164,6 +169,11 @@ private:
     inputDims; // input dims
   std::unordered_map<std::string, std::string>
     layerOutputMap; // key: name of output, value: name of layer
+  std::unordered_map<std::string, int>
+    dimParamMap; // Mapping of symbolic dimension names (dim_param) to static
+                 // integer values. Users should populate this via
+                 // `setDimParamMap` before calling `deserialize` so dynamic
+                 // dimensions can be resolved.
 
   std::unordered_map<std::string, std::string> layerKeyMap = {
     {"Add", "add"},
