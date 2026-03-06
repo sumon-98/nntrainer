@@ -67,6 +67,7 @@ int NetworkGraph::compile(const std::string &loss_type) {
   }
 
   graph.realizeInputOutputNode();
+  std::cout << "Output Nodes: " << graph.getNumOutputNodes() << std::endl;
 
   if (exec_mode != ExecutionMode::INFERENCE) {
     try {

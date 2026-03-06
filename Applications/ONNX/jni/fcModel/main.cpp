@@ -25,13 +25,12 @@ int main() {
   auto model = ml::train::createModel();
 #ifdef ENABLE_ONNX_INTERPRETER
   try {
-    std::string path = "../../../../Applications/ONNX/jni/"
-                       "fcModel/matmul_dynamic.onnx";
+    std::string path = "/workspace/nntrainer/Applications/ONNX/python/qwen3/multi-token-kv-cache/prefill/prefill.onnx";
 
     nntrainer::ONNXInterpreter interp;
 
     // Example user-provided mapping of symbolic dimension names to values.
-    std::unordered_map<std::string, int> dim_map = {{"seq", 5}};
+    std::unordered_map<std::string, int> dim_map = {{"past_seq", 256}};
 
     // This step should be done before 'deserialize'
     interp.setDimParamMap(dim_map);

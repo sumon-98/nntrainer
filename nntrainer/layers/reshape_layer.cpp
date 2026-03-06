@@ -47,6 +47,7 @@ void ReshapeLayer::finalize(InitLayerContext &context) {
 }
 
 void ReshapeLayer::forwarding(RunLayerContext &context, bool training) {
+  // std::cout << context.getInput(SINGLE_INOUT_IDX);
   if (!context.getInPlace()) {
     context.getOutput(SINGLE_INOUT_IDX)
       .copyData(context.getInput(SINGLE_INOUT_IDX));

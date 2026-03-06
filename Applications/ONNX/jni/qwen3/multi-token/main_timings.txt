@@ -10,6 +10,7 @@
  */
 
 #include <algorithm>
+#include <chrono>
 #include <fstream>
 #include <iostream>
 #include <layer.h>
@@ -62,6 +63,9 @@ int main() {
   std::cout << "--------------------------------------Create Model "
                "Done--------------------------------------"
             << std::endl;
+               
+  // Timing model loading
+  auto model_load_start = std::chrono::high_resolution_clock::now();
   try {
     std::string path =
       "/workspace/nntrainer/Applications/ONNX/python/qwen3/multi-token-kv-cache/prefill.onnx";
@@ -86,36 +90,57 @@ int main() {
     std::cerr << "Error during load: " << e.what() << "\n";
     return 1;
   }
+  auto model_load_end = std::chrono::high_resolution_clock::now();
+  auto model_load_duration = std::chrono::duration_cast<std::chrono::microseconds>(
+      model_load_end - model_load_start);
+  double model_load_time = model_load_duration.count() / 1000.0; // Convert to milliseconds
 
   std::cout << "--------------------------------------Load Model "
                "Done--------------------------------------"
             << std::endl;
+  
+  // Timing model compilation
+  auto compile_start = std::chrono::high_resolution_clock::now();
   try {
     model->compile(ml::train::ExecutionMode::INFERENCE);
   } catch (const std::exception &e) {
     std::cerr << "Error during compile: " << e.what() << "\n";
     return 1;
   }
+  auto compile_end = std::chrono::high_resolution_clock::now();
+  auto compile_duration = std::chrono::duration_cast<std::chrono::microseconds>(
+      compile_end - compile_start);
+  double compile_time = compile_duration.count() / 1000.0; // Convert to milliseconds
 
   std::cout << "--------------------------------------Compile Model "
                "Done--------------------------------------"
             << std::endl;
+  
+  // Timing model initialization
+  auto init_start = std::chrono::high_resolution_clock::now();
   try {
     model->initialize();
   } catch (const std::exception &e) {
     std::cerr << "Error during initialize: " << e.what() << "\n";
     return 1;
   }
+  auto init_end = std::chrono::high_resolution_clock::now();
+  auto init_duration = std::chrono::duration_cast<std::chrono::microseconds>(
+      init_end - init_start);
+  double init_time = init_duration.count() / 1000.0; // Convert to milliseconds
 
   std::cout << "--------------------------------------Initialize Model "
                "Done--------------------------------------"
             << std::endl;
+  
   model->summarize(std::cout, ML_TRAIN_SUMMARY_MODEL);
 
   std::cout << "--------------------------------------Summarize Model "
                "Done--------------------------------------"
             << std::endl;
 
+  // Timing weight loading
+  auto weight_load_start = std::chrono::high_resolution_clock::now();
   std::string weight_path =
     "/workspace/nntrainer/Applications/ONNX/python/qwen3/multi-token-kv-cache/prefill_bins/";
   try {
@@ -124,6 +149,10 @@ int main() {
     std::cerr << "Error during loading weights: " << e.what() << "\n";
     return 1;
   }
+  auto weight_load_end = std::chrono::high_resolution_clock::now();
+  auto weight_load_duration = std::chrono::duration_cast<std::chrono::microseconds>(
+      weight_load_end - weight_load_start);
+  double weight_load_time = weight_load_duration.count() / 1000.0; // Convert to milliseconds
 
   std::cout << "--------------------------------------Loading weights "
                "Done--------------------------------------"
@@ -179,90 +208,64 @@ int main() {
   in.push_back(cos);
   in.push_back(input);
 
-  return 0;
-  float *output = model->inference(1, in)[0];
-  float *decode_input = output + (int)(curr_len - 1) * (num_vocab);
-  float token_id =
-    std::distance(output, std::max_element(output, output + num_vocab));
-
-  sin = sin + (int)(curr_len) * 128;
-  cos = cos + (int)(curr_len) * 128;
- 
-  auto model_decode = ml::train::createModel();
-
-  std::cout << "--------------------------------------Create Model Decode "
-               "Done--------------------------------------"
-            << std::endl;
-    
-  try {
-    std::string path =
-      "/workspace/nntrainer/Applications/ONNX/python/qwen3/multi-token-kv-cache/decode.onnx";
-    // model->load(path, ml::train::ModelFormat::MODEL_FORMAT_ONNX);
-#ifdef ENABLE_ONNX_INTERPRETER
-    nntrainer::ONNXInterpreter interp;
-
-    // Example user-provided mapping of symbolic dimension names to values.
-    std::unordered_map<std::string, int> dim_map = {{"past_seq", 1}};
-
-    // This step should be done before 'deserialize'
-    interp.setDimParamMap(dim_map);
-
-    auto graph = interp.deserialize(path);
-
-    // add layers produced by the interpreter into the model
-    for (auto &node : graph) {
-      model_decode->addLayer(node);
+  // Timing for multi-token generation
+  std::vector<double> token_times;
+  token_times.reserve(tokens_to_be_generated);
+  
+  auto total_start = std::chrono::high_resolution_clock::now();
+  
+  for (int i = 0; i < tokens_to_be_generated; i++) {
+    // auto token_start = std::chrono::high_resolution_clock::now();
+    float *output = model->inference(1, in)[0];
+    // auto token_end = std::chrono::high_resolution_clock::now();
+    // auto token_duration = std::chrono::duration_cast<std::chrono::microseconds>(
+        // token_end - token_start);
+    // token_times.push_back(token_duration.count() / 1000.0); // Convert to milliseconds
+    output = output + (int)(curr_len - 1) * (num_vocab);
+    std::cout << "############" << std::endl;
+    for(int i = 0; i < num_vocab; i++) {
+      std::cout << output[i] << " ";
     }
-#endif
-  } catch (const std::exception &e) {
-    std::cerr << "Error during load: " << e.what() << "\n";
-    return 1;
+    std::cout << std::endl;
+    float token_id =
+      std::distance(output, std::max_element(output, output + num_vocab));
+    input[curr_len] = token_id;
+    curr_len += 1;
+    // std::cout << "Token " << (i + 1) << " generated in " 
+              // << token_times.back() << " ms" << std::endl;
   }
-
-  std::cout << "--------------------------------------Load Model Decode "
-               "Done--------------------------------------"
-            << std::endl;
-  try {
-    model_decode->compile(ml::train::ExecutionMode::INFERENCE);
-  } catch (const std::exception &e) {
-    std::cerr << "Error during compile: " << e.what() << "\n";
-    return 1;
-  }
-
-  std::cout << "--------------------------------------Compile Model Decode "
-               "Done--------------------------------------"
-            << std::endl;
-  try {
-    model_decode->initialize();
-  } catch (const std::exception &e) {
-    std::cerr << "Error during initialize: " << e.what() << "\n";
-    return 1;
-  }
-
-  std::cout << "--------------------------------------Initialize Model Decode "
-               "Done--------------------------------------"
-            << std::endl;
-  model_decode->summarize(std::cout, ML_TRAIN_SUMMARY_MODEL);
-
-  std::cout << "--------------------------------------Summarize Model Decode "
-               "Done--------------------------------------"
-            << std::endl;
-
-  weight_path =
-    "/workspace/nntrainer/Applications/ONNX/python/qwen3/multi-token-kv-cache/decode_bins/";
-  try {
-    model_decode->load(weight_path, ml::train::ModelFormat::MODEL_FORMAT_BIN);
-  } catch (std::exception &e) {
-    std::cerr << "Error during loading weights: " << e.what() << "\n";
-    return 1;
-  }
-
-  std::cout << "--------------------------------------Loading weights "
-               "Done--------------------------------------"
-            << std::endl;
   
-
+  auto total_end = std::chrono::high_resolution_clock::now();
+  auto total_duration = std::chrono::duration_cast<std::chrono::microseconds>(
+      total_end - total_start);
   
+  // Report timing statistics
+  double total_time = total_duration.count() / 1000.0; // Convert to milliseconds
+  double avg_time = total_time / tokens_to_be_generated;
+  
+  // Find min and max times
+  double min_time = *std::min_element(token_times.begin(), token_times.end());
+  double max_time = *std::max_element(token_times.begin(), token_times.end());
+  
+  std::cout << "\n=== Timing Report ===" << std::endl;
+  std::cout << "Total time for " << tokens_to_be_generated 
+            << " tokens: " << total_time << " ms" << std::endl;
+  std::cout << "Average time per token: " << avg_time << " ms" << std::endl;
+  std::cout << "Min time for a token: " << min_time << " ms" << std::endl;
+  std::cout << "Max time for a token: " << max_time << " ms" << std::endl;
+  std::cout << "Tokens per second: " << (1000.0 / avg_time) << std::endl;
+  
+  // Print all timing information at the end
+  std::cout << "\n=== Complete Timing Report ===" << std::endl;
+  std::cout << "Model loading time: " << model_load_time << " ms" << std::endl;
+  std::cout << "Model compilation time: " << compile_time << " ms" << std::endl;
+  std::cout << "Model initialization time: " << init_time << " ms" << std::endl;
+  std::cout << "Weight loading time: " << weight_load_time << " ms" << std::endl;
+  std::cout << "Total time for " << tokens_to_be_generated 
+            << " tokens: " << total_time << " ms" << std::endl;
+  std::cout << "Average time per token: " << avg_time << " ms" << std::endl;
+  std::cout << "Tokens per second: " << (1000.0 / avg_time) << std::endl;
+
   saveToRaw(
     input, curr_len,
     "/workspace/nntrainer/Applications/ONNX/python/qwen3/multi-token-kv-cache/output_tokens.bin");

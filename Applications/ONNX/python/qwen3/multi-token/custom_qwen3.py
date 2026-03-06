@@ -340,5 +340,7 @@ class NNTrainerQwen3ForCausalLM(PreTrainedModel):
         )
 
         logits = self.lm_head(hidden_states)
+        print(logits)
+        # exit()
 
         return logits

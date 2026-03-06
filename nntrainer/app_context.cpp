@@ -54,6 +54,7 @@
 #include <fc_layer.h>
 #include <flatten_layer.h>
 #include <gather_layer.h>
+#include <eager_attention_layer.h>
 #include <gru.h>
 #include <grucell.h>
 #include <identity_layer.h>
@@ -308,6 +309,8 @@ void AppContext::add_default_object() {
                   LayerType::LAYER_CAST);
   registerFactory(nntrainer::createLayer<GatherLayer>, GatherLayer::type,
                   LayerType::LAYER_GATHER);
+  registerFactory(nntrainer::createLayer<EagerAttentionLayer>, EagerAttentionLayer::type,
+                  LayerType::LAYER_EAGER_ATTENTION);
   registerFactory(nntrainer::createLayer<SliceLayer>, SliceLayer::type,
                   LayerType::LAYER_SLICE);
   registerFactory(nntrainer::createLayer<NegativeLayer>, NegativeLayer::type,

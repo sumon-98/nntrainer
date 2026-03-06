@@ -68,6 +68,7 @@ void GatherLayer::forwarding_operation(const Tensor &input, const Tensor &index,
       }
     }
   }
+  // std::cout<< input << output;
 }
 
 void GatherLayer::calcDerivative(RunLayerContext &context) {

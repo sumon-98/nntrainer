@@ -61,9 +61,14 @@ executable('nntrainer_onnx_qwen3_multi_token',
   install_dir: application_install_dir
 )
 
-fc_model_executable = executable('nntrainer_onnx_fc_model',
-  fc_model_sources,
-  include_directories: [include_directories('.')],
+# qwen3 multi-token-no-kv example
+qwen3_multi_token_no_kv_sources = [
+  'qwen3/multi-token-no-kv/main.cpp',
+]
+
+executable('nntrainer_onnx_qwen3_multi_token_no_kv',
+  qwen3_multi_token_no_kv_sources,
+  include_directories: [include_directories('.'), include_directories('qwen3'), include_directories('qwen3/multi-token-no-kv')],
   dependencies: onnx_example_dependencies,
   install: get_option('install-app'),
   install_dir: application_install_dir

@@ -27,6 +27,7 @@ void MultiplyLayer::finalize(InitLayerContext &context) {
 
 void MultiplyLayer::forwarding_operation(const Tensor &input0,
                                          const Tensor &input1, Tensor &hidden) {
+  // std::cout << input0 << input1;
   input0.multiply(input1, hidden);
 }
 

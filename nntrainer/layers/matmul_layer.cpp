@@ -40,6 +40,10 @@ void MatMulLayer::finalize(InitLayerContext &context) {
 void MatMulLayer::forwarding_operation(const Tensor &input0,
                                        const Tensor &input1, Tensor &output) {
 
+  // std::cout << "----------------------------Matmul-------------------------------" << std::endl;
+  // std::cout << input0.getDim() << input1.getDim();
+
+  // std::cout << input0 << input1;
   if (input0.channel() != 1) {
 
     unsigned int batch = input0.batch();
@@ -60,6 +64,7 @@ void MatMulLayer::forwarding_operation(const Tensor &input0,
     output.reshape(TensorDim({batch, channel, height0, width1}));
   } else
     input0.dot(input1, output);
+  std::cout << output;
 }
 
 void MatMulLayer::calcDerivative(RunLayerContext &context) {

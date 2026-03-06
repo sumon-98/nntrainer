@@ -27,6 +27,7 @@ void MultiOutLayer::finalize(InitLayerContext &context) {
   const TensorDim &in_dim = context.getInputDimensions()[0];
 
   std::fill(out_dims.begin(), out_dims.end(), in_dim);
+  std::cout << context.getName() << " Num: " << context.getNumRequestedOutputs() <<  " MultiOut layer: " << in_dim;
   context.setOutputDimensions(out_dims);
 }
 

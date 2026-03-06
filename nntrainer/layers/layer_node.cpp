@@ -825,6 +825,7 @@ void LayerNode::forwarding(bool training) {
     }
   }
 
+  std::cout << run_context->getName() << std::endl;
   layer->forwarding(*run_context, training);
   reStoreData(false);
   PROFILE_TIME_END(forward_event_key);

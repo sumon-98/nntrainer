@@ -58,6 +58,7 @@ void InputLayer::forwarding(RunLayerContext &context, bool training) {
     hidden_.normalization_i();
   if (std::get<props::Standardization>(input_props))
     hidden_.standardization_i();
+  // std::cout << hidden_;
 }
 
 void InputLayer::calcDerivative(RunLayerContext &context) {

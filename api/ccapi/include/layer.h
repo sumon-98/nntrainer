@@ -85,6 +85,7 @@ enum LayerType {
   LAYER_ZONEOUT_LSTMCELL =
     ML_TRAIN_LAYER_TYPE_ZONEOUTLSTMCELL, /**< Zoneout LSTM Cell Layer type */
   LAYER_ATTENTION = ML_TRAIN_LAYER_TYPE_ATTENTION, /**< Attention Layer type */
+  LAYER_EAGER_ATTENTION = ML_TRAIN_LAYER_TYPE_EAGER_ATTENTION, /**< Attention Layer type */
   LAYER_MOL_ATTENTION =
     ML_TRAIN_LAYER_TYPE_MOL_ATTENTION, /**< MoL Attention Layer type */
   LAYER_MULTI_HEAD_ATTENTION =
@@ -432,6 +433,14 @@ CastLayer(const std::vector<std::string> &properties = {}) {
 inline std::unique_ptr<Layer>
 GatherLayer(const std::vector<std::string> &properties = {}) {
   return createLayer(LayerType::LAYER_GATHER, properties);
+}
+
+/**
+ * @brief Helper function to create EagerAttention layer
+ */
+inline std::unique_ptr<Layer>
+EagerAttentionLayer(const std::vector<std::string> &properties = {}) {
+  return createLayer(LayerType::LAYER_EAGER_ATTENTION, properties);
 }
 
 /**

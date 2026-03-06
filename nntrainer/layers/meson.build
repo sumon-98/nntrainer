@@ -18,6 +18,7 @@ layer_sources = [
   'matmul_layer.cpp',
   'cast_layer.cpp',
   'gather_layer.cpp',
+  'eager_attention_layer.cpp',
   'slice_layer.cpp',
   'negative_layer.cpp',
   'addition_layer.cpp',

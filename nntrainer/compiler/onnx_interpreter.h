@@ -60,6 +60,11 @@ public:
                       const std::string &op_type,
                       std::vector<std::string> &props);
 
+  void handleAttentionOp(const onnx::NodeProto &node,
+                      GraphRepresentation &representation,
+                      const std::string &op_type,
+                      std::vector<std::string> &props);
+
   void registerBasicUnaryOp(const std::string &op_type);
 
   void registerBasicBinaryOp(const std::string &op_type);
@@ -155,6 +160,12 @@ public:
    */
   void setDimParamMap(const std::unordered_map<std::string, int> &map);
 
+  /**
+   * @brief Print layer information and parameters
+   * @param layer_node The layer node to print information for
+   */
+  void printLayerInfo(const std::shared_ptr<LayerNode> &layer_node);
+
 private:
   std::unordered_map<std::string, NodeHandler>
     NodeHandlers;              // node handlers function map
@@ -194,6 +205,7 @@ private:
     {"Identity", "identity"},
     {"Unsqueeze", "reshape"},
     {"Gather", "gather"},
+    {"Attention", "eager_attention"},
     {"GatherElements", "gather"},
     {"Cosine", "cosine"},
     {"Sine", "sine"},

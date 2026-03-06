@@ -103,11 +103,17 @@ void ONNXInterpreter::handleUnaryOp(const onnx::NodeProto &node,
                                     const std::string &op_type,
                                     std::vector<std::string> &props) {
   std::vector<std::string> inputNames = createOutputRemap(node);
+  
   props.push_back("name=" + cleanName(node.name()));
   if (op_type == "activation") {
     props.push_back("activation=" + activationKeyMap[node.op_type()]);
   }
   props.push_back("input_layers=" + inputNames[0]);
+
+  // std::cout << "Op: " << op_type << std::endl;
+  // for(auto prop: props) {
+  //   std::cout << prop << std::endl;
+  // }
 
   representation.push_back(
     createLayerNode(op_type, {props.begin(), props.end()}));
@@ -120,6 +126,26 @@ void ONNXInterpreter::handleBinaryOp(const onnx::NodeProto &node,
   std::vector<std::string> inputNames = createOutputRemap(node);
   props.push_back("name=" + cleanName(node.name()));
   props.push_back("input_layers=" + inputNames[0] + "," + inputNames[1]);
+  // std::cout << "Op: " << op_type << std::endl;
+  // for(auto prop: props) {
+  //   std::cout << prop << std::endl;
+  // }
+
+  representation.push_back(
+    createLayerNode(op_type, {props.begin(), props.end()}));
+}
+
+void ONNXInterpreter::handleAttentionOp(const onnx::NodeProto &node,
+                                     GraphRepresentation &representation,
+                                     const std::string &op_type,
+                                     std::vector<std::string> &props) {
+  std::vector<std::string> inputNames = createOutputRemap(node);
+  props.push_back("name=" + cleanName(node.name()));
+  props.push_back("input_layers=" + inputNames[0] + "," + inputNames[1] + "," + inputNames[2] + "," + inputNames[4] + "," + inputNames[5]);
+  // std::cout << "Op: " << op_type << std::endl;
+  // for(auto prop: props) {
+  //   std::cout << prop << std::endl;
+  // }
   representation.push_back(
     createLayerNode(op_type, {props.begin(), props.end()}));
 }
@@ -146,6 +172,7 @@ void ONNXInterpreter::registerNodeHandlers() {
   registerBasicBinaryOp("Mul");
   registerBasicBinaryOp("Div");
   registerBasicBinaryOp("MatMul");
+  // registerBasicBinaryOp("Attention");
   registerBasicUnaryOp("Pow");
   registerBasicUnaryOp("Sqrt");
   registerBasicUnaryOp("Softmax");
@@ -246,10 +273,18 @@ void ONNXInterpreter::registerNodeHandlers() {
     handleBinaryOp(node, rep, layerKeyMap[node.op_type()], props);
   };
 
+  NodeHandlers["Attention"] = [this](const onnx::NodeProto &node,
+                                  GraphRepresentation &rep) {
+    std::vector<std::string> props;
+    handleAttentionOp(node, rep, layerKeyMap[node.op_type()], props);
+  };
+
+
   NodeHandlers["ReduceMean"] = [this](const onnx::NodeProto &node,
                                       GraphRepresentation &rep) {
     std::vector<std::string> props;
-    props.push_back(extractAttribute(node, "axes", "axis"));
+    // props.push_back(extractAttribute(node, "axes", "axis"));
+    props.push_back("axis=3");
     handleUnaryOp(node, rep, layerKeyMap[node.op_type()], props);
   };
 
@@ -293,7 +328,9 @@ void ONNXInterpreter::loadInputsAndWeights(
   // Create input & constant tensor layer
   for (const auto &input : onnx_model.graph().input()) {
     auto shape = input.type().tensor_type().shape();
-    if (shape.dim_size() >= 4 || shape.dim_size() == 0) {
+    // std::cout << input.name() << " " << shape.dim_size() << std::endl;
+    // if (shape.dim_size() >= 4 || shape.dim_size() == 0) {
+    if (shape.dim_size() > 4 || shape.dim_size() == 0) {
       throw std::runtime_error(
         "Tensors with batch dimensions of 5 or more, or zero_dimensional "
         "tensors are not supported.");
@@ -303,6 +340,29 @@ void ONNXInterpreter::loadInputsAndWeights(
     representation.push_back(
       createLayerNode("input", {withKey("name", cleanName(input.name())),
                                 withKey("input_shape", dim)}));
+  }
+
+  for(auto &output: onnx_model.graph().output()) {
+    std::string outputName = cleanName(output.name());
+    std::cout << "ONNX output: " << output.name() << std::endl;
+    // Find the node that produces this output
+    for (const auto& node : onnx_model.graph().node()) {
+      for (int i = 0; i < node.output_size(); ++i) {
+        std::string cleanOutputName = cleanName(node.output(i));
+        if(cleanOutputName == outputName) {
+          std::string nodeName = cleanName(node.name());
+          std::cout << "Found producer node: " << nodeName << std::endl;
+          
+          // Create a MultiOut layer for this output
+          // The MultiOut layer takes the output of the producer node as input
+          // Format: layer_name(index)
+          representation.push_back(createLayerNode(
+            "multiout", 
+            {"name=" + outputName, "input_layers=" + nodeName + "(" + std::to_string(i) + ")"}));
+            break;
+        }
+      }
+    }
   }
 }
 
@@ -324,7 +384,9 @@ tensors from operations.
     std::string inputName = cleanName(input);
     outputRemap(inputName);
     inputNames.push_back(inputName);
+    // std::cout << inputName << " ";
   }
+  // std::cout << std::endl;
   layerOutputMap.insert({cleanName(node.output()[0]), cleanName(node.name())});
 
   return inputNames;
@@ -343,7 +405,8 @@ void ONNXInterpreter::loadOperations(GraphRepresentation &representation) {
       constantTensors.insert({node.name() + "_output_0", node});
       continue;
     }
-    std::vector<std::string> inputNames = createOutputRemap(node);
+    std::vector<std::string> inputNames = createOutputRemap(node);  // redundant not needed
+    // std::cout << node.op_type() << std::endl;
     NodeHandlers[node.op_type()](node, representation);
   }
 };

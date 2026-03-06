@@ -1,0 +1,151 @@
+{
+    "model.vocab_weights": {
+        "file": "./bins/model_vocab_weights.bin",
+        "tensor name": "model.vocab_weights",
+        "dtype": "FLOAT",
+        "shape": [
+            151936,
+            2048
+        ]
+    },
+    "model.broadcast": {
+        "file": "./bins/model_broadcast.bin",
+        "tensor name": "model.broadcast",
+        "dtype": "INT64",
+        "shape": [
+            256,
+            2048
+        ]
+    },
+    "model.layers.0.self_attn.attention_mask": {
+        "file": "./bins/model_layers_0_self_attn_attention_mask.bin",
+        "tensor name": "model.layers.0.self_attn.attention_mask",
+        "dtype": "FLOAT",
+        "shape": [
+            1,
+            1,
+            256,
+            256
+        ]
+    },
+    "model.layers.0.self_attn.scaling_factor": {
+        "file": "./bins/model_layers_0_self_attn_scaling_factor.bin",
+        "tensor name": "model.layers.0.self_attn.scaling_factor",
+        "dtype": "FLOAT",
+        "shape": [
+            1
+        ]
+    },
+    "model.layers.0.self_attn.q_norm.weight": {
+        "file": "./bins/model_layers_0_self_attn_q_norm_weight.bin",
+        "tensor name": "model.layers.0.self_attn.q_norm.weight",
+        "dtype": "FLOAT",
+        "shape": [
+            128
+        ]
+    },
+    "model.layers.0.self_attn.k_norm.weight": {
+        "file": "./bins/model_layers_0_self_attn_k_norm_weight.bin",
+        "tensor name": "model.layers.0.self_attn.k_norm.weight",
+        "dtype": "FLOAT",
+        "shape": [
+            128
+        ]
+    },
+    "model.layers.0.input_layernorm.weight": {
+        "file": "./bins/model_layers_0_input_layernorm_weight.bin",
+        "tensor name": "model.layers.0.input_layernorm.weight",
+        "dtype": "FLOAT",
+        "shape": [
+            2048
+        ]
+    },
+    "model.layers.0.post_attention_layernorm.weight": {
+        "file": "./bins/model_layers_0_post_attention_layernorm_weight.bin",
+        "tensor name": "model.layers.0.post_attention_layernorm.weight",
+        "dtype": "FLOAT",
+        "shape": [
+            2048
+        ]
+    },
+    "model.norm.weight": {
+        "file": "./bins/model_norm_weight.bin",
+        "tensor name": "model.norm.weight",
+        "dtype": "FLOAT",
+        "shape": [
+            2048
+        ]
+    },
+    "onnx::MatMul_584": {
+        "file": "./bins/onnx__matmul_584.bin",
+        "tensor name": "onnx::MatMul_584",
+        "dtype": "FLOAT",
+        "shape": [
+            2048,
+            2048
+        ]
+    },
+    "onnx::MatMul_590": {
+        "file": "./bins/onnx__matmul_590.bin",
+        "tensor name": "onnx::MatMul_590",
+        "dtype": "FLOAT",
+        "shape": [
+            2048,
+            1024
+        ]
+    },
+    "onnx::MatMul_601": {
+        "file": "./bins/onnx__matmul_601.bin",
+        "tensor name": "onnx::MatMul_601",
+        "dtype": "FLOAT",
+        "shape": [
+            2048,
+            1024
+        ]
+    },
+    "onnx::MatMul_633": {
+        "file": "./bins/onnx__matmul_633.bin",
+        "tensor name": "onnx::MatMul_633",
+        "dtype": "FLOAT",
+        "shape": [
+            2048,
+            2048
+        ]
+    },
+    "onnx::MatMul_634": {
+        "file": "./bins/onnx__matmul_634.bin",
+        "tensor name": "onnx::MatMul_634",
+        "dtype": "FLOAT",
+        "shape": [
+            2048,
+            6144
+        ]
+    },
+    "onnx::MatMul_635": {
+        "file": "./bins/onnx__matmul_635.bin",
+        "tensor name": "onnx::MatMul_635",
+        "dtype": "FLOAT",
+        "shape": [
+            2048,
+            6144
+        ]
+    },
+    "onnx::MatMul_636": {
+        "file": "./bins/onnx__matmul_636.bin",
+        "tensor name": "onnx::MatMul_636",
+        "dtype": "FLOAT",
+        "shape": [
+            6144,
+            2048
+        ]
+    },
+    "onnx::MatMul_637": {
+        "file": "./bins/onnx__matmul_637.bin",
+        "tensor name": "onnx::MatMul_637",
+        "dtype": "FLOAT",
+        "shape": [
+            2048,
+            151936
+        ]
+    }
+}
