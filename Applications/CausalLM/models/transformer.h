@@ -116,6 +116,25 @@ public:
     return performance_metrics;
   }
 
+  /**
+   * @brief Configure dataset for the model
+   */
+  virtual void setDataset(ml::train::DatasetModeType mode,
+                          std::shared_ptr<ml::train::Dataset> dataset) {
+    if (!model)
+      throw std::invalid_argument("Model is not initialized");
+    model->setDataset(mode, std::move(dataset));
+  }
+
+  /**
+   * @brief Train the model
+   */
+  virtual void train(const std::vector<std::string> &values = {}) {
+    if (!model)
+      throw std::invalid_argument("Model is not initialized");
+    model->train(values);
+  }
+
 protected:
   /**
    * @brief Setup the parameters for the Transformer model

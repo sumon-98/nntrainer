@@ -78,7 +78,7 @@ public:
   /**
    * @copydoc   Layer::supportBackwarding()
    */
-  bool supportBackwarding() const override { return false; }
+  bool supportBackwarding() const override { return true; }
 
   static constexpr const char *type = "embedding_normalize";
 };

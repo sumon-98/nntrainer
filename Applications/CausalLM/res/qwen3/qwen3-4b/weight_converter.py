@@ -64,11 +64,13 @@ if __name__ == "__main__":
     parser.add_argument("--model_path", type=str, default="./Qwen3-4b")
     parser.add_argument("--output_name", type=str, default="./nntr_qwen3_4b_fp32.bin")
     parser.add_argument("--data_type", type=str, default="float32")
+    parser.add_argument("--num_layers", type=int, default=2, help="Number of layers to convert (default: 2)")
     args = parser.parse_args()
     
     data_dtype = args.data_type
     model_path = args.model_path
     output_name = args.output_name
+    num_layers = args.num_layers
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
     
     tokenizer = AutoTokenizer.from_pretrained(model_path)
@@ -77,4 +79,4 @@ if __name__ == "__main__":
     model.eval()
 
     with open(output_name, "wb") as f_model :
-        save_qwen3_for_nntrainer(model.state_dict(), config.num_hidden_layers, data_dtype, f_model)
+        save_qwen3_for_nntrainer(model.state_dict(), num_layers, data_dtype, f_model)

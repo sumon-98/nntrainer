@@ -38,8 +38,10 @@ public:
    * @brief Construct a TrainingDataGenerator
    * @param tokenizer Tokenizer to use for encoding text
    * @param seq_len Sequence length for training samples
+   * @param vocab_size Vocabulary size for one-hot representation
    */
-  TrainingDataGenerator(tokenizers::Tokenizer *tokenizer, unsigned int seq_len);
+  TrainingDataGenerator(tokenizers::Tokenizer *tokenizer, unsigned int seq_len,
+                        unsigned int vocab_size);
 
   /**
    * @brief Load training text from a file
@@ -75,7 +77,8 @@ public:
 private:
   tokenizers::Tokenizer *tokenizer_;
   unsigned int seq_len_;
-  std::vector<int> all_token_ids_;
+  unsigned int vocab_size_;
+  std::vector<std::vector<int>> samples_;
   unsigned int current_idx_;
 
   void reset();

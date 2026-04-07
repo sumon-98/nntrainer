@@ -20,10 +20,10 @@
 
 static std::mutex rope_init_mtx;
 
+#include "mha_core.h"
 #include <engine.h>
 #include <fp16.h>
 #include <layer_context.h>
-#include <mha_core.h>
 #include <nntrainer_error.h>
 #include <node_exporter.h>
 
@@ -185,6 +185,7 @@ void MHACoreLayer::finalize(nntrainer::InitLayerContext &context) {
 
   /** Allocate training tensors for backward pass */
   if (context.getExecutionMode() == ml::train::ExecutionMode::TRAIN) {
+    const unsigned int batch_size = query_dim.batch();
     const unsigned int seq_len = query_dim.height();
 
     // RoPE-applied Q: (batch, num_heads_Q, seq_len, head_dim)
@@ -221,12 +222,13 @@ void MHACoreLayer::finalize(nntrainer::InitLayerContext &context) {
 
 /**
  * @note This forwarding function is used for training mode.
- *       Full-sequence attention without KV-cache.
+ *       This will be implemented ASAP.
+ * @date 2024-09-02
  */
 void MHACoreLayer::forwarding(nntrainer::RunLayerContext &context,
                               bool training) {
+  printf("Entering Forwarding\n");
   unsigned int gqa_size = num_heads_Q / num_heads_KV;
-
   nntrainer::Tensor &query = context.getInput(INOUT_INDEX::QUERY);
   nntrainer::Tensor &key = context.getInput(INOUT_INDEX::KEY);
   nntrainer::Tensor &value = context.getInput(INOUT_INDEX::VALUE);
@@ -247,7 +249,6 @@ void MHACoreLayer::forwarding(nntrainer::RunLayerContext &context,
 
   // Step 1: Apply RoPE to copies of Q and K, then reshape to per-head format
   // Must not modify input tensors (test framework checks inputs after forward)
-
   // Copy Q and K, apply RoPE to copies
   nntrainer::Tensor q_rope = query.clone();
   nntrainer::Tensor k_rope = key.clone();
@@ -289,7 +290,6 @@ void MHACoreLayer::forwarding(nntrainer::RunLayerContext &context,
 
   // Step 2: Compute attention for each batch and Q head
   float scale_factor = 1.0f / std::sqrt(static_cast<float>(head_dim));
-
   for (unsigned int b = 0; b < batch_size; b++) {
     for (unsigned int q_head = 0; q_head < num_heads_Q; q_head++) {
       unsigned int kv_head = q_head / gqa_size;
@@ -330,13 +330,15 @@ void MHACoreLayer::forwarding(nntrainer::RunLayerContext &context,
       // attn_output = scores @ V_h: (1, 1, seq_len, head_dim)
       nntrainer::TensorDim out_dim(1, 1, seq_len, head_dim,
                                    query.getTensorType());
+
       // Write directly to the output tensor at the right head offset
       float *out_base = output.getAddress<float>(b, 0, 0, 0);
       for (unsigned int h = 0; h < seq_len; h++) {
         float *attn_row = scores.getAddress<float>(0, 0, h, 0);
         float *v_data = v_h.getAddress<float>(0, 0, 0, 0);
-        float *out_row = out_base + h * (num_heads_Q * head_dim) +
-                         q_head * head_dim;
+        float *out_row =
+          out_base + h * (num_heads_Q * head_dim) + q_head * head_dim;
+
         // out_row = sum_j(attn[h,j] * V[j,:])
         std::fill(out_row, out_row + head_dim, 0.0f);
         for (unsigned int j = 0; j < seq_len; j++) {
@@ -500,7 +502,7 @@ void MHACoreLayer::incremental_forwarding(nntrainer::RunLayerContext &context,
         cache_value_dim, cache_value_step_dim);
     }
   }
-  
+
   // increase cache size
   cache_index += step_size;
 }
@@ -1440,13 +1442,15 @@ void MHACoreLayer::updateTensorsByInputDimensions(
 }
 
 void MHACoreLayer::calcDerivative(nntrainer::RunLayerContext &context) {
+  printf("Entering Derivative\n");
   unsigned int gqa_size = num_heads_Q / num_heads_KV;
-
   const nntrainer::Tensor &incoming_deriv =
     context.getIncomingDerivative(INOUT_INDEX::OUTPUT);
-  nntrainer::Tensor &d_query = context.getOutgoingDerivative(INOUT_INDEX::QUERY);
+  nntrainer::Tensor &d_query =
+    context.getOutgoingDerivative(INOUT_INDEX::QUERY);
   nntrainer::Tensor &d_key = context.getOutgoingDerivative(INOUT_INDEX::KEY);
-  nntrainer::Tensor &d_value = context.getOutgoingDerivative(INOUT_INDEX::VALUE);
+  nntrainer::Tensor &d_value =
+    context.getOutgoingDerivative(INOUT_INDEX::VALUE);
 
   nntrainer::Tensor &train_q =
     context.getTensor(tensor_idx[AttentionParams::train_query]);
@@ -1517,10 +1521,20 @@ void MHACoreLayer::calcDerivative(nntrainer::RunLayerContext &context) {
         attn_wt.dot(d_out_head, d_v_head, true, false, 1.0f);
 
         // Softmax backward: d_scores_pre_softmax = softmax' * d_scores
-        sm.run_prime_fn(attn_wt, d_scores, d_scores);
-
-        // Scale
-        d_scores.multiply_i(scale_factor);
+        // dL/dX_i = Y_i * (dL/dY_i - sum(Y_j * dL/dY_j)) * scale_factor
+        float *aw_ptr = attn_wt.getData<float>();
+        float *ds_ptr = d_scores.getData<float>();
+        for (unsigned int i = 0; i < seq_len; i++) {
+          float dot_sum = 0.0f;
+          for (unsigned int j = 0; j < seq_len; j++) {
+            dot_sum += aw_ptr[i * seq_len + j] * ds_ptr[i * seq_len + j];
+          }
+          for (unsigned int j = 0; j < seq_len; j++) {
+            float y = aw_ptr[i * seq_len + j];
+            float dy = ds_ptr[i * seq_len + j];
+            ds_ptr[i * seq_len + j] = y * (dy - dot_sum) * scale_factor;
+          }
+        }
 
         // d_Q for this head: d_scores @ K: (seq_len, head_dim)
         // Write directly into d_query
@@ -1592,6 +1606,8 @@ void MHACoreLayer::setProperty(const std::vector<std::string> &values) {
   LayerImpl::setProperty(remain_props);
 }
 
+size_t MHACoreLayer::calc_attn_index(size_t i) { return (i * (i + 1)) / 2; };
+
 void MHACoreLayer::apply_inverse_rotary_emb(nntrainer::Tensor &tensor,
                                             unsigned int dim,
                                             unsigned int from) {
@@ -1618,7 +1634,6 @@ void MHACoreLayer::apply_inverse_rotary_emb(nntrainer::Tensor &tensor,
         std::vector<float> &cos_v = (*freqs_cos)[pos];
         std::vector<float> &sin_v = (*freqs_sin)[pos];
         float *ptr = tensor.getAddress<float>(b, c, h, 0);
-
         for (unsigned int w = 0; w < tensor.width(); w += dim) {
           for (unsigned int k = 0; k < half_; k++) {
             float a = ptr[w + k];
@@ -1632,8 +1647,6 @@ void MHACoreLayer::apply_inverse_rotary_emb(nntrainer::Tensor &tensor,
     }
   }
 }
-
-size_t MHACoreLayer::calc_attn_index(size_t i) { return (i * (i + 1)) / 2; };
 
 #ifdef PLUGGABLE
 

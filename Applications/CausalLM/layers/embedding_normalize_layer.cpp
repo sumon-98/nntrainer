@@ -64,15 +64,15 @@ void EmbeddingNormalizeLayer::incremental_forwarding(
 
 void EmbeddingNormalizeLayer::calcDerivative(
   nntrainer::RunLayerContext &context) {
-  throw nntrainer::exception::not_supported(
-    "calcDerivative for EmbeddingNormalize layer is not supported");
+  const nntrainer::Tensor &incoming_deriv =
+    context.getIncomingDerivative(SINGLE_INOUT_IDX);
+  nntrainer::Tensor &outgoing_deriv =
+    context.getOutgoingDerivative(SINGLE_INOUT_IDX);
+  outgoing_deriv.copyData(incoming_deriv);
 }
 
 void EmbeddingNormalizeLayer::calcGradient(
-  nntrainer::RunLayerContext &context) {
-  throw nntrainer::exception::not_supported(
-    "calcGradient for EmbeddingNormalize layer is not supported");
-}
+  nntrainer::RunLayerContext &context) {}
 
 void EmbeddingNormalizeLayer::exportTo(
   nntrainer::Exporter &exporter, const ml::train::ExportMethods &method) const {

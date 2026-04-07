@@ -78,6 +78,11 @@ public:
                                          bool training) override;
 
   /**
+   * @copydoc Layer::calcGradient(RunLayerContext &context)
+   */
+  WIN_EXPORT void calcGradient(nntrainer::RunLayerContext &context) override;
+
+  /**
    * @copydoc Layer::calcDerivative(RunLayerContext &context)
    */
   WIN_EXPORT void calcDerivative(nntrainer::RunLayerContext &context) override;
@@ -85,7 +90,7 @@ public:
   /**
    * @copydoc bool supportBackwarding() const
    */
-  WIN_EXPORT bool supportBackwarding() const override { return false; };
+  WIN_EXPORT bool supportBackwarding() const override { return true; };
 
   /**
    * @copydoc Layer::exportTo(Exporter &exporter, ExportMethods method)

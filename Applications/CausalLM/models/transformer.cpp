@@ -11,11 +11,13 @@
  */
 
 #include <fstream>
+#include <iostream>
 
 #include <app_context.h>
 #include <engine.h>
 #include <model.h>
 
+#include <layer.h>
 #include <llm_util.hpp>
 #include <tokenizers_cpp.h>
 #include <transformer.h>
@@ -185,17 +187,19 @@ void Transformer::initialize() {
 }
 
 void Transformer::initializeForTraining(float lr, unsigned int epochs) {
-
-  // RegisterCustomLayers
   registerCustomLayers();
-
-  // construct causalLM model
   constructModel();
+
+  // Append cross_softmax loss explicitly for training the network
+  try {
+    model->addLayer(ml::train::createLayer("cross_softmax", {"name=loss"}));
+  } catch (const std::exception &e) {
+    std::cerr << "Note: " << e.what() << std::endl;
+  }
 
   // setup model property
   std::vector<std::string> model_props = {
-    withKey("batch_size", BATCH_SIZE),
-    withKey("epochs", epochs),
+    withKey("batch_size", BATCH_SIZE), withKey("epochs", epochs),
     withKey("model_tensor_type", MODEL_TENSOR_TYPE)};
 
   model->setProperty(model_props);
@@ -260,6 +264,15 @@ void Transformer::constructModel() {
      withKey("input_layers",
              "layer" + std::to_string(NUM_LAYERS - 1) + "_decoder_output"),
      withKey("packed", "false")}));
+
+  // // CLINE CHANGE
+  // // Create LM Head (output projection to vocabulary)
+  // layers.push_back(createLayer(
+  //   "fully_connected",
+  //   {withKey("name", "lm_head"), withKey("unit", std::to_string(NUM_VOCAB)),
+  //    withKey("disable_bias", "true"), withKey("input_layers", "output_norm"),
+  //    withKey("weight_initializer", "zeros")})); // zeros or load from pretrained
+  // // CLINE CHANGE ENDS
 
   // add created layers into the model
   for (auto &layer : layers) {
@@ -453,8 +466,7 @@ std::vector<LayerHandle> Transformer::createMlp(const int layer_id, int dim,
   std::vector<std::string> up_params = {
     withKey("name", "layer" + std::to_string(layer_id) + "_ffn_up"),
     withKey("unit", hidden_dim), withKey("disable_bias", "true"),
-    withKey("input_layers", input_name),
-    withKey("weight_initializer", "ones")};
+    withKey("input_layers", input_name), withKey("weight_initializer", "ones")};
   if (isLoRATarget("ffn_up")) {
     up_params.push_back(withKey("lora_rank", LORA_RANK));
     up_params.push_back(withKey("lora_alpha", LORA_ALPHA));
@@ -464,8 +476,7 @@ std::vector<LayerHandle> Transformer::createMlp(const int layer_id, int dim,
   std::vector<std::string> gate_params = {
     withKey("name", "layer" + std::to_string(layer_id) + "_ffn_gate"),
     withKey("unit", hidden_dim), withKey("disable_bias", "true"),
-    withKey("input_layers", input_name),
-    withKey("weight_initializer", "ones")};
+    withKey("input_layers", input_name), withKey("weight_initializer", "ones")};
   if (isLoRATarget("ffn_gate")) {
     gate_params.push_back(withKey("lora_rank", LORA_RANK));
     gate_params.push_back(withKey("lora_alpha", LORA_ALPHA));
@@ -482,8 +493,7 @@ std::vector<LayerHandle> Transformer::createMlp(const int layer_id, int dim,
   std::vector<std::string> down_params = {
     withKey("name", "layer" + std::to_string(layer_id) + "_ffn_down"),
     withKey("unit", dim), withKey("disable_bias", "true"),
-    withKey("input_layers",
-            "layer" + std::to_string(layer_id) + "_ffn_swiglu"),
+    withKey("input_layers", "layer" + std::to_string(layer_id) + "_ffn_swiglu"),
     withKey("weight_initializer", "ones")};
   if (isLoRATarget("ffn_down")) {
     down_params.push_back(withKey("lora_rank", LORA_RANK));

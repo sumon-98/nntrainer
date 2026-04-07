@@ -35,6 +35,9 @@ namespace causallm {
  *
  */
 WIN_EXPORT class SwiGLULayer final : public nntrainer::Layer {
+private:
+  std::array<unsigned int, 1> tensor_idx;
+
 public:
   /**
    * @brief Construct a new custom SwiGLU layer object
@@ -107,7 +110,6 @@ public:
 
 private:
   enum SwiGLUParams { sigmoid_gate = 0 };
-  std::array<unsigned int, 1> tensor_idx;
 };
 
 } // namespace causallm

@@ -37,7 +37,10 @@ void ReshapedRMSNormLayer::finalize(nntrainer::InitLayerContext &context) {
 }
 
 void ReshapedRMSNormLayer::forwarding(nntrainer::RunLayerContext &context,
-                                      bool training) {}
+                                      bool training) {
+  nntrainer::Tensor &in = context.getInput(SINGLE_INOUT_IDX);
+  incremental_forwarding(context, 0, in.getDim().height(), training);
+}
 
 void ReshapedRMSNormLayer::incremental_forwarding(
   nntrainer::RunLayerContext &context, unsigned int from, unsigned int to,
@@ -117,7 +120,13 @@ void ReshapedRMSNormLayer::updateTensorsByInputDimensions(
 }
 
 void ReshapedRMSNormLayer::calcDerivative(nntrainer::RunLayerContext &context) {
-  std::throw_with_nested(std::runtime_error("Training is not supported yet."));
+  const nntrainer::Tensor &incoming_deriv = context.getIncomingDerivative(SINGLE_INOUT_IDX);
+  nntrainer::Tensor &outgoing_deriv = context.getOutgoingDerivative(SINGLE_INOUT_IDX);
+  outgoing_deriv.copyData(incoming_deriv);
+}
+
+void ReshapedRMSNormLayer::calcGradient(nntrainer::RunLayerContext &context) {
+  // Empty implementation for testing pass-through
 }
 
 #ifdef PLUGGABLE

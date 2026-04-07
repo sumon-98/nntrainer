@@ -8,7 +8,7 @@
  * @see    https://github.com/nntrainer/nntrainer
  * @author Seungbaek Hong <sb92.hong@samsung.com>
  * @bug    No known bugs except for NYI items
- * @note   This layer supports both inference and training mode.
+ * @note   This layer only supports inference mode.
  */
 
 #ifndef __RMS_NORM_LAYER_H__
@@ -26,7 +26,7 @@
 #include <node_exporter.h>
 #include <utility>
 
-#include <causallm_common_properties.h>
+#include "causallm_common_properties.h"
 #include <connection.h>
 #include <tensor.h>
 #include <tensor_wrap_specs.h>
@@ -74,6 +74,11 @@ public:
    * @copydoc Layer::calcDerivative(RunLayerContext &context)
    */
   WIN_EXPORT void calcDerivative(nntrainer::RunLayerContext &context) override;
+
+  /**
+   * @copydoc Layer::calcGradient(RunLayerContext &context)
+   */
+  WIN_EXPORT void calcGradient(nntrainer::RunLayerContext &context) override;
 
   /**
    * @copydoc bool supportBackwarding() const

@@ -21,9 +21,11 @@
 namespace causallm {
 
 TrainingDataGenerator::TrainingDataGenerator(tokenizers::Tokenizer *tokenizer,
-                                             unsigned int seq_len) :
+                                             unsigned int seq_len,
+                                             unsigned int vocab_size) :
   tokenizer_(tokenizer),
   seq_len_(seq_len),
+  vocab_size_(vocab_size),
   current_idx_(0) {}
 
 void TrainingDataGenerator::loadTextFile(const std::string &path) {
@@ -32,27 +34,26 @@ void TrainingDataGenerator::loadTextFile(const std::string &path) {
     throw std::runtime_error("Failed to open training data file: " + path);
   }
 
-  std::stringstream buffer;
-  buffer << file.rdbuf();
-  std::string text = buffer.str();
+  std::string line;
+  int count = 0;
+  while (std::getline(file, line)) {
+    if (line.empty())
+      continue;
+    auto ids = tokenizer_->Encode(line);
+    samples_.push_back(ids);
+    count++;
+  }
 
-  // Tokenize the text
-  auto ids = tokenizer_->Encode(text);
-  all_token_ids_.insert(all_token_ids_.end(), ids.begin(), ids.end());
-
-  std::cout << "[TrainingData] Loaded " << path << ": " << ids.size()
-            << " tokens, total: " << all_token_ids_.size() << std::endl;
+  std::cout << "[TrainingData] Loaded " << path
+            << " line by line, total: " << count << " samples." << std::endl;
 }
 
 void TrainingDataGenerator::addTokenIds(const std::vector<int> &ids) {
-  all_token_ids_.insert(all_token_ids_.end(), ids.begin(), ids.end());
+  samples_.push_back(ids);
 }
 
 unsigned int TrainingDataGenerator::getNumSamples() const {
-  if (all_token_ids_.size() <= seq_len_) {
-    return 0;
-  }
-  return static_cast<unsigned int>(all_token_ids_.size() - seq_len_);
+  return static_cast<unsigned int>(samples_.size());
 }
 
 void TrainingDataGenerator::reset() { current_idx_ = 0; }
@@ -61,19 +62,43 @@ int TrainingDataGenerator::dataCb(float **input, float **label, bool *last,
                                   void *user_data) {
   auto *self = static_cast<TrainingDataGenerator *>(user_data);
 
-  if (self->current_idx_ + self->seq_len_ >= self->all_token_ids_.size()) {
+  if (self->current_idx_ >= self->samples_.size()) {
     *last = true;
     self->reset();
     return 0;
   }
 
-  // Input: [t_i, t_{i+1}, ..., t_{i+seq_len-1}]
-  // Label: [t_{i+1}, t_{i+2}, ..., t_{i+seq_len}]
+  const auto &ids = self->samples_[self->current_idx_];
+  unsigned int available = ids.size();
+
+  // Input: [t_0, t_1, ..., t_{L-1}, pad, ..., pad]
+  // Label: [t_1, t_2, ..., t_L,     pad, ..., pad]
   for (unsigned int j = 0; j < self->seq_len_; j++) {
-    input[0][j] =
-      static_cast<float>(self->all_token_ids_[self->current_idx_ + j]);
-    label[0][j] =
-      static_cast<float>(self->all_token_ids_[self->current_idx_ + j + 1]);
+    // Input
+    if (j < available) {
+      input[0][j] = static_cast<float>(ids[j]);
+    } else {
+      input[0][j] = 0.0f; // pad
+    }
+
+    // // Label: zero out first
+    // for (unsigned int v = 0; v < self->vocab_size_; ++v) {
+    //   label[0][j * self->vocab_size_ + v] = 0.0f;
+    // }
+
+    // // Label: set one-hot
+    // if (j + 1 < available) {
+    //   label[0][j * self->vocab_size_ + ids[j + 1]] = 1.0f;
+    // } else {
+    //   label[0][j * self->vocab_size_ + 0] = 1.0f; // pad or eos
+    // }
+    // CLINE FIX SUGGESTION
+    // Label: just the next token ID (not one-hot)
+    if (j + 1 < available) {
+      label[0][j] = static_cast<float>(ids[j + 1]);
+    } else {
+      label[0][j] = 0.0f; // pad
+    }
   }
 
   self->current_idx_++;

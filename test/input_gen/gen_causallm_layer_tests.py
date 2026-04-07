@@ -408,10 +408,10 @@ def gen_mha_core_golden(batch=2, seq_len=4, num_heads_q=4, num_heads_kv=2,
 
                 # Softmax backward
                 dot_sum = np.sum(d_attn * attn_w, axis=-1, keepdims=True)
-                d_scores = attn_w * (d_attn - dot_sum) * scale
+                d_scores = attn_w * (d_attn - dot_sum)
 
-                d_Q_heads[b, q_head] = d_scores @ k_h
-                d_k_head += d_scores.T @ q_h
+                d_Q_heads[b, q_head] = d_scores @ k_h * scale
+                d_k_head += d_scores.T @ q_h * scale
 
             d_K_heads[b, kv_head] = d_k_head
             d_V_heads[b, kv_head] = d_v_head
