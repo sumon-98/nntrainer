@@ -1,5 +1,10 @@
-lora_example_sources = [
-  'main.cpp',
+lora_train_sources = [
+  'lora_train.cpp',
+  'mnist_loader.cpp',
+]
+
+lora_test_sources = [
+  'lora_test.cpp',
   'mnist_loader.cpp',
 ]
 
@@ -18,8 +23,16 @@ if get_option('enable-test')
   lora_example_dependencies += [gtest_dep]
 endif
 
-e = executable('lora_example',
-  lora_example_sources,
+e = executable('lora_train',
+  lora_train_sources,
+  include_directories: [include_directories('.')],
+  dependencies: lora_example_dependencies,
+  install: get_option('install-app'),
+  install_dir: application_install_dir
+)
+
+e2 = executable('lora_test',
+  lora_test_sources,
   include_directories: [include_directories('.')],
   dependencies: lora_example_dependencies,
   install: get_option('install-app'),
@@ -27,7 +40,7 @@ e = executable('lora_example',
 )
 
 # Inference-only executable
-e2 = executable('lora_run',
+e3 = executable('lora_run',
   lora_run_sources,
   include_directories: [include_directories('.')],
   dependencies: lora_example_dependencies,

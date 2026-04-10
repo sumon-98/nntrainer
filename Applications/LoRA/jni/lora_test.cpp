@@ -11,7 +11,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * @file    main.cpp
+ * @file    lora_train.cpp
  * @date    February 2026
  * @brief   Standard backpropagation training example on MNIST
  * @see     https://github.com/nntrainer/nntrainer
@@ -211,44 +211,37 @@ int main(int argc, char **argv) {
   // Parse arguments
   std::string images_path = "train-images-idx3-ubyte";
   std::string labels_path = "train-labels-idx1-ubyte";
-  std::string mode = "train"; // Default mode is training
   std::string model_path = "mnist_model.bin"; // Default model path
   unsigned int epochs = 10;
   unsigned int batch_size = 64;
   float learning_rate = 0.1f;
 
   // Parse command line arguments
-  // Usage: ./program [images_path] [labels_path] [mode] [model_path] [epochs] [batch_size] [learning_rate]
+  // Usage: ./program [images_path] [labels_path] [model_path] [epochs] [batch_size] [learning_rate]
   if (argc >= 3) {
     images_path = argv[1];
     labels_path = argv[2];
   }
   if (argc >= 4) {
-    mode = argv[3];
+    model_path = argv[3];
   }
   if (argc >= 5) {
-    model_path = argv[4];
+    epochs = std::stoul(argv[4]);
   }
   if (argc >= 6) {
-    epochs = std::stoul(argv[5]);
+    batch_size = std::stoul(argv[5]);
   }
   if (argc >= 7) {
-    batch_size = std::stoul(argv[6]);
-  }
-  if (argc >= 8) {
-    learning_rate = std::stof(argv[7]);
+    learning_rate = std::stof(argv[6]);
   }
 
   std::cout << "\nConfiguration:" << std::endl;
   std::cout << "  Images: " << images_path << std::endl;
   std::cout << "  Labels: " << labels_path << std::endl;
-  std::cout << "  Mode: " << mode << std::endl;
   std::cout << "  Model Path: " << model_path << std::endl;
-  if (mode == "train") {
-    std::cout << "  Epochs: " << epochs << std::endl;
-    std::cout << "  Batch Size: " << batch_size << std::endl;
-    std::cout << "  Learning Rate: " << learning_rate << std::endl;
-  }
+  std::cout << "  Epochs: " << epochs << std::endl;
+  std::cout << "  Batch Size: " << batch_size << std::endl;
+  std::cout << "  Learning Rate: " << learning_rate << std::endl;
 
   // Load MNIST dataset or generate fake data for testing
   std::vector<float> images, labels;
@@ -321,140 +314,90 @@ int main(int argc, char **argv) {
     return 1;
   }
 
-  // Check the mode and execute accordingly
-  if (mode == "train") {
-    // Training mode
-    std::cout << "\nEntering training mode..." << std::endl;
-    
-    // Create optimizer with learning rate
-    auto optimizer = ml::train::createOptimizer("sgd", {"learning_rate=" + std::to_string(learning_rate)});
-    try {
-      model->setOptimizer(std::move(optimizer));
-    } catch (const std::exception &e) {
-      std::cerr << "Error setting optimizer: " << e.what() << std::endl;
-      return 1;
-    }
+  // Training mode
+  std::cout << "\nEntering training mode..." << std::endl;
+  
+  // Create optimizer with learning rate
+  auto optimizer = ml::train::createOptimizer("sgd", {"learning_rate=" + std::to_string(learning_rate)});
+  try {
+    model->setOptimizer(std::move(optimizer));
+  } catch (const std::exception &e) {
+    std::cerr << "Error setting optimizer: " << e.what() << std::endl;
+    return 1;
+  }
 
-    try {
-      model->initialize();
-      std::cout << "Model initialized successfully. " << std::endl;
-    } catch (const std::exception &e) {
-      std::cerr << "Error initializing model: " << e.what() << std::endl;
-      return 1;
-    }
-    
-    // Create DataInformation objects for training data (using only first train_samples)
-    auto train_user_data =
-      std::make_unique<DataInformation>(images, labels, train_samples);
+  try {
+    model->initialize();
+    std::cout << "Model initialized successfully. " << std::endl;
+  } catch (const std::exception &e) {
+    std::cerr << "Error initializing model: " << e.what() << std::endl;
+    return 1;
+  }
+  
+  // Create DataInformation objects for training data (using only first train_samples)
+  auto train_user_data =
+    std::make_unique<DataInformation>(images, labels, train_samples);
 
-    // Create datasets using the callback function
-    std::shared_ptr<ml::train::Dataset> dataset_train;
-    try {
-      dataset_train = createDataset(ml::train::DatasetType::GENERATOR, getSample,
-                                    train_user_data.get());
-    } catch (const std::exception &e) {
-      std::cerr << "Error creating dataset: " << e.what() << std::endl;
-      return 1;
-    }
+  // Create datasets using the callback function
+  std::shared_ptr<ml::train::Dataset> dataset_train;
+  try {
+    dataset_train = createDataset(ml::train::DatasetType::GENERATOR, getSample,
+                                  train_user_data.get());
+  } catch (const std::exception &e) {
+    std::cerr << "Error creating dataset: " << e.what() << std::endl;
+    return 1;
+  }
 
-    // Set the datasets on the model
-    try {
-      model->setDataset(ml::train::DatasetModeType::MODE_TRAIN, dataset_train);
-    } catch (const std::exception &e) {
-      std::cerr << "Error setting dataset: " << e.what() << std::endl;
-      return 1;
-    }
+  // Set the datasets on the model
+  try {
+    model->setDataset(ml::train::DatasetModeType::MODE_TRAIN, dataset_train);
+  } catch (const std::exception &e) {
+    std::cerr << "Error setting dataset: " << e.what() << std::endl;
+    return 1;
+  }
 
-    // Set up training properties for standard training (without learning_rate)
-    try {
-      model->setProperty({"epochs=" + std::to_string(epochs),
-                          "batch_size=" + std::to_string(batch_size)});
-    } catch (const std::exception &e) {
-      std::cerr << "Error setting properties: " << e.what() << std::endl;
-      return 1;
-    }
+  // Set up training properties for standard training (without learning_rate)
+  try {
+    model->setProperty({"epochs=" + std::to_string(epochs),
+                        "batch_size=" + std::to_string(batch_size)});
+  } catch (const std::exception &e) {
+    std::cerr << "Error setting properties: " << e.what() << std::endl;
+    return 1;
+  }
 
-    std::cout << "\nStarting standard training..." << std::endl;
+  std::cout << "\nStarting standard training..." << std::endl;
 
-    try {
-      // Train using standard backpropagation
-      model->train();
+  try {
+    // Train using standard backpropagation
+    model->train();
 
-      std::cout << "\nTraining completed!" << std::endl;
-    } catch (const std::exception &e) {
-      std::cerr << "Error during training: " << e.what() << std::endl;
-      return 1;
-    }
-    
-    // Save the trained model
-    try {
-      model->save(model_path);
-      std::cout << "Model saved to " << model_path << std::endl;
-    } catch (const std::exception &e) {
-      std::cerr << "Error saving model: " << e.what() << std::endl;
-      return 1;
-    }
+    std::cout << "\nTraining completed!" << std::endl;
+  } catch (const std::exception &e) {
+    std::cerr << "Error during training: " << e.what() << std::endl;
+    return 1;
+  }
+  
+  // Save the trained model
+  try {
+    model->save(model_path);
+    std::cout << "Model saved to " << model_path << std::endl;
+  } catch (const std::exception &e) {
+    std::cerr << "Error saving model: " << e.what() << std::endl;
+    return 1;
+  }
 
-    // For evaluation, we need to create separate test data
-    // Create test data starting from train_samples index
-    std::vector<float> test_images(images.begin() + train_samples * 784, images.end());
-    std::vector<float> test_labels(labels.begin() + train_samples, labels.end());
-    
-    // Evaluate model accuracy on test data
-    try {
-      std::cout << "\nEvaluating model accuracy on test set..." << std::endl;
-      float accuracy = evaluateAccuracy(model, test_images, test_labels, test_samples);
-      std::cout << "Model accuracy on test set: " << std::fixed << std::setprecision(2) << accuracy << "%" << std::endl;
-    } catch (const std::exception &e) {
-      std::cerr << "Error during evaluation: " << e.what() << std::endl;
-      return 1;
-    }
-  } else if (mode == "inference") {
-    // Inference mode
-    std::cout << "\nEntering inference mode..." << std::endl;
-    
-    try {
-      // Compile the model for inference
-      model->compile(ml::train::ExecutionMode::INFERENCE);
-      std::cout << "Model compiled successfully for inference." << std::endl;
-    } catch (const std::exception &e) {
-      std::cerr << "Error compiling model: " << e.what() << std::endl;
-      return 1;
-    }
-    
-    try {
-      model->initialize(ml::train::ExecutionMode::INFERENCE);
-      std::cout << "Model initialized successfully for inference." << std::endl;
-    } catch (const std::exception &e) {
-      std::cerr << "Error initializing model: " << e.what() << std::endl;
-      return 1;
-    }
-    
-    // Load the trained model AFTER initialization
-    try {
-      model->load(model_path);
-      std::cout << "Model loaded from " << model_path << std::endl;
-    } catch (const std::exception &e) {
-      std::cerr << "Error loading model: " << e.what() << std::endl;
-      return 1;
-    }
-    
-    // For inference, we can use test data
-    // Create test data starting from train_samples index
-    std::vector<float> test_images(images.begin() + train_samples * 784, images.end());
-    std::vector<float> test_labels(labels.begin() + train_samples, labels.end());
-    
-    // Evaluate model accuracy on test data
-    try {
-      std::cout << "\nEvaluating model accuracy on test set..." << std::endl;
-      float accuracy = evaluateAccuracy(model, test_images, test_labels, test_samples);
-      std::cout << "Model accuracy on test set: " << std::fixed << std::setprecision(2) << accuracy << "%" << std::endl;
-    } catch (const std::exception &e) {
-      std::cerr << "Error during evaluation: " << e.what() << std::endl;
-      return 1;
-    }
-  } else {
-    std::cerr << "Invalid mode. Use 'train' or 'inference'." << std::endl;
+  // For evaluation, we need to create separate test data
+  // Create test data starting from train_samples index
+  std::vector<float> test_images(images.begin() + train_samples * 784, images.end());
+  std::vector<float> test_labels(labels.begin() + train_samples, labels.end());
+  
+  // Evaluate model accuracy on test data
+  try {
+    std::cout << "\nEvaluating model accuracy on test set..." << std::endl;
+    float accuracy = evaluateAccuracy(model, test_images, test_labels, test_samples);
+    std::cout << "Model accuracy on test set: " << std::fixed << std::setprecision(2) << accuracy << "%" << std::endl;
+  } catch (const std::exception &e) {
+    std::cerr << "Error during evaluation: " << e.what() << std::endl;
     return 1;
   }
 
