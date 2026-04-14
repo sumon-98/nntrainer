@@ -368,10 +368,18 @@ int main(int argc, char **argv) {
   std::cout << "\nStarting standard training..." << std::endl;
 
   try {
+    // Start timing
+    auto start_time = std::chrono::high_resolution_clock::now();
+    
     // Train using standard backpropagation
     model->train();
+    
+    // End timing
+    auto end_time = std::chrono::high_resolution_clock::now();
+    auto elapsed_time = std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time);
 
     std::cout << "\nTraining completed!" << std::endl;
+    std::cout << "Total training time: " << elapsed_time.count() << " ms" << std::endl;
   } catch (const std::exception &e) {
     std::cerr << "Error during training: " << e.what() << std::endl;
     return 1;
