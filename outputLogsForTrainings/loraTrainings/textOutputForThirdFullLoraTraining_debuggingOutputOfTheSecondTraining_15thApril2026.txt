@@ -1,0 +1,2684 @@
+lvmdev@ws2033005051:/data/Pranjal/QZO/ARFWork$ docker run -v /data/Pranjal/QZO/ARFWork/nnTrainerRepo_Copy3/nnTrainerRepo_Copy2/nntrainer/:/nntrainerPranjal -it nntrainer_pranjal_gdb /bin/bash
+root@437e46614157:/# ls
+bin  boot  dev  etc  home  lib  lib32  lib64  libx32  media  mnt  nntrainerPranjal  opt  proc  root  run  sbin  srv  sys  tmp  usr  var
+root@437e46614157:/# cd nntrainerPranjal/
+root@437e46614157:/nntrainerPranjal# ls
+Applications        LICENSE         RELEASE.md  configurations  index.md     meson.build                                     model_weights_5thAttempt_Epochs20_Samples10.bin  nntrainer.ini.in        packaging    tools
+CHANGES             MAINTAINERS.md  api         core.3316       jni          meson_options.txt                               nnstreamer                                       nntrainer.pc.in         res
+CODE_OF_CONDUCT.md  NOTICE          benchmarks  debian          libiomp_win  model_weights.bin                               nntrainer                                        out.txt                 subprojects
+CONTRIBUTING.md     README.md       build       docs            logs         model_weights_2ndAttempt_Epochs2_Samples10.bin  nntrainer-windows-resource                       outputLogsForTrainings  test
+root@437e46614157:/nntrainerPranjal# meson configure build -Denable-transformer=true
+root@437e46614157:/nntrainerPranjal# ninja -C build
+ninja: Entering directory `build'
+[0/1] Regenerating build files.
+The Meson build system
+Version: 0.61.2
+Source dir: /nntrainerPranjal
+Build dir: /nntrainerPranjal/build
+Build type: native build
+Project name: nntrainer
+Project version: 0.6.0
+C compiler for the host machine: cc (gcc 11.4.0 "cc (Ubuntu 11.4.0-1ubuntu1~22.04.3) 11.4.0")
+C linker for the host machine: cc ld.bfd 2.38
+C++ compiler for the host machine: c++ (gcc 11.4.0 "c++ (Ubuntu 11.4.0-1ubuntu1~22.04.3) 11.4.0")
+C++ linker for the host machine: c++ ld.bfd 2.38
+Host machine cpu family: x86_64
+Host machine cpu: x86_64
+Program powershell found: NO
+Program nproc found: YES (/usr/bin/nproc)
+Program cmd.exe found: NO
+Message: Build for X86 architecture
+Message: -march=native added for AVX hardware acceleration.
+Message: MMAP enabled
+Message: OpenCL kernel path set to: nntrainer_opencl_kernels
+Compiler for C supports arguments -Wredundant-decls: YES (cached)
+Compiler for C++ supports arguments -Wredundant-decls: YES (cached)
+Compiler for C supports arguments -Wwrite-strings: YES (cached)
+Compiler for C++ supports arguments -Wwrite-strings: YES (cached)
+Compiler for C supports arguments -Wformat: YES (cached)
+Compiler for C++ supports arguments -Wformat: YES (cached)
+Compiler for C supports arguments -Wformat-nonliteral: YES (cached)
+Compiler for C++ supports arguments -Wformat-nonliteral: YES (cached)
+Compiler for C supports arguments -Wformat-security: YES (cached)
+Compiler for C++ supports arguments -Wformat-security: YES (cached)
+Compiler for C supports arguments -Winit-self: YES (cached)
+Compiler for C++ supports arguments -Winit-self: YES (cached)
+Compiler for C supports arguments -Waddress: YES (cached)
+Compiler for C++ supports arguments -Waddress: YES (cached)
+Compiler for C supports arguments -Wvla: YES (cached)
+Compiler for C++ supports arguments -Wvla: YES (cached)
+Compiler for C supports arguments -Wpointer-arith: YES (cached)
+Compiler for C++ supports arguments -Wpointer-arith: YES (cached)
+Compiler for C supports arguments -Wno-error=varargs: YES (cached)
+Compiler for C++ supports arguments -Wno-error=varargs: YES (cached)
+Compiler for C supports arguments -Wno-error=ignored-attributes: YES (cached)
+Compiler for C++ supports arguments -Wno-error=ignored-attributes: YES (cached)
+Compiler for C supports arguments -Wno-error=sign-compare: YES (cached)
+Compiler for C++ supports arguments -Wno-error=sign-compare: YES (cached)
+Compiler for C supports arguments -Wdefaulted-function-deleted: NO (cached)
+Compiler for C++ supports arguments -Wdefaulted-function-deleted: NO (cached)
+Compiler for C supports arguments -ftree-vectorize: YES (cached)
+Compiler for C++ supports arguments -ftree-vectorize: YES (cached)
+Compiler for C supports arguments -Wno-unused-variable: YES (cached)
+Compiler for C++ supports arguments -Wno-unused-variable: YES (cached)
+Compiler for C supports arguments -Wno-comment: YES (cached)
+Compiler for C++ supports arguments -Wno-comment: YES (cached)
+Compiler for C supports arguments -Wno-ignored-attributes: YES (cached)
+Compiler for C++ supports arguments -Wno-ignored-attributes: YES (cached)
+Compiler for C supports arguments -Wno-sign-compare: YES (cached)
+Compiler for C++ supports arguments -Wno-sign-compare: YES (cached)
+Compiler for C supports arguments -Wno-maybe-uninitialized: YES (cached)
+Compiler for C++ supports arguments -Wno-maybe-uninitialized: YES (cached)
+Compiler for C supports arguments -Wmissing-declarations: YES (cached)
+Compiler for C supports arguments -Wmissing-include-dirs: YES (cached)
+Compiler for C supports arguments -Wmissing-prototypes: YES (cached)
+Compiler for C supports arguments -Wnested-externs: YES (cached)
+Compiler for C supports arguments -Waggregate-return: YES (cached)
+Compiler for C supports arguments -Wold-style-definition: YES (cached)
+Compiler for C supports arguments -Wdeclaration-after-statement: YES (cached)
+Compiler for C supports arguments -Wno-error=varargs: YES (cached)
+Dependency capi-ml-common found: YES 1.8.8 (cached)
+Dependency capi-ml-inference found: YES 1.8.8 (cached)
+Dependency openblas found: YES 0.3.20 (cached)
+Message: OpenBLAS dependency found in system
+Message: set nntrainer num threads=1
+Dependency openmp found: YES 4.5 (cached)
+Message: set nntrainer omp threads=6
+Dependency gmock found: YES unknown (cached)
+Dependency gtest found: YES 1.11.0 (cached)
+Dependency gtest found: YES 1.11.0 (cached)
+Library m found: YES
+Library dl found: YES
+Dependency threads found: YES unknown (cached)
+Dependency iniparser found: YES 3.2 (cached)
+Dependency tensorflow2-lite found: YES 2.15.0 (cached)
+Found pkg-config: /usr/bin/pkg-config (0.29.2)
+Found CMake: /usr/bin/cmake (3.22.1)
+Run-time dependency opencv found: NO (tried pkgconfig and cmake)
+Run-time dependency opencv4 found: NO (tried pkgconfig and cmake)
+Run-time dependency opencv3 found: NO (tried pkgconfig and cmake)
+Program flatc found: YES (/usr/bin/flatc)
+Configuring nntrainer.pc using configuration
+Configuring nntrainer.ini using configuration
+../meson.build:733: WARNING: The variable(s) 'FLASH_STORAGE_UTILIZATION_LOOKAHEAD' in the input file 'nntrainer.ini.in' are not present in the given configuration data.
+Message: NNTRAINER_CONF_PATH=/usr/local/etc/nntrainer.ini
+Message: extra defines are:-DMIN_CPP_VERSION=201703L -DMMAP_READ=1 -DKERNEL_CACHE=0 -DUSE_MMAP=1 -DOPENCL_KERNEL_PATH=nntrainer_opencl_kernels -DML_API_COMMON=1 -DNNSTREAMER_AVAILABLE=1 -DUSE_BLAS=1 -DHGEMM_EXPERIMENTAL_KERNEL=false -DNNTR_NUM_THREA
+DS=1 -DOMP_NUM_THREADS=6 -DDEBUG=1 -D__LOGGING__=1 -DENABLE_TEST=1 -DREDUCE_TOLERANCE=1 -DENABLE_TFLITE_BACKBONE=1 -DENABLE_TFLITE_INTERPRETER=1 -DNNTRAINER_CONF_PATH="/usr/local/etc/nntrainer.ini"
+Message: arm_arch_opt : none
+Configuring ccapi-ml-training.pc using configuration
+Configuring capi-ml-training.pc using configuration
+Run-time dependency nnstreamer-test-devel found: NO (tried pkgconfig and cmake)
+Dependency jsoncpp found: YES 1.9.5 (cached)
+Dependency libcurl found: YES 7.81.0 (cached)
+Dependency openmp found: YES 4.5 (cached)
+../meson.build:789: WARNING: android nnstreamer-filter and nnstreamer-trainer are not yet supported, building them is skipped
+Build targets in project: 103
+NOTICE: Future-deprecated features used:
+ * 0.56.0: {'meson.source_root', 'meson.build_root'}
+
+nntrainer 0.6.0
+
+  User defined options
+    backend           : ninja
+    buildtype         : debug
+    enable-debug      : true
+    enable-transformer: true
+
+Found ninja-1.10.1 at /usr/bin/ninja
+Cleaning... 0 files.
+[51/51] Linking target Applications/CausalLM/nntr_causallm_lora_train
+root@437e46614157:/nntrainerPranjal# ./build/Applications/CausalLM/nntr_qwen3_lora_master Applications/CausalLM/res/qwen3/qwen3-0.6b ./Applications/CausalLM/sst2_data/train.txt --epochs 1 --output LORA_test2.bin
+
+=== Qwen3 LoRA Training Master ===
+Model dir: Applications/CausalLM/res/qwen3/qwen3-0.6b
+Train data: ./Applications/CausalLM/sst2_data/train.txt
+
+[LoRA Master] Programmatically injecting LoRA configurations...
+[LoRA Master] LoRA Rank & Alpha explicitly forced to: 8, 16
+[LoRA Master] LoRA Targets configured: ["wq","wk","wv","wo","ffn_up","ffn_down","ffn_gate"]
+
+Loading initial weights from: Applications/CausalLM/res/qwen3/qwen3-0.6b/nntr_qwen3_0.6b_fp32.bin
+[TrainingData] Loaded ./Applications/CausalLM/sst2_data/train.txt line by line, total: 67349 samples.
+
+=== Starting Qwen3 LoRA full model training ===
+[DataGen] Sample 0 / 67349
+embedding0 :
+ input:<N9nntrainer6TensorE at 0x5c1c3a7c17e0>
+data addr: 0x5c1c3fb6fb50
+Shape: 1:1:1:1024 [ FP32 : NCHW ]
+[84564 25 10265 ... 0 0 0]
+
+ weight: <N9nntrainer6TensorE at 0x5c1c3734ca50>
+data addr: 0x736a64e45c10
+Shape: 1:1:151936:1024 [ FP32 : NCHW ]
+[1 1 1 ... 1 1 1]
+
+ hidden: <N9nntrainer6TensorE at 0x5c1c373493a0>
+data addr: 0x73674a0001d0
+Shape: 1:1:1024:1024 [ FP32 : NCHW ]
+[1 1 1 ... 1 1 1]
+
+layer0_attention_norm
+ input:<N9nntrainer6TensorE at 0x7fff8b37cb40>
+data addr: 0x73674a0001d0
+Shape: 1:1:1024:1024 [ FP32 : NCHW ]
+[1 1 1 ... 1 1 1]
+
+ output:<N9nntrainer6TensorE at 0x7fff8b37cb70>
+data addr: 0x73674a4001d0
+Shape: 1:1:1024:1024 [ FP32 : NCHW ]
+[-0.00927734 0.0336914 -0.074707 ... 0.0119629 -0.0105591 0.0159912]
+
+ gamma:<N9nntrainer6TensorE at 0x5c1c3a3a7590>
+data addr: 0x7369fd800e10
+Shape: 1:1:1:1024 [ FP32 : NCHW ]
+[-0.00927734 0.0336914 -0.074707 ... 0.0119629 -0.0105591 0.0159912]
+
+layer0_ffn_norm
+ input:<N9nntrainer6TensorE at 0x7fff8b37cb40>
+data addr: 0x7367520191d0
+Shape: 1:1:1024:1024 [ FP32 : NCHW ]
+[1.00618 0.96125 1.05985 ... 1.01066 1.0138 1.02122]
+
+ output:<N9nntrainer6TensorE at 0x7fff8b37cb70>
+data addr: 0x7367524191d0
+Shape: 1:1:1024:1024 [ FP32 : NCHW ]
+[-0.00453447 0.00177084 0.031498 ... 0.0300361 0.0151265 -0.0338328]
+
+ gamma:<N9nntrainer6TensorE at 0x5c1c3a3b79d0>
+data addr: 0x7369fbfffa10
+Shape: 1:1:1:1024 [ FP32 : NCHW ]
+[-0.0045166 0.00184631 0.0297852 ... 0.0297852 0.0149536 -0.0332031]
+
+Entered LoRA condition for the layer: layer0_ffn_up
+Entered LoRA condition for the layer: layer0_ffn_gate
+Entered LoRA condition for the layer: layer0_ffn_down
+layer1_attention_norm
+ input:<N9nntrainer6TensorE at 0x7fff8b37cb40>
+data addr: 0x73675582a1d0
+Shape: 1:1:1024:1024 [ FP32 : NCHW ]
+[1.00598 0.961759 1.05988 ... 1.01038 1.01379 1.02164]
+
+ output:<N9nntrainer6TensorE at 0x7fff8b37cb70>
+data addr: 0x7367560321d0
+Shape: 1:1:1024:1024 [ FP32 : NCHW ]
+[-0.0226678 0.0501371 0.0482809 ... 0.00695313 0.00994013 -0.0222741]
+
+ gamma:<N9nntrainer6TensorE at 0x5c1c3a2b03b0>
+data addr: 0x7369f97b6a10
+Shape: 1:1:1:1024 [ FP32 : NCHW ]
+[-0.022583 0.0522461 0.0456543 ... 0.00689697 0.00982666 -0.0218506]
+
+layer1_ffn_norm
+ input:<N9nntrainer6TensorE at 0x7fff8b37cb40>
+data addr: 0x73675dc4b1d0
+Shape: 1:1:1024:1024 [ FP32 : NCHW ]
+[1.01223 0.926034 1.03574 ... 1.01116 0.963073 1.05696]
+
+ output:<N9nntrainer6TensorE at 0x7fff8b37cb70>
+data addr: 0x73675e04b1d0
+Shape: 1:1:1024:1024 [ FP32 : NCHW ]
+[-0.0150473 0.0467141 -0.0319297 ... 0.00263358 0.0288679 0.0337427]
+
+ gamma:<N9nntrainer6TensorE at 0x5c1c3a4d8800>
+data addr: 0x736a0206c410
+Shape: 1:1:1:1024 [ FP32 : NCHW ]
+[-0.0148926 0.0505371 -0.0308838 ... 0.00260925 0.0300293 0.0319824]
+
+Entered LoRA condition for the layer: layer1_ffn_up
+Entered LoRA condition for the layer: layer1_ffn_gate
+Entered LoRA condition for the layer: layer1_ffn_down
+layer2_attention_norm
+ input:<N9nntrainer6TensorE at 0x7fff8b37cb40>
+data addr: 0x73676145c1d0
+Shape: 1:1:1024:1024 [ FP32 : NCHW ]
+[1.01342 0.926919 1.03548 ... 1.01148 0.965227 1.05727]
+
+ output:<N9nntrainer6TensorE at 0x7fff8b37cb70>
+data addr: 0x736761c641d0
+Shape: 1:1:1024:1024 [ FP32 : NCHW ]
+[0.00651424 -0.0323041 -0.0345735 ... 0.0419071 0.00391085 -0.00618408]
+
+ gamma:<N9nntrainer6TensorE at 0x5c1c3a202830>
+data addr: 0x7369ffc13210
+Shape: 1:1:1:1024 [ FP32 : NCHW ]
+[0.00643921 -0.0349121 -0.0334473 ... 0.0415039 0.00405884 -0.00585938]
+
+layer2_ffn_norm
+ input:<N9nntrainer6TensorE at 0x7fff8b37cb40>
+data addr: 0x73676987d1d0
+Shape: 1:1:1024:1024 [ FP32 : NCHW ]
+[1.00064 0.937835 1.09075 ... 1.04573 0.984459 1.14455]
+
+ output:<N9nntrainer6TensorE at 0x7fff8b37cb70>
+data addr: 0x736769c7d1d0
+Shape: 1:1:1024:1024 [ FP32 : NCHW ]
+[0.00269917 0.00110052 -0.0297883 ... 0.0693566 -0.00321064 0.0440952]
+
+ gamma:<N9nntrainer6TensorE at 0x5c1c3a230870>
+data addr: 0x7369fe411e10
+Shape: 1:1:1:1024 [ FP32 : NCHW ]
+[0.00270081 0.00117493 -0.0273438 ... 0.0664062 -0.00326538 0.0385742]
+
+Entered LoRA condition for the layer: layer2_ffn_up
+Entered LoRA condition for the layer: layer2_ffn_gate
+Entered LoRA condition for the layer: layer2_ffn_down
+layer3_attention_norm
+ input:<N9nntrainer6TensorE at 0x7fff8b37cb40>
+data addr: 0x73676d08e1d0
+Shape: 1:1:1024:1024 [ FP32 : NCHW ]
+[1.00138 0.937829 1.08994 ... 1.04482 0.985623 1.14511]
+
+ output:<N9nntrainer6TensorE at 0x7fff8b37cb70>
+data addr: 0x73676d8961d0
+Shape: 1:1:1024:1024 [ FP32 : NCHW ]
+[0.0124526 0.0347582 -0.0791969 ... 0.0205082 -0.0137587 0.0349017]
+
+ gamma:<N9nntrainer6TensorE at 0x5c1c3a30d3b0>
+data addr: 0x7369f2ae2010
+Shape: 1:1:1:1024 [ FP32 : NCHW ]
+[0.0124512 0.0371094 -0.0727539 ... 0.0196533 -0.0139771 0.0305176]
+
+layer3_ffn_norm
+ input:<N9nntrainer6TensorE at 0x7fff8b37cb40>
+data addr: 0x7367754af1d0
+Shape: 1:1:1024:1024 [ FP32 : NCHW ]
+[0.983051 0.965024 1.09509 ... 1.03511 0.947588 1.1987]
+
+ output:<N9nntrainer6TensorE at 0x7fff8b37cb70>
+data addr: 0x7367758af1d0
+Shape: 1:1:1024:1024 [ FP32 : NCHW ]
+[0.055221 -0.0504373 0.0262106 ... -0.0228788 -0.0177044 -2.71604e-06]
+
+ gamma:<N9nntrainer6TensorE at 0x5c1c3a47e9d0>
+data addr: 0x7369f12d8e10
+Shape: 1:1:1:1024 [ FP32 : NCHW ]
+[0.0561523 -0.0522461 0.0239258 ... -0.0220947 -0.0186768 -2.26498e-06]
+
+Entered LoRA condition for the layer: layer3_ffn_up
+Entered LoRA condition for the layer: layer3_ffn_gate
+Entered LoRA condition for the layer: layer3_ffn_down
+layer4_attention_norm
+ input:<N9nntrainer6TensorE at 0x7fff8b37cb40>
+data addr: 0x736778cc01d0
+Shape: 1:1:1024:1024 [ FP32 : NCHW ]
+[0.983634 0.960036 1.09756 ... 1.03431 0.94714 1.1984]
+
+ output:<N9nntrainer6TensorE at 0x7fff8b37cb70>
+data addr: 0x7367794c81d0
+Shape: 1:1:1024:1024 [ FP32 : NCHW ]
+[0.0175373 -0.0356399 -0.0162848 ... 0.028798 -0.0114505 -0.00250614]
+
+ gamma:<N9nntrainer6TensorE at 0x5c1c398bbca0>
+data addr: 0x7369f8b9d610
+Shape: 1:1:1:1024 [ FP32 : NCHW ]
+[0.0178223 -0.0371094 -0.0148315 ... 0.027832 -0.012085 -0.00209045]
+
+layer4_ffn_norm
+ input:<N9nntrainer6TensorE at 0x7fff8b37cb40>
+data addr: 0x7367810e11d0
+Shape: 1:1:1024:1024 [ FP32 : NCHW ]
+[1.00708 0.954841 1.03891 ... 1.01894 0.962058 1.21566]
+
+ output:<N9nntrainer6TensorE at 0x7fff8b37cb70>
+data addr: 0x7367814e11d0
+Shape: 1:1:1024:1024 [ FP32 : NCHW ]
+[-0.0287476 -0.00241696 0.0166023 ... -0.0229953 -0.024411 -0.0438958]
+
+ gamma:<N9nntrainer6TensorE at 0x5c1c3986b410>
+data addr: 0x7369f739c210
+Shape: 1:1:1:1024 [ FP32 : NCHW ]
+[-0.0285645 -0.00253296 0.0159912 ... -0.022583 -0.0253906 -0.0361328]
+
+Entered LoRA condition for the layer: layer4_ffn_up
+Entered LoRA condition for the layer: layer4_ffn_gate
+Entered LoRA condition for the layer: layer4_ffn_down
+layer5_attention_norm
+ input:<N9nntrainer6TensorE at 0x7fff8b37cb40>
+data addr: 0x7367848f21d0
+Shape: 1:1:1024:1024 [ FP32 : NCHW ]
+[1.00071 0.956261 1.04427 ... 1.02048 0.960338 1.216]
+
+ output:<N9nntrainer6TensorE at 0x7fff8b37cb70>
+data addr: 0x7367850fa1d0
+Shape: 1:1:1024:1024 [ FP32 : NCHW ]
+[-0.017335 0.00349968 -0.0103188 ... -0.0248981 -0.0365518 -0.0137216]
+
+ gamma:<N9nntrainer6TensorE at 0x5c1c3a39bc00>
+data addr: 0x7369f4f3b210
+Shape: 1:1:1:1024 [ FP32 : NCHW ]
+[-0.017334 0.00366211 -0.0098877 ... -0.0244141 -0.0380859 -0.0112915]
+
+layer5_ffn_norm
+ input:<N9nntrainer6TensorE at 0x7fff8b37cb40>
+data addr: 0x73678cd131d0
+Shape: 1:1:1024:1024 [ FP32 : NCHW ]
+[0.964559 0.924077 0.998388 ... 0.950092 0.916828 1.16892]
+
+ output:<N9nntrainer6TensorE at 0x7fff8b37cb70>
+data addr: 0x73678d1131d0
+Shape: 1:1:1024:1024 [ FP32 : NCHW ]
+[0.0191829 -0.00490451 -0.0105978 ... 0.0477596 -0.0689075 -0.0275258]
+
+ gamma:<N9nntrainer6TensorE at 0x5c1c3a2d4280>
+data addr: 0x736a10dd6410
+Shape: 1:1:1:1024 [ FP32 : NCHW ]
+[0.0198975 -0.00531006 -0.0106201 ... 0.050293 -0.0751953 -0.0235596]
+
+Entered LoRA condition for the layer: layer5_ffn_up
+Entered LoRA condition for the layer: layer5_ffn_gate
+Entered LoRA condition for the layer: layer5_ffn_down
+layer6_attention_norm
+ input:<N9nntrainer6TensorE at 0x7fff8b37cb40>
+data addr: 0x7367905241d0
+Shape: 1:1:1024:1024 [ FP32 : NCHW ]
+[0.964155 0.924951 0.997617 ... 0.951222 0.916435 1.16783]
+
+ output:<N9nntrainer6TensorE at 0x7fff8b37cb70>
+data addr: 0x736790d2c1d0
+Shape: 1:1:1024:1024 [ FP32 : NCHW ]
+[0.00729348 0.0187337 0.00949411 ... -0.0266935 -0.00269752 0.035052]
+
+ gamma:<N9nntrainer6TensorE at 0x5c1c3a0307f0>
+data addr: 0x736a0e975410
+Shape: 1:1:1:1024 [ FP32 : NCHW ]
+[0.00756836 0.0202637 0.00952148 ... -0.0280762 -0.00294495 0.0300293]
+
+layer6_ffn_norm
+ input:<N9nntrainer6TensorE at 0x7fff8b37cb40>
+data addr: 0x7367989451d0
+Shape: 1:1:1024:1024 [ FP32 : NCHW ]
+[0.957475 0.969096 0.913766 ... 0.956369 0.841395 1.21107]
+
+ output:<N9nntrainer6TensorE at 0x7fff8b37cb70>
+data addr: 0x736798d451d0
+Shape: 1:1:1024:1024 [ FP32 : NCHW ]
+[-0.0496671 0.0226569 -0.0338252 ... -0.0208454 -0.024794 0.0557435]
+
+ gamma:<N9nntrainer6TensorE at 0x5c1c39faf020>
+data addr: 0x736a0d174010
+Shape: 1:1:1:1024 [ FP32 : NCHW ]
+[-0.052002 0.0234375 -0.0371094 ... -0.0218506 -0.029541 0.0461426]
+
+Entered LoRA condition for the layer: layer6_ffn_up
+Entered LoRA condition for the layer: layer6_ffn_gate
+Entered LoRA condition for the layer: layer6_ffn_down
+layer7_attention_norm
+ input:<N9nntrainer6TensorE at 0x7fff8b37cb40>
+data addr: 0x73679c1561d0
+Shape: 1:1:1024:1024 [ FP32 : NCHW ]
+[0.956373 0.969206 0.915003 ... 0.956723 0.841795 1.21095]
+
+ output:<N9nntrainer6TensorE at 0x7fff8b37cb70>
+data addr: 0x73679c95e1d0
+Shape: 1:1:1024:1024 [ FP32 : NCHW ]
+[0.0270181 0.0149295 -0.0187185 ... 0.0194555 -0.0178359 -0.00457115]
+
+ gamma:<N9nntrainer6TensorE at 0x5c1c3a0177d0>
+data addr: 0x736a15618a10
+Shape: 1:1:1:1024 [ FP32 : NCHW ]
+[0.0283203 0.0154419 -0.0205078 ... 0.0203857 -0.0212402 -0.00378418]
+
+layer7_ffn_norm
+ input:<N9nntrainer6TensorE at 0x7fff8b37cb40>
+data addr: 0x7367a45771d0
+Shape: 1:1:1024:1024 [ FP32 : NCHW ]
+[0.950286 0.922984 0.8314 ... 0.986879 0.829504 1.19757]
+
+ output:<N9nntrainer6TensorE at 0x7fff8b37cb70>
+data addr: 0x7367a49771d0
+Shape: 1:1:1024:1024 [ FP32 : NCHW ]
+[0.00439522 -0.0665057 0.0164945 ... 0.0217413 -0.013529 -0.0285693]
+
+ gamma:<N9nntrainer6TensorE at 0x5c1c3a0d5f80>
+data addr: 0x736a13e17610
+Shape: 1:1:1:1024 [ FP32 : NCHW ]
+[0.00463867 -0.0722656 0.0198975 ... 0.0220947 -0.0163574 -0.0239258]
+
+Entered LoRA condition for the layer: layer7_ffn_up
+Entered LoRA condition for the layer: layer7_ffn_gate
+Entered LoRA condition for the layer: layer7_ffn_down
+layer8_attention_norm
+ input:<N9nntrainer6TensorE at 0x7fff8b37cb40>
+data addr: 0x7367a7d881d0
+Shape: 1:1:1024:1024 [ FP32 : NCHW ]
+[0.951295 0.919205 0.833928 ... 0.988104 0.829214 1.19723]
+
+ output:<N9nntrainer6TensorE at 0x7fff8b37cb70>
+data addr: 0x7367a85901d0
+Shape: 1:1:1024:1024 [ FP32 : NCHW ]
+[-0.0328839 -0.0543749 0.0198946 ... -0.0586911 -0.00262415 0.106669]
+
+ gamma:<N9nntrainer6TensorE at 0x5c1c3a109510>
+data addr: 0x736a070cfc10
+Shape: 1:1:1:1024 [ FP32 : NCHW ]
+[-0.034668 -0.0593262 0.0239258 ... -0.0595703 -0.00317383 0.0893555]
+
+layer8_ffn_norm
+ input:<N9nntrainer6TensorE at 0x7fff8b37cb40>
+data addr: 0x7367b01a91d0
+Shape: 1:1:1024:1024 [ FP32 : NCHW ]
+[0.996855 0.995687 0.795061 ... 0.999541 0.881842 1.14844]
+
+ output:<N9nntrainer6TensorE at 0x7fff8b37cb70>
+data addr: 0x7367b05a91d0
+Shape: 1:1:1024:1024 [ FP32 : NCHW ]
+[-0.036103 0.00176219 0.0117401 ... 0.0142736 -0.013611 0.0339163]
+
+ gamma:<N9nntrainer6TensorE at 0x5c1c39f28f00>
+data addr: 0x736a058ce810
+Shape: 1:1:1:1024 [ FP32 : NCHW ]
+[-0.036377 0.00177765 0.0148315 ... 0.0143433 -0.0155029 0.0296631]
+
+Entered LoRA condition for the layer: layer8_ffn_up
+Entered LoRA condition for the layer: layer8_ffn_gate
+Entered LoRA condition for the layer: layer8_ffn_down
+layer9_attention_norm
+ input:<N9nntrainer6TensorE at 0x7fff8b37cb40>
+data addr: 0x7367b39ba1d0
+Shape: 1:1:1024:1024 [ FP32 : NCHW ]
+[0.996366 0.996041 0.795743 ... 0.999549 0.88154 1.14837]
+
+ output:<N9nntrainer6TensorE at 0x7fff8b37cb70>
+data addr: 0x7367b41c21d0
+Shape: 1:1:1024:1024 [ FP32 : NCHW ]
+[-0.00829472 0.00310194 0.0118468 ... 0.0105078 -0.0246412 0.023726]
+
+ gamma:<N9nntrainer6TensorE at 0x5c1c3a0af0b0>
+data addr: 0x736a03475610
+Shape: 1:1:1:1024 [ FP32 : NCHW ]
+[-0.00836182 0.00312805 0.0149536 ... 0.0105591 -0.0280762 0.020752]
+
+layer9_ffn_norm
+ input:<N9nntrainer6TensorE at 0x7fff8b37cb40>
+data addr: 0x7367bbddb1d0
+Shape: 1:1:1024:1024 [ FP32 : NCHW ]
+[1.00324 0.999761 0.776505 ... 1.00646 0.910602 1.14347]
+
+ output:<N9nntrainer6TensorE at 0x7fff8b37cb70>
+data addr: 0x7367bc1db1d0
+Shape: 1:1:1024:1024 [ FP32 : NCHW ]
+[0.0343715 0.0041297 0.0206601 ... 0.0125944 0.0180327 0.0305626]
+
+ gamma:<N9nntrainer6TensorE at 0x5c1c3a09c5e0>
+data addr: 0x736a0b953010
+Shape: 1:1:1:1024 [ FP32 : NCHW ]
+[0.0344238 0.00415039 0.0267334 ... 0.0125732 0.0198975 0.0268555]
+
+Entered LoRA condition for the layer: layer9_ffn_up
+Entered LoRA condition for the layer: layer9_ffn_gate
+Entered LoRA condition for the layer: layer9_ffn_down
+layer10_attention_norm
+ input:<N9nntrainer6TensorE at 0x7fff8b37cb40>
+data addr: 0x7367bf5ec1d0
+Shape: 1:1:1024:1024 [ FP32 : NCHW ]
+[1.00328 0.999849 0.776398 ... 1.00645 0.91072 1.14334]
+
+ output:<N9nntrainer6TensorE at 0x7fff8b37cb70>
+data addr: 0x7367bfdf41d0
+Shape: 1:1:1024:1024 [ FP32 : NCHW ]
+[0.0133459 0.0239284 0.0390479 ... -0.033501 -0.013553 0.00243068]
+
+ gamma:<N9nntrainer6TensorE at 0x5c1c39faaf50>
+data addr: 0x736a094f2010
+Shape: 1:1:1:1024 [ FP32 : NCHW ]
+[0.0133667 0.0240479 0.0505371 ... -0.0334473 -0.0149536 0.00213623]
+
+layer10_ffn_norm
+ input:<N9nntrainer6TensorE at 0x7fff8b37cb40>
+data addr: 0x7367c7a0d1d0
+Shape: 1:1:1024:1024 [ FP32 : NCHW ]
+[1.05098 1.04088 0.799338 ... 0.938786 0.942581 1.12774]
+
+ output:<N9nntrainer6TensorE at 0x7fff8b37cb70>
+data addr: 0x7367c7e0d1d0
+Shape: 1:1:1024:1024 [ FP32 : NCHW ]
+[-0.0130743 0.0371405 0.0252235 ... 0.0533229 0.0228797 0.0618652]
+
+ gamma:<N9nntrainer6TensorE at 0x5c1c3a05ced0>
+data addr: 0x736a07cf0c10
+Shape: 1:1:1:1024 [ FP32 : NCHW ]
+[-0.0125122 0.0358887 0.0317383 ... 0.0571289 0.0244141 0.0551758]
+
+Entered LoRA condition for the layer: layer10_ffn_up
+Entered LoRA condition for the layer: layer10_ffn_gate
+Entered LoRA condition for the layer: layer10_ffn_down
+layer11_attention_norm
+ input:<N9nntrainer6TensorE at 0x7fff8b37cb40>
+data addr: 0x7367cb21e1d0
+Shape: 1:1:1024:1024 [ FP32 : NCHW ]
+[1.05061 1.04178 0.799134 ... 0.938794 0.942825 1.12762]
+
+ output:<N9nntrainer6TensorE at 0x7fff8b37cb70>
+data addr: 0x7367cba261d0
+Shape: 1:1:1024:1024 [ FP32 : NCHW ]
+[-0.00698081 -0.0278148 0.0162933 ... 0.00234987 0.00606437 0.0331175]
+
+ gamma:<N9nntrainer6TensorE at 0x5c1c39f83510>
+data addr: 0x7369d4fa8210
+Shape: 1:1:1:1024 [ FP32 : NCHW ]
+[-0.00668335 -0.0268555 0.0205078 ... 0.0025177 0.00646973 0.029541]
+
+layer11_ffn_norm
+ input:<N9nntrainer6TensorE at 0x7fff8b37cb40>
+data addr: 0x7367d363f1d0
+Shape: 1:1:1024:1024 [ FP32 : NCHW ]
+[1.05639 1.01568 0.783388 ... 0.95077 0.94696 1.14452]
+
+ output:<N9nntrainer6TensorE at 0x7fff8b37cb70>
+data addr: 0x7367d3a3f1d0
+Shape: 1:1:1024:1024 [ FP32 : NCHW ]
+[-0.01321 0.00450085 0.0225408 ... -0.0134476 0.0234534 -0.00729501]
+
+ gamma:<N9nntrainer6TensorE at 0x5c1c39f7f2b0>
+data addr: 0x7369d3b8ee10
+Shape: 1:1:1:1024 [ FP32 : NCHW ]
+[-0.0125732 0.00445557 0.0289307 ... -0.0142212 0.0249023 -0.00640869]
+
+Entered LoRA condition for the layer: layer11_ffn_up
+Entered LoRA condition for the layer: layer11_ffn_gate
+Entered LoRA condition for the layer: layer11_ffn_down
+layer12_attention_norm
+ input:<N9nntrainer6TensorE at 0x7fff8b37cb40>
+data addr: 0x7367d6e501d0
+Shape: 1:1:1024:1024 [ FP32 : NCHW ]
+[1.05593 1.01486 0.782773 ... 0.950619 0.947173 1.14427]
+
+ output:<N9nntrainer6TensorE at 0x7fff8b37cb70>
+data addr: 0x7367d76581d0
+Shape: 1:1:1024:1024 [ FP32 : NCHW ]
+[0.000560842 -0.0215611 -0.0262284 ... 0.053549 -0.0374864 -0.0229213]
+
+ gamma:<N9nntrainer6TensorE at 0x5c1c3a00bc90>
+data addr: 0x7369db863810
+Shape: 1:1:1:1024 [ FP32 : NCHW ]
+[0.000534058 -0.0213623 -0.0336914 ... 0.0566406 -0.0397949 -0.0201416]
+
+layer12_ffn_norm
+ input:<N9nntrainer6TensorE at 0x7fff8b37cb40>
+data addr: 0x7367df2711d0
+Shape: 1:1:1024:1024 [ FP32 : NCHW ]
+[1.05555 1.02364 0.790353 ... 0.95555 0.907645 1.13883]
+
+ output:<N9nntrainer6TensorE at 0x7fff8b37cb70>
+data addr: 0x7367df6711d0
+Shape: 1:1:1024:1024 [ FP32 : NCHW ]
+[0.0317832 -0.00293618 0.00964389 ... 0.0175184 0.00843029 0.00102837]
+
+ gamma:<N9nntrainer6TensorE at 0x5c1c3a14f390>
+data addr: 0x7369da062410
+Shape: 1:1:1:1024 [ FP32 : NCHW ]
+[0.0302734 -0.00288391 0.0122681 ... 0.0184326 0.00933838 0.000907898]
+
+Entered LoRA condition for the layer: layer12_ffn_up
+Entered LoRA condition for the layer: layer12_ffn_gate
+Entered LoRA condition for the layer: layer12_ffn_down
+layer13_attention_norm
+ input:<N9nntrainer6TensorE at 0x7fff8b37cb40>
+data addr: 0x7367e2a821d0
+Shape: 1:1:1024:1024 [ FP32 : NCHW ]
+[1.05555 1.0235 0.790389 ... 0.955901 0.907788 1.1394]
+
+ output:<N9nntrainer6TensorE at 0x7fff8b37cb70>
+data addr: 0x7367e328a1d0
+Shape: 1:1:1024:1024 [ FP32 : NCHW ]
+[0.00126567 -0.0618899 0.00940527 ... 0.0164818 -0.00738521 0.0101688]
+
+ gamma:<N9nntrainer6TensorE at 0x5c1c3a10abd0>
+data addr: 0x7369d7009410
+Shape: 1:1:1:1024 [ FP32 : NCHW ]
+[0.00120544 -0.060791 0.0119629 ... 0.017334 -0.00817871 0.00897217]
+
+layer13_ffn_norm
+ input:<N9nntrainer6TensorE at 0x7fff8b37cb40>
+data addr: 0x7367eaea31d0
+Shape: 1:1:1024:1024 [ FP32 : NCHW ]
+[1.01455 1.09453 0.798723 ... 0.959469 0.944212 1.08996]
+
+ output:<N9nntrainer6TensorE at 0x7fff8b37cb70>
+data addr: 0x7367eb2a31d0
+Shape: 1:1:1024:1024 [ FP32 : NCHW ]
+[0.00184796 -0.0399721 0.022215 ... 0.0343435 0.0310571 -0.0107421]
+
+ gamma:<N9nntrainer6TensorE at 0x5c1c3a010190>
+data addr: 0x7369cbab3810
+Shape: 1:1:1:1024 [ FP32 : NCHW ]
+[0.00183868 -0.0368652 0.0280762 ... 0.0361328 0.0332031 -0.00994873]
+
+Entered LoRA condition for the layer: layer13_ffn_up
+Entered LoRA condition for the layer: layer13_ffn_gate
+Entered LoRA condition for the layer: layer13_ffn_down
+layer14_attention_norm
+ input:<N9nntrainer6TensorE at 0x7fff8b37cb40>
+data addr: 0x7367ee6b41d0
+Shape: 1:1:1024:1024 [ FP32 : NCHW ]
+[1.01417 1.0934 0.798983 ... 0.959382 0.943799 1.08915]
+
+ output:<N9nntrainer6TensorE at 0x7fff8b37cb70>
+data addr: 0x7367eeebc1d0
+Shape: 1:1:1024:1024 [ FP32 : NCHW ]
+[-0.00435381 -0.0191724 -0.0112562 ... -0.0118337 0.0406311 -0.0227857]
+
+ gamma:<N9nntrainer6TensorE at 0x5c1c39f61b70>
+data addr: 0x7369ca24a810
+Shape: 1:1:1:1024 [ FP32 : NCHW ]
+[-0.0043335 -0.0177002 -0.0142212 ... -0.0124512 0.043457 -0.0211182]
+
+layer14_ffn_norm
+ input:<N9nntrainer6TensorE at 0x7fff8b37cb40>
+data addr: 0x7367f6ad51d0
+Shape: 1:1:1024:1024 [ FP32 : NCHW ]
+[1.02286 1.12253 0.823514 ... 0.934027 0.947719 1.09366]
+
+ output:<N9nntrainer6TensorE at 0x7fff8b37cb70>
+data addr: 0x7367f6ed51d0
+Shape: 1:1:1024:1024 [ FP32 : NCHW ]
+[0.0331048 0.0109805 -0.0399794 ... -0.00538607 0.00892718 -0.0163113]
+
+ gamma:<N9nntrainer6TensorE at 0x5c1c3a0420d0>
+data addr: 0x7369c8a49410
+Shape: 1:1:1:1024 [ FP32 : NCHW ]
+[0.0327148 0.0098877 -0.0490723 ... -0.00582886 0.00952148 -0.0150757]
+
+Entered LoRA condition for the layer: layer14_ffn_up
+Entered LoRA condition for the layer: layer14_ffn_gate
+Entered LoRA condition for the layer: layer14_ffn_down
+layer15_attention_norm
+ input:<N9nntrainer6TensorE at 0x7fff8b37cb40>
+data addr: 0x7367fa2e61d0
+Shape: 1:1:1024:1024 [ FP32 : NCHW ]
+[1.02246 1.12276 0.823957 ... 0.934829 0.948135 1.0946]
+
+ output:<N9nntrainer6TensorE at 0x7fff8b37cb70>
+data addr: 0x7367faaee1d0
+Shape: 1:1:1024:1024 [ FP32 : NCHW ]
+[0.0227228 -0.00183071 0.00915571 ... 0.0289049 -0.0225599 0.02036]
+
+ gamma:<N9nntrainer6TensorE at 0x5c1c3a1a6450>
+data addr: 0x7369cfaf5e10
+Shape: 1:1:1:1024 [ FP32 : NCHW ]
+[0.0224609 -0.00164795 0.0112305 ... 0.03125 -0.0240479 0.0187988]
+
+layer15_ffn_norm
+ input:<N9nntrainer6TensorE at 0x7fff8b37cb40>
+data addr: 0x7368027071d0
+Shape: 1:1:1024:1024 [ FP32 : NCHW ]
+[1.03939 1.12799 0.823542 ... 0.930235 0.951682 1.06843]
+
+ output:<N9nntrainer6TensorE at 0x7fff8b37cb70>
+data addr: 0x736802b071d0
+Shape: 1:1:1024:1024 [ FP32 : NCHW ]
+[0.00532941 -0.0183718 -0.00118607 ... -0.0118401 0.0219299 -0.0595522]
+
+ gamma:<N9nntrainer6TensorE at 0x5c1c39e96c00>
+data addr: 0x7369ce2f4a10
+Shape: 1:1:1:1024 [ FP32 : NCHW ]
+[0.00518799 -0.0164795 -0.00145721 ... -0.0128784 0.0233154 -0.0563965]
+
+Entered LoRA condition for the layer: layer15_ffn_up
+Entered LoRA condition for the layer: layer15_ffn_gate
+Entered LoRA condition for the layer: layer15_ffn_down
+layer16_attention_norm
+ input:<N9nntrainer6TensorE at 0x7fff8b37cb40>
+data addr: 0x736805f181d0
+Shape: 1:1:1024:1024 [ FP32 : NCHW ]
+[1.03975 1.12771 0.827604 ... 0.930269 0.951769 1.06893]
+
+ output:<N9nntrainer6TensorE at 0x7fff8b37cb70>
+data addr: 0x7368067201d0
+Shape: 1:1:1024:1024 [ FP32 : NCHW ]
+[0.00263432 0.0135376 -0.0250622 ... -0.00653773 -0.00970311 -0.00954343]
+
+ gamma:<N9nntrainer6TensorE at 0x5c1c3a12c7f0>
+data addr: 0x7369ea5f4610
+Shape: 1:1:1:1024 [ FP32 : NCHW ]
+[0.00256348 0.012146 -0.0306396 ... -0.0071106 -0.0103149 -0.0090332]
+
+layer16_ffn_norm
+ input:<N9nntrainer6TensorE at 0x7fff8b37cb40>
+data addr: 0x73680e3391d0
+Shape: 1:1:1024:1024 [ FP32 : NCHW ]
+[0.984594 1.15087 0.817543 ... 0.949942 0.957199 1.08137]
+
+ output:<N9nntrainer6TensorE at 0x7fff8b37cb70>
+data addr: 0x73680e7391d0
+Shape: 1:1:1024:1024 [ FP32 : NCHW ]
+[0.0574033 -0.015804 -0.0113744 ... 0.0434825 -0.0507328 0.0298294]
+
+ gamma:<N9nntrainer6TensorE at 0x5c1c3a074430>
+data addr: 0x7369e8df3210
+Shape: 1:1:1:1024 [ FP32 : NCHW ]
+[0.059082 -0.013916 -0.0140991 ... 0.0463867 -0.0537109 0.0279541]
+
+Entered LoRA condition for the layer: layer16_ffn_up
+Entered LoRA condition for the layer: layer16_ffn_gate
+Entered LoRA condition for the layer: layer16_ffn_down
+layer17_attention_norm
+ input:<N9nntrainer6TensorE at 0x7fff8b37cb40>
+data addr: 0x736811b4a1d0
+Shape: 1:1:1024:1024 [ FP32 : NCHW ]
+[0.985707 1.15062 0.817962 ... 0.950229 0.958523 1.08101]
+
+ output:<N9nntrainer6TensorE at 0x7fff8b37cb70>
+data addr: 0x7368123521d0
+Shape: 1:1:1024:1024 [ FP32 : NCHW ]
+[0.00644155 -0.00460856 0.00514827 ... 0.0462437 0.00802472 -0.0116545]
+
+ gamma:<N9nntrainer6TensorE at 0x5c1c39f3f7d0>
+data addr: 0x7369e7192210
+Shape: 1:1:1:1024 [ FP32 : NCHW ]
+[0.00662231 -0.00405884 0.00637817 ... 0.0493164 0.00848389 -0.0109253]
+
+layer17_ffn_norm
+ input:<N9nntrainer6TensorE at 0x7fff8b37cb40>
+data addr: 0x736819f6b1d0
+Shape: 1:1:1024:1024 [ FP32 : NCHW ]
+[0.947382 1.19912 0.836772 ... 0.987253 0.966181 1.07458]
+
+ output:<N9nntrainer6TensorE at 0x7fff8b37cb70>
+data addr: 0x73681a36b1d0
+Shape: 1:1:1024:1024 [ FP32 : NCHW ]
+[0.0207468 0.0313096 -0.0559805 ... -0.0515553 0.0181359 0.00956809]
+
+ gamma:<N9nntrainer6TensorE at 0x5c1c3a06ef10>
+data addr: 0x7369ee27fa10
+Shape: 1:1:1:1024 [ FP32 : NCHW ]
+[0.0222168 0.0264893 -0.0678711 ... -0.0529785 0.019043 0.0090332]
+
+Entered LoRA condition for the layer: layer17_ffn_up
+Entered LoRA condition for the layer: layer17_ffn_gate
+Entered LoRA condition for the layer: layer17_ffn_down
+layer18_attention_norm
+ input:<N9nntrainer6TensorE at 0x7fff8b37cb40>
+data addr: 0x73681d77c1d0
+Shape: 1:1:1024:1024 [ FP32 : NCHW ]
+[0.946892 1.20021 0.837628 ... 0.98599 0.967619 1.07583]
+
+ output:<N9nntrainer6TensorE at 0x7fff8b37cb70>
+data addr: 0x73681df841d0
+Shape: 1:1:1024:1024 [ FP32 : NCHW ]
+[-0.0219894 0.0238286 -0.0318489 ... 0.0208805 0.0554202 -0.0150809]
+
+ gamma:<N9nntrainer6TensorE at 0x5c1c39f6dcf0>
+data addr: 0x7369eca16a10
+Shape: 1:1:1:1024 [ FP32 : NCHW ]
+[-0.0235596 0.0201416 -0.0385742 ... 0.0214844 0.0581055 -0.0142212]
+
+layer18_ffn_norm
+ input:<N9nntrainer6TensorE at 0x7fff8b37cb40>
+data addr: 0x736825b9d1d0
+Shape: 1:1:1024:1024 [ FP32 : NCHW ]
+[0.951384 1.20664 0.873158 ... 1.02159 0.991853 1.0738]
+
+ output:<N9nntrainer6TensorE at 0x7fff8b37cb70>
+data addr: 0x736825f9d1d0
+Shape: 1:1:1024:1024 [ FP32 : NCHW ]
+[-0.00862749 -0.0202903 -0.0339797 ... 0.0478545 0.0264473 -0.00902822]
+
+ gamma:<N9nntrainer6TensorE at 0x5c1c3a0eba70>
+data addr: 0x7369eb215610
+Shape: 1:1:1:1024 [ FP32 : NCHW ]
+[-0.00921631 -0.0170898 -0.0395508 ... 0.0476074 0.0270996 -0.00854492]
+
+Entered LoRA condition for the layer: layer18_ffn_up
+Entered LoRA condition for the layer: layer18_ffn_gate
+Entered LoRA condition for the layer: layer18_ffn_down
+layer19_attention_norm
+ input:<N9nntrainer6TensorE at 0x7fff8b37cb40>
+data addr: 0x7368293ae1d0
+Shape: 1:1:1024:1024 [ FP32 : NCHW ]
+[0.950261 1.20579 0.872742 ... 1.02172 0.991852 1.07326]
+
+ output:<N9nntrainer6TensorE at 0x7fff8b37cb70>
+data addr: 0x736829bb61d0
+Shape: 1:1:1024:1024 [ FP32 : NCHW ]
+[-0.0203165 -0.0521387 0.0245294 ... -0.00262315 0.00288897 -0.0358374]
+
+ gamma:<N9nntrainer6TensorE at 0x5c1c3a0ad770>
+data addr: 0x7369df4adc10
+Shape: 1:1:1:1024 [ FP32 : NCHW ]
+[-0.0217285 -0.0439453 0.0285645 ... -0.00260925 0.00296021 -0.0339355]
+
+layer19_ffn_norm
+ input:<N9nntrainer6TensorE at 0x7fff8b37cb40>
+data addr: 0x7368317cf1d0
+Shape: 1:1:1024:1024 [ FP32 : NCHW ]
+[0.997454 1.18941 0.952416 ... 1.02117 0.955498 1.09614]
+
+ output:<N9nntrainer6TensorE at 0x7fff8b37cb70>
+data addr: 0x736831bcf1d0
+Shape: 1:1:1024:1024 [ FP32 : NCHW ]
+[-0.0898716 -0.00708983 -0.00479278 ... 0.0187197 0.0251863 -0.00978436]
+
+ gamma:<N9nntrainer6TensorE at 0x5c1c39f39fb0>
+data addr: 0x7369dd0aca10
+Shape: 1:1:1:1024 [ FP32 : NCHW ]
+[-0.0917969 -0.006073 -0.00512695 ... 0.0186768 0.0268555 -0.00909424]
+
+Entered LoRA condition for the layer: layer19_ffn_up
+Entered LoRA condition for the layer: layer19_ffn_gate
+Entered LoRA condition for the layer: layer19_ffn_down
+layer20_attention_norm
+ input:<N9nntrainer6TensorE at 0x7fff8b37cb40>
+data addr: 0x736834fe01d0
+Shape: 1:1:1024:1024 [ FP32 : NCHW ]
+[0.998101 1.19077 0.95202 ... 1.01917 0.956192 1.09615]
+
+ output:<N9nntrainer6TensorE at 0x7fff8b37cb70>
+data addr: 0x7368357e81d0
+Shape: 1:1:1024:1024 [ FP32 : NCHW ]
+[0.0552545 -0.0856111 0.0176819 ... -0.0542226 -0.0240611 0.00761812]
+
+ gamma:<N9nntrainer6TensorE at 0x5c1c3a174bf0>
+data addr: 0x7369e5d71010
+Shape: 1:1:1:1024 [ FP32 : NCHW ]
+[0.0563965 -0.0732422 0.0189209 ... -0.0541992 -0.0256348 0.00708008]
+
+layer20_ffn_norm
+ input:<N9nntrainer6TensorE at 0x7fff8b37cb40>
+data addr: 0x73683d4011d0
+Shape: 1:1:1024:1024 [ FP32 : NCHW ]
+[0.992429 1.17809 0.926822 ... 1.04486 0.958724 1.08363]
+
+ output:<N9nntrainer6TensorE at 0x7fff8b37cb70>
+data addr: 0x73683d8011d0
+Shape: 1:1:1024:1024 [ FP32 : NCHW ]
+[-0.0428962 -0.0200856 -0.0454019 ... 0.023083 0.0425904 0.00281356]
+
+ gamma:<N9nntrainer6TensorE at 0x5c1c39fbe070>
+data addr: 0x7369e456fc10
+Shape: 1:1:1:1024 [ FP32 : NCHW ]
+[-0.0439453 -0.017334 -0.0498047 ... 0.0224609 0.045166 0.00263977]
+
+Entered LoRA condition for the layer: layer20_ffn_up
+Entered LoRA condition for the layer: layer20_ffn_gate
+Entered LoRA condition for the layer: layer20_ffn_down
+layer21_attention_norm
+ input:<N9nntrainer6TensorE at 0x7fff8b37cb40>
+data addr: 0x736840c121d0
+Shape: 1:1:1024:1024 [ FP32 : NCHW ]
+[0.991888 1.17992 0.928953 ... 1.04429 0.958741 1.08389]
+
+ output:<N9nntrainer6TensorE at 0x7fff8b37cb70>
+data addr: 0x73684141a1d0
+Shape: 1:1:1024:1024 [ FP32 : NCHW ]
+[0.030727 0.00704828 0.0319005 ... 0.0144197 0.010821 -0.00735312]
+
+ gamma:<N9nntrainer6TensorE at 0x5c1c3a41b240>
+data addr: 0x7369e210ec10
+Shape: 1:1:1:1024 [ FP32 : NCHW ]
+[0.0314941 0.006073 0.0349121 ... 0.0140381 0.0114746 -0.00689697]
+
+layer21_ffn_norm
+ input:<N9nntrainer6TensorE at 0x7fff8b37cb40>
+data addr: 0x7368490331d0
+Shape: 1:1:1024:1024 [ FP32 : NCHW ]
+[0.965631 1.14036 0.938905 ... 1.06206 0.957594 1.08057]
+
+ output:<N9nntrainer6TensorE at 0x7fff8b37cb70>
+data addr: 0x7368494331d0
+Shape: 1:1:1024:1024 [ FP32 : NCHW ]
+[0.0260194 -0.0724291 0.0370453 ... -0.0863641 -0.0322536 0.0670721]
+
+ gamma:<N9nntrainer6TensorE at 0x5c1c3a4966a0>
+data addr: 0x736a4c810210
+Shape: 1:1:1:1024 [ FP32 : NCHW ]
+[0.0273438 -0.0644531 0.0400391 ... -0.0825195 -0.0341797 0.0629883]
+
+Entered LoRA condition for the layer: layer21_ffn_up
+Entered LoRA condition for the layer: layer21_ffn_gate
+Entered LoRA condition for the layer: layer21_ffn_down
+layer22_attention_norm
+ input:<N9nntrainer6TensorE at 0x7fff8b37cb40>
+data addr: 0x73684c8441d0
+Shape: 1:1:1024:1024 [ FP32 : NCHW ]
+[0.965097 1.14101 0.94012 ... 1.06187 0.95685 1.08055]
+
+ output:<N9nntrainer6TensorE at 0x7fff8b37cb70>
+data addr: 0x73684d04c1d0
+Shape: 1:1:1024:1024 [ FP32 : NCHW ]
+[-0.0283235 -0.0347212 0.0291735 ... 0.00743966 -0.0455747 0.00324914]
+
+ gamma:<N9nntrainer6TensorE at 0x5c1c3a5040c0>
+data addr: 0x736a497c7210
+Shape: 1:1:1:1024 [ FP32 : NCHW ]
+[-0.0297852 -0.0308838 0.0314941 ... 0.0071106 -0.0483398 0.00305176]
+
+layer22_ffn_norm
+ input:<N9nntrainer6TensorE at 0x7fff8b37cb40>
+data addr: 0x736854c651d0
+Shape: 1:1:1024:1024 [ FP32 : NCHW ]
+[0.959321 1.06189 0.861611 ... 0.987762 0.933747 1.12493]
+
+ output:<N9nntrainer6TensorE at 0x7fff8b37cb70>
+data addr: 0x7368550651d0
+Shape: 1:1:1024:1024 [ FP32 : NCHW ]
+[-0.00245046 -0.0416123 -0.00613654 ... 0.00119477 0.0372642 -0.0757251]
+
+ gamma:<N9nntrainer6TensorE at 0x5c1c3a1e3e30>
+data addr: 0x736a47fc5e10
+Shape: 1:1:1:1024 [ FP32 : NCHW ]
+[-0.00259399 -0.0397949 -0.00723267 ... 0.00122833 0.0405273 -0.0683594]
+
+Entered LoRA condition for the layer: layer22_ffn_up
+Entered LoRA condition for the layer: layer22_ffn_gate
+Entered LoRA condition for the layer: layer22_ffn_down
+layer23_attention_norm
+ input:<N9nntrainer6TensorE at 0x7fff8b37cb40>
+data addr: 0x7368584761d0
+Shape: 1:1:1024:1024 [ FP32 : NCHW ]
+[0.959996 1.06241 0.861659 ... 0.987493 0.933588 1.12498]
+
+ output:<N9nntrainer6TensorE at 0x7fff8b37cb70>
+data addr: 0x736858c7e1d0
+Shape: 1:1:1024:1024 [ FP32 : NCHW ]
+[0.015231 -0.0321792 -0.00302932 ... 0.013056 0.0209836 -0.0338041]
+
+ gamma:<N9nntrainer6TensorE at 0x5c1c3a20ce70>
+data addr: 0x736a5083b810
+Shape: 1:1:1:1024 [ FP32 : NCHW ]
+[0.0161133 -0.0307617 -0.00357056 ... 0.0134277 0.0228271 -0.0305176]
+
+layer23_ffn_norm
+ input:<N9nntrainer6TensorE at 0x7fff8b37cb40>
+data addr: 0x7368608971d0
+Shape: 1:1:1024:1024 [ FP32 : NCHW ]
+[0.960006 1.10655 0.89464 ... 1.01514 0.954645 1.08503]
+
+ output:<N9nntrainer6TensorE at 0x7fff8b37cb70>
+data addr: 0x736860c971d0
+Shape: 1:1:1024:1024 [ FP32 : NCHW ]
+[-0.0209728 0.0584432 0.0457476 ... -0.050691 0.0129488 0.00143267]
+
+ gamma:<N9nntrainer6TensorE at 0x5c1c39ae1b00>
+data addr: 0x736a4f039610
+Shape: 1:1:1:1024 [ FP32 : NCHW ]
+[-0.0222168 0.0537109 0.052002 ... -0.0507812 0.0137939 0.00134277]
+
+Entered LoRA condition for the layer: layer23_ffn_up
+Entered LoRA condition for the layer: layer23_ffn_gate
+Entered LoRA condition for the layer: layer23_ffn_down
+layer24_attention_norm
+ input:<N9nntrainer6TensorE at 0x7fff8b37cb40>
+data addr: 0x7368640a81d0
+Shape: 1:1:1024:1024 [ FP32 : NCHW ]
+[0.96003 1.10618 0.893963 ... 1.01492 0.955048 1.08516]
+
+ output:<N9nntrainer6TensorE at 0x7fff8b37cb70>
+data addr: 0x7368648b01d0
+Shape: 1:1:1024:1024 [ FP32 : NCHW ]
+[0.00230471 0.0144064 -0.021461 ... -0.0242429 0.00438487 -0.00527532]
+
+ gamma:<N9nntrainer6TensorE at 0x5c1c39811050>
+data addr: 0x736a42712810
+Shape: 1:1:1:1024 [ FP32 : NCHW ]
+[0.00244141 0.0132446 -0.0244141 ... -0.024292 0.00466919 -0.00494385]
+
+layer24_ffn_norm
+ input:<N9nntrainer6TensorE at 0x7fff8b37cb40>
+data addr: 0x73686c4c91d0
+Shape: 1:1:1024:1024 [ FP32 : NCHW ]
+[1.05244 1.14194 0.870416 ... 1.02393 0.945077 1.07396]
+
+ output:<N9nntrainer6TensorE at 0x7fff8b37cb70>
+data addr: 0x73686c8c91d0
+Shape: 1:1:1024:1024 [ FP32 : NCHW ]
+[0.0157294 -0.0212482 -0.0157779 ... 0.0200356 0.00162379 -0.0458969]
+
+ gamma:<N9nntrainer6TensorE at 0x5c1c39c026d0>
+data addr: 0x736a3e2b0210
+Shape: 1:1:1:1024 [ FP32 : NCHW ]
+[0.0151978 -0.0189209 -0.0184326 ... 0.0198975 0.00174713 -0.043457]
+
+Entered LoRA condition for the layer: layer24_ffn_up
+Entered LoRA condition for the layer: layer24_ffn_gate
+Entered LoRA condition for the layer: layer24_ffn_down
+layer25_attention_norm
+ input:<N9nntrainer6TensorE at 0x7fff8b37cb40>
+data addr: 0x73686fcda1d0
+Shape: 1:1:1024:1024 [ FP32 : NCHW ]
+[1.05271 1.14204 0.870327 ... 1.02428 0.945181 1.07389]
+
+ output:<N9nntrainer6TensorE at 0x7fff8b37cb70>
+data addr: 0x7368704e21d0
+Shape: 1:1:1024:1024 [ FP32 : NCHW ]
+[-0.00720362 0.0104884 -0.025912 ... -0.0175841 -0.0105527 -0.032875]
+
+ gamma:<N9nntrainer6TensorE at 0x5c1c395d28d0>
+data addr: 0x736a3eab1210
+Shape: 1:1:1:1024 [ FP32 : NCHW ]
+[-0.00695801 0.00933838 -0.0302734 ... -0.0174561 -0.0113525 -0.0311279]
+
+layer25_ffn_norm
+ input:<N9nntrainer6TensorE at 0x7fff8b37cb40>
+data addr: 0x7368780fb1d0
+Shape: 1:1:1024:1024 [ FP32 : NCHW ]
+[1.04496 1.18423 0.881947 ... 0.982816 0.915333 1.06386]
+
+ output:<N9nntrainer6TensorE at 0x7fff8b37cb70>
+data addr: 0x7368784fb1d0
+Shape: 1:1:1024:1024 [ FP32 : NCHW ]
+[-0.0219732 0.00229453 0.0430255 ... -0.0451121 -0.0208973 0.00958743]
+
+ gamma:<N9nntrainer6TensorE at 0x5c1c39e0b180>
+data addr: 0x736a46facc10
+Shape: 1:1:1:1024 [ FP32 : NCHW ]
+[-0.0213623 0.00196838 0.0495605 ... -0.0466309 -0.0231934 0.00915527]
+
+Entered LoRA condition for the layer: layer25_ffn_up
+Entered LoRA condition for the layer: layer25_ffn_gate
+Entered LoRA condition for the layer: layer25_ffn_down
+layer26_attention_norm
+ input:<N9nntrainer6TensorE at 0x7fff8b37cb40>
+data addr: 0x73687b90c1d0
+Shape: 1:1:1024:1024 [ FP32 : NCHW ]
+[1.04535 1.18291 0.88144 ... 0.983128 0.914935 1.06474]
+
+ output:<N9nntrainer6TensorE at 0x7fff8b37cb70>
+data addr: 0x73687c1141d0
+Shape: 1:1:1024:1024 [ FP32 : NCHW ]
+[4.21987e-05 -0.0336885 0.0118629 ... 0.0135269 -0.00296849 -0.0330098]
+
+ gamma:<N9nntrainer6TensorE at 0x5c1c39915640>
+data addr: 0x736a44b4bc10
+Shape: 1:1:1:1024 [ FP32 : NCHW ]
+[4.1008e-05 -0.0289307 0.0136719 ... 0.0139771 -0.0032959 -0.0314941]
+
+^C^C^C
+root@437e46614157:/nntrainerPranjal# ^C
+root@437e46614157:/nntrainerPranjal# ^C
+root@437e46614157:/nntrainerPranjal# ^C
+root@437e46614157:/nntrainerPranjal# ./build/Applications/CausalLM/nntr_qwen3_lora_master Applications/CausalLM/res/qwen3/qwen3-0.6b ./Applications/CausalLM/sst2_data/train.txt --epochs 1 --output LORA_test2.bin
+=== Qwen3 LoRA Training Master ===
+Model dir: Applications/CausalLM/res/qwen3/qwen3-0.6b
+Train data: ./Applications/CausalLM/sst2_data/train.txt
+
+[LoRA Master] Programmatically injecting LoRA configurations...
+[LoRA Master] LoRA Rank & Alpha explicitly forced to: 8, 16
+[LoRA Master] LoRA Targets configured: ["wq","wk","wv","wo","ffn_up","ffn_down","ffn_gate"]
+
+Loading initial weights from: Applications/CausalLM/res/qwen3/qwen3-0.6b/nntr_qwen3_0.6b_fp32.bin
+[TrainingData] Loaded ./Applications/CausalLM/sst2_data/train.txt line by line, total: 67349 samples.
+
+=== Starting Qwen3 LoRA full model training ===
+[DataGen] Sample 0 / 67349
+embedding0 :
+ input:<N9nntrainer6TensorE at 0x641543cc1280>
+data addr: 0x6415490725d0
+Shape: 1:1:1:1024 [ FP32 : NCHW ]
+[84564 25 10265 ... 0 0 0]
+
+ weight: <N9nntrainer6TensorE at 0x641540854a50>
+data addr: 0x78b96b245c10
+Shape: 1:1:151936:1024 [ FP32 : NCHW ]
+[1 1 1 ... 1 1 1]
+
+ hidden: <N9nntrainer6TensorE at 0x6415408513a0>
+data addr: 0x78b6504001d0
+Shape: 1:1:1024:1024 [ FP32 : NCHW ]
+[1 1 1 ... 1 1 1]
+
+layer0_attention_norm
+ input:<N9nntrainer6TensorE at 0x7ffcf844a000>
+data addr: 0x78b6504001d0
+Shape: 1:1:1024:1024 [ FP32 : NCHW ]
+[1 1 1 ... 1 1 1]
+
+ output:<N9nntrainer6TensorE at 0x7ffcf844a030>
+data addr: 0x78b6508001d0
+Shape: 1:1:1024:1024 [ FP32 : NCHW ]
+[-0.00927734 0.0336914 -0.074707 ... 0.0119629 -0.0105591 0.0159912]
+
+ gamma:<N9nntrainer6TensorE at 0x6415437d0290>
+data addr: 0x78b903c00e10
+Shape: 1:1:1:1024 [ FP32 : NCHW ]
+[-0.00927734 0.0336914 -0.074707 ... 0.0119629 -0.0105591 0.0159912]
+
+layer0_ffn_norm
+ input:<N9nntrainer6TensorE at 0x7ffcf844a000>
+data addr: 0x78b6584191d0
+Shape: 1:1:1024:1024 [ FP32 : NCHW ]
+[1.00618 0.96125 1.05985 ... 1.01066 1.0138 1.02122]
+
+ output:<N9nntrainer6TensorE at 0x7ffcf844a030>
+data addr: 0x78b6588191d0
+Shape: 1:1:1024:1024 [ FP32 : NCHW ]
+[-0.00453447 0.00177084 0.031498 ... 0.0300361 0.0151265 -0.0338328]
+
+ gamma:<N9nntrainer6TensorE at 0x641543838350>
+data addr: 0x78b9023ffa10
+Shape: 1:1:1:1024 [ FP32 : NCHW ]
+[-0.0045166 0.00184631 0.0297852 ... 0.0297852 0.0149536 -0.0332031]
+
+Entered LoRA condition for the layer: layer0_ffn_up
+Entered LoRA condition for the layer: layer0_ffn_gate
+Entered LoRA condition for the layer: layer0_ffn_down
+layer1_attention_norm
+ input:<N9nntrainer6TensorE at 0x7ffcf844a000>
+data addr: 0x78b65bc2a1d0
+Shape: 1:1:1024:1024 [ FP32 : NCHW ]
+[1.00598 0.961759 1.05988 ... 1.01038 1.01379 1.02164]
+
+ output:<N9nntrainer6TensorE at 0x7ffcf844a030>
+data addr: 0x78b65c4321d0
+Shape: 1:1:1024:1024 [ FP32 : NCHW ]
+[-0.0226678 0.0501371 0.0482809 ... 0.00695313 0.00994013 -0.0222741]
+
+ gamma:<N9nntrainer6TensorE at 0x64154372d270>
+data addr: 0x78b8ffbb6a10
+Shape: 1:1:1:1024 [ FP32 : NCHW ]
+[-0.022583 0.0522461 0.0456543 ... 0.00689697 0.00982666 -0.0218506]
+
+layer1_ffn_norm
+ input:<N9nntrainer6TensorE at 0x7ffcf844a000>
+data addr: 0x78b66404b1d0
+Shape: 1:1:1024:1024 [ FP32 : NCHW ]
+[1.01223 0.926034 1.03574 ... 1.01116 0.963073 1.05696]
+
+ output:<N9nntrainer6TensorE at 0x7ffcf844a030>
+data addr: 0x78b66444b1d0
+Shape: 1:1:1024:1024 [ FP32 : NCHW ]
+[-0.0150473 0.0467141 -0.0319297 ... 0.00263358 0.0288679 0.0337427]
+
+ gamma:<N9nntrainer6TensorE at 0x6415439d0cc0>
+data addr: 0x78b90846c410
+Shape: 1:1:1:1024 [ FP32 : NCHW ]
+[-0.0148926 0.0505371 -0.0308838 ... 0.00260925 0.0300293 0.0319824]
+
+Entered LoRA condition for the layer: layer1_ffn_up
+Entered LoRA condition for the layer: layer1_ffn_gate
+Entered LoRA condition for the layer: layer1_ffn_down
+layer2_attention_norm
+ input:<N9nntrainer6TensorE at 0x7ffcf844a000>
+data addr: 0x78b66785c1d0
+Shape: 1:1:1024:1024 [ FP32 : NCHW ]
+[1.01342 0.926919 1.03548 ... 1.01148 0.965227 1.05727]
+
+ output:<N9nntrainer6TensorE at 0x7ffcf844a030>
+data addr: 0x78b6680641d0
+Shape: 1:1:1024:1024 [ FP32 : NCHW ]
+[0.00651424 -0.0323041 -0.0345735 ... 0.0419071 0.00391085 -0.00618408]
+
+ gamma:<N9nntrainer6TensorE at 0x641543176340>
+data addr: 0x78b906013210
+Shape: 1:1:1:1024 [ FP32 : NCHW ]
+[0.00643921 -0.0349121 -0.0334473 ... 0.0415039 0.00405884 -0.00585938]
+
+^C^C^C
+root@437e46614157:/nntrainerPranjal# ^C
+root@437e46614157:/nntrainerPranjal# ^C
+root@437e46614157:/nntrainerPranjal# ^C
+root@437e46614157:/nntrainerPranjal# meson configure build -Denable-transformer=true
+root@437e46614157:/nntrainerPranjal# ninja -C build
+ninja: Entering directory `build'
+[0/1] Regenerating build files.
+The Meson build system
+Version: 0.61.2
+Source dir: /nntrainerPranjal
+Build dir: /nntrainerPranjal/build
+Build type: native build
+Project name: nntrainer
+Project version: 0.6.0
+C compiler for the host machine: cc (gcc 11.4.0 "cc (Ubuntu 11.4.0-1ubuntu1~22.04.3) 11.4.0")
+C linker for the host machine: cc ld.bfd 2.38
+C++ compiler for the host machine: c++ (gcc 11.4.0 "c++ (Ubuntu 11.4.0-1ubuntu1~22.04.3) 11.4.0")
+C++ linker for the host machine: c++ ld.bfd 2.38
+Host machine cpu family: x86_64
+Host machine cpu: x86_64
+Program powershell found: NO
+Program nproc found: YES (/usr/bin/nproc)
+Program cmd.exe found: NO
+Message: Build for X86 architecture
+Message: -march=native added for AVX hardware acceleration.
+Message: MMAP enabled
+Message: OpenCL kernel path set to: nntrainer_opencl_kernels
+Compiler for C supports arguments -Wredundant-decls: YES (cached)
+Compiler for C++ supports arguments -Wredundant-decls: YES (cached)
+Compiler for C supports arguments -Wwrite-strings: YES (cached)
+Compiler for C++ supports arguments -Wwrite-strings: YES (cached)
+Compiler for C supports arguments -Wformat: YES (cached)
+Compiler for C++ supports arguments -Wformat: YES (cached)
+Compiler for C supports arguments -Wformat-nonliteral: YES (cached)
+Compiler for C++ supports arguments -Wformat-nonliteral: YES (cached)
+Compiler for C supports arguments -Wformat-security: YES (cached)
+Compiler for C++ supports arguments -Wformat-security: YES (cached)
+Compiler for C supports arguments -Winit-self: YES (cached)
+Compiler for C++ supports arguments -Winit-self: YES (cached)
+Compiler for C supports arguments -Waddress: YES (cached)
+Compiler for C++ supports arguments -Waddress: YES (cached)
+Compiler for C supports arguments -Wvla: YES (cached)
+Compiler for C++ supports arguments -Wvla: YES (cached)
+Compiler for C supports arguments -Wpointer-arith: YES (cached)
+Compiler for C++ supports arguments -Wpointer-arith: YES (cached)
+Compiler for C supports arguments -Wno-error=varargs: YES (cached)
+Compiler for C++ supports arguments -Wno-error=varargs: YES (cached)
+Compiler for C supports arguments -Wno-error=ignored-attributes: YES (cached)
+Compiler for C++ supports arguments -Wno-error=ignored-attributes: YES (cached)
+Compiler for C supports arguments -Wno-error=sign-compare: YES (cached)
+Compiler for C++ supports arguments -Wno-error=sign-compare: YES (cached)
+Compiler for C supports arguments -Wdefaulted-function-deleted: NO (cached)
+Compiler for C++ supports arguments -Wdefaulted-function-deleted: NO (cached)
+Compiler for C supports arguments -ftree-vectorize: YES (cached)
+Compiler for C++ supports arguments -ftree-vectorize: YES (cached)
+Compiler for C supports arguments -Wno-unused-variable: YES (cached)
+Compiler for C++ supports arguments -Wno-unused-variable: YES (cached)
+Compiler for C supports arguments -Wno-comment: YES (cached)
+Compiler for C++ supports arguments -Wno-comment: YES (cached)
+Compiler for C supports arguments -Wno-ignored-attributes: YES (cached)
+Compiler for C++ supports arguments -Wno-ignored-attributes: YES (cached)
+Compiler for C supports arguments -Wno-sign-compare: YES (cached)
+Compiler for C++ supports arguments -Wno-sign-compare: YES (cached)
+Compiler for C supports arguments -Wno-maybe-uninitialized: YES (cached)
+Compiler for C++ supports arguments -Wno-maybe-uninitialized: YES (cached)
+Compiler for C supports arguments -Wmissing-declarations: YES (cached)
+Compiler for C supports arguments -Wmissing-include-dirs: YES (cached)
+Compiler for C supports arguments -Wmissing-prototypes: YES (cached)
+Compiler for C supports arguments -Wnested-externs: YES (cached)
+Compiler for C supports arguments -Waggregate-return: YES (cached)
+Compiler for C supports arguments -Wold-style-definition: YES (cached)
+Compiler for C supports arguments -Wdeclaration-after-statement: YES (cached)
+Compiler for C supports arguments -Wno-error=varargs: YES (cached)
+Dependency capi-ml-common found: YES 1.8.8 (cached)
+Dependency capi-ml-inference found: YES 1.8.8 (cached)
+Dependency openblas found: YES 0.3.20 (cached)
+Message: OpenBLAS dependency found in system
+Message: set nntrainer num threads=1
+Dependency openmp found: YES 4.5 (cached)
+Message: set nntrainer omp threads=6
+Dependency gmock found: YES unknown (cached)
+Dependency gtest found: YES 1.11.0 (cached)
+Dependency gtest found: YES 1.11.0 (cached)
+Library m found: YES
+Library dl found: YES
+Dependency threads found: YES unknown (cached)
+Dependency iniparser found: YES 3.2 (cached)
+Dependency tensorflow2-lite found: YES 2.15.0 (cached)
+Found pkg-config: /usr/bin/pkg-config (0.29.2)
+Found CMake: /usr/bin/cmake (3.22.1)
+Run-time dependency opencv found: NO (tried pkgconfig and cmake)
+Run-time dependency opencv4 found: NO (tried pkgconfig and cmake)
+Run-time dependency opencv3 found: NO (tried pkgconfig and cmake)
+Program flatc found: YES (/usr/bin/flatc)
+Configuring nntrainer.pc using configuration
+Configuring nntrainer.ini using configuration
+../meson.build:733: WARNING: The variable(s) 'FLASH_STORAGE_UTILIZATION_LOOKAHEAD' in the input file 'nntrainer.ini.in' are not present in the given configuration data.
+Message: NNTRAINER_CONF_PATH=/usr/local/etc/nntrainer.ini
+Message: extra defines are:-DMIN_CPP_VERSION=201703L -DMMAP_READ=1 -DKERNEL_CACHE=0 -DUSE_MMAP=1 -DOPENCL_KERNEL_PATH=nntrainer_opencl_kernels -DML_API_COMMON=1 -DNNSTREAMER_AVAILABLE=1 -DUSE_BLAS=1 -DHGEMM_EXPERIMENTAL_KERNEL=false -DNNTR_NUM_THREA
+DS=1 -DOMP_NUM_THREADS=6 -DDEBUG=1 -D__LOGGING__=1 -DENABLE_TEST=1 -DREDUCE_TOLERANCE=1 -DENABLE_TFLITE_BACKBONE=1 -DENABLE_TFLITE_INTERPRETER=1 -DNNTRAINER_CONF_PATH="/usr/local/etc/nntrainer.ini"
+Message: arm_arch_opt : none
+Configuring ccapi-ml-training.pc using configuration
+Configuring capi-ml-training.pc using configuration
+Run-time dependency nnstreamer-test-devel found: NO (tried pkgconfig and cmake)
+Dependency jsoncpp found: YES 1.9.5 (cached)
+Dependency libcurl found: YES 7.81.0 (cached)
+Dependency openmp found: YES 4.5 (cached)
+../meson.build:789: WARNING: android nnstreamer-filter and nnstreamer-trainer are not yet supported, building them is skipped
+Build targets in project: 103
+NOTICE: Future-deprecated features used:
+ * 0.56.0: {'meson.source_root', 'meson.build_root'}
+
+nntrainer 0.6.0
+
+  User defined options
+    backend           : ninja
+    buildtype         : debug
+    enable-debug      : true
+    enable-transformer: true
+
+Found ninja-1.10.1 at /usr/bin/ninja
+Cleaning... 0 files.
+[47/47] Linking target Applications/CausalLM/nntr_causallm_lora_train
+root@437e46614157:/nntrainerPranjal# ./build/Applications/CausalLM/nntr_qwen3_lora_master Applications/CausalLM/res/qwen3/qwen3-0.6b ./Applications/CausalLM/sst2_data/train.txt --epochs 1 --output LORA_test2.bin
+=== Qwen3 LoRA Training Master ===
+Model dir: Applications/CausalLM/res/qwen3/qwen3-0.6b
+Train data: ./Applications/CausalLM/sst2_data/train.txt
+
+[LoRA Master] Programmatically injecting LoRA configurations...
+[LoRA Master] LoRA Rank & Alpha explicitly forced to: 8, 16
+[LoRA Master] LoRA Targets configured: ["wq","wk","wv","wo","ffn_up","ffn_down","ffn_gate"]
+
+Entered qwen3_casaullm.cpp's createAttention function.
+Entered qwen3_casaullm.cpp's createAttention function.
+Entered qwen3_casaullm.cpp's createAttention function.
+Entered qwen3_casaullm.cpp's createAttention function.
+Entered qwen3_casaullm.cpp's createAttention function.
+Entered qwen3_casaullm.cpp's createAttention function.
+Entered qwen3_casaullm.cpp's createAttention function.
+Entered qwen3_casaullm.cpp's createAttention function.
+Entered qwen3_casaullm.cpp's createAttention function.
+Entered qwen3_casaullm.cpp's createAttention function.
+Entered qwen3_casaullm.cpp's createAttention function.
+Entered qwen3_casaullm.cpp's createAttention function.
+Entered qwen3_casaullm.cpp's createAttention function.
+Entered qwen3_casaullm.cpp's createAttention function.
+Entered qwen3_casaullm.cpp's createAttention function.
+Entered qwen3_casaullm.cpp's createAttention function.
+Entered qwen3_casaullm.cpp's createAttention function.
+Entered qwen3_casaullm.cpp's createAttention function.
+Entered qwen3_casaullm.cpp's createAttention function.
+Entered qwen3_casaullm.cpp's createAttention function.
+Entered qwen3_casaullm.cpp's createAttention function.
+Entered qwen3_casaullm.cpp's createAttention function.
+Entered qwen3_casaullm.cpp's createAttention function.
+Entered qwen3_casaullm.cpp's createAttention function.
+Entered qwen3_casaullm.cpp's createAttention function.
+Entered qwen3_casaullm.cpp's createAttention function.
+Entered qwen3_casaullm.cpp's createAttention function.
+Entered qwen3_casaullm.cpp's createAttention function.
+Loading initial weights from: Applications/CausalLM/res/qwen3/qwen3-0.6b/nntr_qwen3_0.6b_fp32.bin
+[TrainingData] Loaded ./Applications/CausalLM/sst2_data/train.txt line by line, total: 67349 samples.
+
+=== Starting Qwen3 LoRA full model training ===
+[DataGen] Sample 0 / 67349
+embedding0 :
+ input:<N9nntrainer6TensorE at 0x56e869efe230>
+data addr: 0x56e86f6616c0
+Shape: 1:1:1:1024 [ FP32 : NCHW ]
+[84564 25 10265 ... 0 0 0]
+
+ weight: <N9nntrainer6TensorE at 0x56e866e3daf0>
+data addr: 0x702909245c10
+Shape: 1:1:151936:1024 [ FP32 : NCHW ]
+[1 1 1 ... 1 1 1]
+
+ hidden: <N9nntrainer6TensorE at 0x56e866e3a3a0>
+data addr: 0x7025ee4001d0
+Shape: 1:1:1024:1024 [ FP32 : NCHW ]
+[1 1 1 ... 1 1 1]
+
+layer0_attention_norm
+ input:<N9nntrainer6TensorE at 0x7fff98f50100>
+data addr: 0x7025ee4001d0
+Shape: 1:1:1024:1024 [ FP32 : NCHW ]
+[1 1 1 ... 1 1 1]
+
+ output:<N9nntrainer6TensorE at 0x7fff98f50130>
+data addr: 0x7025ee8001d0
+Shape: 1:1:1024:1024 [ FP32 : NCHW ]
+[-0.00927734 0.0336914 -0.074707 ... 0.0119629 -0.0105591 0.0159912]
+
+ gamma:<N9nntrainer6TensorE at 0x56e869d26780>
+data addr: 0x7028a1c00e10
+Shape: 1:1:1:1024 [ FP32 : NCHW ]
+[-0.00927734 0.0336914 -0.074707 ... 0.0119629 -0.0105591 0.0159912]
+
+layer0_ffn_norm
+ input:<N9nntrainer6TensorE at 0x7fff98f50100>
+data addr: 0x7025f64191d0
+Shape: 1:1:1024:1024 [ FP32 : NCHW ]
+[1.00618 0.96125 1.05985 ... 1.01066 1.0138 1.02122]
+
+ output:<N9nntrainer6TensorE at 0x7fff98f50130>
+data addr: 0x7025f68191d0
+Shape: 1:1:1024:1024 [ FP32 : NCHW ]
+[-0.00453447 0.00177084 0.031498 ... 0.0300361 0.0151265 -0.0338328]
+
+ gamma:<N9nntrainer6TensorE at 0x56e869e02160>
+data addr: 0x7028a03ffa10
+Shape: 1:1:1:1024 [ FP32 : NCHW ]
+[-0.0045166 0.00184631 0.0297852 ... 0.0297852 0.0149536 -0.0332031]
+
+Entered LoRA condition for the layer: layer0_ffn_up
+Entered LoRA condition for the layer: layer0_ffn_gate
+Entered LoRA condition for the layer: layer0_ffn_down
+layer1_attention_norm
+ input:<N9nntrainer6TensorE at 0x7fff98f50100>
+data addr: 0x7025f9c2a1d0
+Shape: 1:1:1024:1024 [ FP32 : NCHW ]
+[1.00598 0.961759 1.05988 ... 1.01038 1.01379 1.02164]
+
+ output:<N9nntrainer6TensorE at 0x7fff98f50130>
+data addr: 0x7025fa4321d0
+Shape: 1:1:1024:1024 [ FP32 : NCHW ]
+[-0.0226678 0.0501371 0.0482809 ... 0.00695313 0.00994013 -0.0222741]
+
+ gamma:<N9nntrainer6TensorE at 0x56e869edef90>
+data addr: 0x70289dbb6a10
+Shape: 1:1:1:1024 [ FP32 : NCHW ]
+[-0.022583 0.0522461 0.0456543 ... 0.00689697 0.00982666 -0.0218506]
+
+layer1_ffn_norm
+ input:<N9nntrainer6TensorE at 0x7fff98f50100>
+data addr: 0x70260204b1d0
+Shape: 1:1:1024:1024 [ FP32 : NCHW ]
+[1.01223 0.926034 1.03574 ... 1.01116 0.963073 1.05696]
+
+ output:<N9nntrainer6TensorE at 0x7fff98f50130>
+data addr: 0x70260244b1d0
+Shape: 1:1:1024:1024 [ FP32 : NCHW ]
+[-0.0150473 0.0467141 -0.0319297 ... 0.00263358 0.0288679 0.0337427]
+
+ gamma:<N9nntrainer6TensorE at 0x56e869f7fbe0>
+data addr: 0x7028a646c410
+Shape: 1:1:1:1024 [ FP32 : NCHW ]
+[-0.0148926 0.0505371 -0.0308838 ... 0.00260925 0.0300293 0.0319824]
+
+Entered LoRA condition for the layer: layer1_ffn_up
+Entered LoRA condition for the layer: layer1_ffn_gate
+Entered LoRA condition for the layer: layer1_ffn_down
+layer2_attention_norm
+ input:<N9nntrainer6TensorE at 0x7fff98f50100>
+data addr: 0x70260585c1d0
+Shape: 1:1:1024:1024 [ FP32 : NCHW ]
+[1.01342 0.926919 1.03548 ... 1.01148 0.965227 1.05727]
+
+ output:<N9nntrainer6TensorE at 0x7fff98f50130>
+data addr: 0x7026060641d0
+Shape: 1:1:1024:1024 [ FP32 : NCHW ]
+[0.00651424 -0.0323041 -0.0345735 ... 0.0419071 0.00391085 -0.00618408]
+
+ gamma:<N9nntrainer6TensorE at 0x56e869d39b70>
+data addr: 0x7028a4013210
+Shape: 1:1:1:1024 [ FP32 : NCHW ]
+[0.00643921 -0.0349121 -0.0334473 ... 0.0415039 0.00405884 -0.00585938]
+
+layer2_ffn_norm
+ input:<N9nntrainer6TensorE at 0x7fff98f50100>
+data addr: 0x70260dc7d1d0
+Shape: 1:1:1024:1024 [ FP32 : NCHW ]
+[1.00064 0.937835 1.09075 ... 1.04573 0.984459 1.14455]
+
+ output:<N9nntrainer6TensorE at 0x7fff98f50130>
+data addr: 0x70260e07d1d0
+Shape: 1:1:1024:1024 [ FP32 : NCHW ]
+[0.00269917 0.00110052 -0.0297883 ... 0.0693566 -0.00321064 0.0440952]
+
+ gamma:<N9nntrainer6TensorE at 0x56e869d08ba0>
+data addr: 0x7028a2811e10
+Shape: 1:1:1:1024 [ FP32 : NCHW ]
+[0.00270081 0.00117493 -0.0273438 ... 0.0664062 -0.00326538 0.0385742]
+
+Entered LoRA condition for the layer: layer2_ffn_up
+Entered LoRA condition for the layer: layer2_ffn_gate
+Entered LoRA condition for the layer: layer2_ffn_down
+layer3_attention_norm
+ input:<N9nntrainer6TensorE at 0x7fff98f50100>
+data addr: 0x70261148e1d0
+Shape: 1:1:1024:1024 [ FP32 : NCHW ]
+[1.00138 0.937829 1.08994 ... 1.04482 0.985623 1.14511]
+
+ output:<N9nntrainer6TensorE at 0x7fff98f50130>
+data addr: 0x702611c961d0
+Shape: 1:1:1024:1024 [ FP32 : NCHW ]
+[0.0124526 0.0347582 -0.0791969 ... 0.0205082 -0.0137587 0.0349017]
+
+ gamma:<N9nntrainer6TensorE at 0x56e869cfe310>
+data addr: 0x702896ee2010
+Shape: 1:1:1:1024 [ FP32 : NCHW ]
+[0.0124512 0.0371094 -0.0727539 ... 0.0196533 -0.0139771 0.0305176]
+
+layer3_ffn_norm
+ input:<N9nntrainer6TensorE at 0x7fff98f50100>
+data addr: 0x7026198af1d0
+Shape: 1:1:1024:1024 [ FP32 : NCHW ]
+[0.983051 0.965024 1.09509 ... 1.03511 0.947588 1.1987]
+
+ output:<N9nntrainer6TensorE at 0x7fff98f50130>
+data addr: 0x702619caf1d0
+Shape: 1:1:1024:1024 [ FP32 : NCHW ]
+[0.055221 -0.0504373 0.0262106 ... -0.0228788 -0.0177044 -2.71604e-06]
+
+ gamma:<N9nntrainer6TensorE at 0x56e869fbf470>
+data addr: 0x7028956d8e10
+Shape: 1:1:1:1024 [ FP32 : NCHW ]
+[0.0561523 -0.0522461 0.0239258 ... -0.0220947 -0.0186768 -2.26498e-06]
+
+Entered LoRA condition for the layer: layer3_ffn_up
+Entered LoRA condition for the layer: layer3_ffn_gate
+Entered LoRA condition for the layer: layer3_ffn_down
+layer4_attention_norm
+ input:<N9nntrainer6TensorE at 0x7fff98f50100>
+data addr: 0x70261d0c01d0
+Shape: 1:1:1024:1024 [ FP32 : NCHW ]
+[0.983634 0.960036 1.09756 ... 1.03431 0.94714 1.1984]
+
+ output:<N9nntrainer6TensorE at 0x7fff98f50130>
+data addr: 0x70261d8c81d0
+Shape: 1:1:1024:1024 [ FP32 : NCHW ]
+[0.0175373 -0.0356399 -0.0162848 ... 0.028798 -0.0114505 -0.00250614]
+
+ gamma:<N9nntrainer6TensorE at 0x56e869f8c060>
+data addr: 0x70289cf9d610
+Shape: 1:1:1:1024 [ FP32 : NCHW ]
+[0.0178223 -0.0371094 -0.0148315 ... 0.027832 -0.012085 -0.00209045]
+
+layer4_ffn_norm
+ input:<N9nntrainer6TensorE at 0x7fff98f50100>
+data addr: 0x7026254e11d0
+Shape: 1:1:1024:1024 [ FP32 : NCHW ]
+[1.00708 0.954841 1.03891 ... 1.01894 0.962058 1.21566]
+
+ output:<N9nntrainer6TensorE at 0x7fff98f50130>
+data addr: 0x7026258e11d0
+Shape: 1:1:1024:1024 [ FP32 : NCHW ]
+[-0.0287476 -0.00241696 0.0166023 ... -0.0229953 -0.024411 -0.0438958]
+
+ gamma:<N9nntrainer6TensorE at 0x56e869f909d0>
+data addr: 0x70289b79c210
+Shape: 1:1:1:1024 [ FP32 : NCHW ]
+[-0.0285645 -0.00253296 0.0159912 ... -0.022583 -0.0253906 -0.0361328]
+
+Entered LoRA condition for the layer: layer4_ffn_up
+Entered LoRA condition for the layer: layer4_ffn_gate
+Entered LoRA condition for the layer: layer4_ffn_down
+layer5_attention_norm
+ input:<N9nntrainer6TensorE at 0x7fff98f50100>
+data addr: 0x702628cf21d0
+Shape: 1:1:1024:1024 [ FP32 : NCHW ]
+[1.00071 0.956261 1.04427 ... 1.02048 0.960338 1.216]
+
+ output:<N9nntrainer6TensorE at 0x7fff98f50130>
+data addr: 0x7026294fa1d0
+Shape: 1:1:1024:1024 [ FP32 : NCHW ]
+[-0.017335 0.00349968 -0.0103188 ... -0.0248981 -0.0365518 -0.0137216]
+
+ gamma:<N9nntrainer6TensorE at 0x56e869dfb980>
+data addr: 0x70289933b210
+Shape: 1:1:1:1024 [ FP32 : NCHW ]
+[-0.017334 0.00366211 -0.0098877 ... -0.0244141 -0.0380859 -0.0112915]
+
+layer5_ffn_norm
+ input:<N9nntrainer6TensorE at 0x7fff98f50100>
+data addr: 0x7026311131d0
+Shape: 1:1:1024:1024 [ FP32 : NCHW ]
+[0.964559 0.924077 0.998388 ... 0.950092 0.916828 1.16892]
+
+ output:<N9nntrainer6TensorE at 0x7fff98f50130>
+data addr: 0x7026315131d0
+Shape: 1:1:1024:1024 [ FP32 : NCHW ]
+[0.0191829 -0.00490451 -0.0105978 ... 0.0477596 -0.0689075 -0.0275258]
+
+ gamma:<N9nntrainer6TensorE at 0x56e869dc6680>
+data addr: 0x7028b51d6410
+Shape: 1:1:1:1024 [ FP32 : NCHW ]
+[0.0198975 -0.00531006 -0.0106201 ... 0.050293 -0.0751953 -0.0235596]
+
+Entered LoRA condition for the layer: layer5_ffn_up
+Entered LoRA condition for the layer: layer5_ffn_gate
+Entered LoRA condition for the layer: layer5_ffn_down
+layer6_attention_norm
+ input:<N9nntrainer6TensorE at 0x7fff98f50100>
+data addr: 0x7026349241d0
+Shape: 1:1:1024:1024 [ FP32 : NCHW ]
+[0.964155 0.924951 0.997617 ... 0.951222 0.916435 1.16783]
+
+ output:<N9nntrainer6TensorE at 0x7fff98f50130>
+data addr: 0x70263512c1d0
+Shape: 1:1:1024:1024 [ FP32 : NCHW ]
+[0.00729348 0.0187337 0.00949411 ... -0.0266935 -0.00269752 0.035052]
+
+ gamma:<N9nntrainer6TensorE at 0x56e869cdfed0>
+data addr: 0x7028b2d75410
+Shape: 1:1:1:1024 [ FP32 : NCHW ]
+[0.00756836 0.0202637 0.00952148 ... -0.0280762 -0.00294495 0.0300293]
+
+layer6_ffn_norm
+ input:<N9nntrainer6TensorE at 0x7fff98f50100>
+data addr: 0x70263cd451d0
+Shape: 1:1:1024:1024 [ FP32 : NCHW ]
+[0.957475 0.969096 0.913766 ... 0.956369 0.841395 1.21107]
+
+ output:<N9nntrainer6TensorE at 0x7fff98f50130>
+data addr: 0x70263d1451d0
+Shape: 1:1:1024:1024 [ FP32 : NCHW ]
+[-0.0496671 0.0226569 -0.0338252 ... -0.0208454 -0.024794 0.0557435]
+
+ gamma:<N9nntrainer6TensorE at 0x56e869affee0>
+data addr: 0x7028b1574010
+Shape: 1:1:1:1024 [ FP32 : NCHW ]
+[-0.052002 0.0234375 -0.0371094 ... -0.0218506 -0.029541 0.0461426]
+
+Entered LoRA condition for the layer: layer6_ffn_up
+Entered LoRA condition for the layer: layer6_ffn_gate
+Entered LoRA condition for the layer: layer6_ffn_down
+layer7_attention_norm
+ input:<N9nntrainer6TensorE at 0x7fff98f50100>
+data addr: 0x7026405561d0
+Shape: 1:1:1024:1024 [ FP32 : NCHW ]
+[0.956373 0.969206 0.915003 ... 0.956723 0.841795 1.21095]
+
+ output:<N9nntrainer6TensorE at 0x7fff98f50130>
+data addr: 0x702640d5e1d0
+Shape: 1:1:1024:1024 [ FP32 : NCHW ]
+[0.0270181 0.0149295 -0.0187185 ... 0.0194555 -0.0178359 -0.00457115]
+
+ gamma:<N9nntrainer6TensorE at 0x56e869b6eff0>
+data addr: 0x7028b9a18a10
+Shape: 1:1:1:1024 [ FP32 : NCHW ]
+[0.0283203 0.0154419 -0.0205078 ... 0.0203857 -0.0212402 -0.00378418]
+
+layer7_ffn_norm
+ input:<N9nntrainer6TensorE at 0x7fff98f50100>
+data addr: 0x7026489771d0
+Shape: 1:1:1024:1024 [ FP32 : NCHW ]
+[0.950286 0.922984 0.8314 ... 0.986879 0.829504 1.19757]
+
+ output:<N9nntrainer6TensorE at 0x7fff98f50130>
+data addr: 0x702648d771d0
+Shape: 1:1:1024:1024 [ FP32 : NCHW ]
+[0.00439522 -0.0665057 0.0164945 ... 0.0217413 -0.013529 -0.0285693]
+
+ gamma:<N9nntrainer6TensorE at 0x56e869ae7d60>
+data addr: 0x7028b8217610
+Shape: 1:1:1:1024 [ FP32 : NCHW ]
+[0.00463867 -0.0722656 0.0198975 ... 0.0220947 -0.0163574 -0.0239258]
+
+Entered LoRA condition for the layer: layer7_ffn_up
+Entered LoRA condition for the layer: layer7_ffn_gate
+Entered LoRA condition for the layer: layer7_ffn_down
+layer8_attention_norm
+ input:<N9nntrainer6TensorE at 0x7fff98f50100>
+data addr: 0x70264c1881d0
+Shape: 1:1:1024:1024 [ FP32 : NCHW ]
+[0.951295 0.919205 0.833928 ... 0.988104 0.829214 1.19723]
+
+ output:<N9nntrainer6TensorE at 0x7fff98f50130>
+data addr: 0x70264c9901d0
+Shape: 1:1:1024:1024 [ FP32 : NCHW ]
+[-0.0328839 -0.0543749 0.0198946 ... -0.0586911 -0.00262415 0.106669]
+
+ gamma:<N9nntrainer6TensorE at 0x56e869a239d0>
+data addr: 0x7028ab4cfc10
+Shape: 1:1:1:1024 [ FP32 : NCHW ]
+[-0.034668 -0.0593262 0.0239258 ... -0.0595703 -0.00317383 0.0893555]
+
+layer8_ffn_norm
+ input:<N9nntrainer6TensorE at 0x7fff98f50100>
+data addr: 0x7026545a91d0
+Shape: 1:1:1024:1024 [ FP32 : NCHW ]
+[0.996855 0.995687 0.795061 ... 0.999541 0.881842 1.14844]
+
+ output:<N9nntrainer6TensorE at 0x7fff98f50130>
+data addr: 0x7026549a91d0
+Shape: 1:1:1024:1024 [ FP32 : NCHW ]
+[-0.036103 0.00176219 0.0117401 ... 0.0142736 -0.013611 0.0339163]
+
+ gamma:<N9nntrainer6TensorE at 0x56e869a4d480>
+data addr: 0x7028a9cce810
+Shape: 1:1:1:1024 [ FP32 : NCHW ]
+[-0.036377 0.00177765 0.0148315 ... 0.0143433 -0.0155029 0.0296631]
+
+Entered LoRA condition for the layer: layer8_ffn_up
+Entered LoRA condition for the layer: layer8_ffn_gate
+Entered LoRA condition for the layer: layer8_ffn_down
+layer9_attention_norm
+ input:<N9nntrainer6TensorE at 0x7fff98f50100>
+data addr: 0x702657dba1d0
+Shape: 1:1:1024:1024 [ FP32 : NCHW ]
+[0.996366 0.996041 0.795743 ... 0.999549 0.88154 1.14837]
+
+ output:<N9nntrainer6TensorE at 0x7fff98f50130>
+data addr: 0x7026585c21d0
+Shape: 1:1:1024:1024 [ FP32 : NCHW ]
+[-0.00829472 0.00310194 0.0118468 ... 0.0105078 -0.0246412 0.023726]
+
+ gamma:<N9nntrainer6TensorE at 0x56e869cc7d30>
+data addr: 0x7028a7875610
+Shape: 1:1:1:1024 [ FP32 : NCHW ]
+[-0.00836182 0.00312805 0.0149536 ... 0.0105591 -0.0280762 0.020752]
+
+layer9_ffn_norm
+ input:<N9nntrainer6TensorE at 0x7fff98f50100>
+data addr: 0x7026601db1d0
+Shape: 1:1:1024:1024 [ FP32 : NCHW ]
+[1.00324 0.999761 0.776505 ... 1.00646 0.910602 1.14347]
+
+ output:<N9nntrainer6TensorE at 0x7fff98f50130>
+data addr: 0x7026605db1d0
+Shape: 1:1:1024:1024 [ FP32 : NCHW ]
+[0.0343715 0.0041297 0.0206601 ... 0.0125944 0.0180327 0.0305626]
+
+ gamma:<N9nntrainer6TensorE at 0x56e869b248c0>
+data addr: 0x7028afd53010
+Shape: 1:1:1:1024 [ FP32 : NCHW ]
+[0.0344238 0.00415039 0.0267334 ... 0.0125732 0.0198975 0.0268555]
+
+Entered LoRA condition for the layer: layer9_ffn_up
+Entered LoRA condition for the layer: layer9_ffn_gate
+Entered LoRA condition for the layer: layer9_ffn_down
+layer10_attention_norm
+ input:<N9nntrainer6TensorE at 0x7fff98f50100>
+data addr: 0x7026639ec1d0
+Shape: 1:1:1024:1024 [ FP32 : NCHW ]
+[1.00328 0.999849 0.776398 ... 1.00645 0.91072 1.14334]
+
+ output:<N9nntrainer6TensorE at 0x7fff98f50130>
+data addr: 0x7026641f41d0
+Shape: 1:1:1024:1024 [ FP32 : NCHW ]
+[0.0133459 0.0239284 0.0390479 ... -0.033501 -0.013553 0.00243068]
+
+ gamma:<N9nntrainer6TensorE at 0x56e869c242d0>
+data addr: 0x7028ad8f2010
+Shape: 1:1:1:1024 [ FP32 : NCHW ]
+[0.0133667 0.0240479 0.0505371 ... -0.0334473 -0.0149536 0.00213623]
+
+layer10_ffn_norm
+ input:<N9nntrainer6TensorE at 0x7fff98f50100>
+data addr: 0x70266be0d1d0
+Shape: 1:1:1024:1024 [ FP32 : NCHW ]
+[1.05098 1.04088 0.799338 ... 0.938786 0.942581 1.12774]
+
+ output:<N9nntrainer6TensorE at 0x7fff98f50130>
+data addr: 0x70266c20d1d0
+Shape: 1:1:1024:1024 [ FP32 : NCHW ]
+[-0.0130743 0.0371405 0.0252235 ... 0.0533229 0.0228797 0.0618652]
+
+ gamma:<N9nntrainer6TensorE at 0x56e869c30230>
+data addr: 0x7028ac0f0c10
+Shape: 1:1:1:1024 [ FP32 : NCHW ]
+[-0.0125122 0.0358887 0.0317383 ... 0.0571289 0.0244141 0.0551758]
+
+Entered LoRA condition for the layer: layer10_ffn_up
+Entered LoRA condition for the layer: layer10_ffn_gate
+Entered LoRA condition for the layer: layer10_ffn_down
+layer11_attention_norm
+ input:<N9nntrainer6TensorE at 0x7fff98f50100>
+data addr: 0x70266f61e1d0
+Shape: 1:1:1024:1024 [ FP32 : NCHW ]
+[1.05061 1.04178 0.799134 ... 0.938794 0.942825 1.12762]
+
+ output:<N9nntrainer6TensorE at 0x7fff98f50130>
+data addr: 0x70266fe261d0
+Shape: 1:1:1024:1024 [ FP32 : NCHW ]
+[-0.00698081 -0.0278148 0.0162933 ... 0.00234987 0.00606437 0.0331175]
+
+ gamma:<N9nntrainer6TensorE at 0x56e869be1d50>
+data addr: 0x7028793a8210
+Shape: 1:1:1:1024 [ FP32 : NCHW ]
+[-0.00668335 -0.0268555 0.0205078 ... 0.0025177 0.00646973 0.029541]
+
+layer11_ffn_norm
+ input:<N9nntrainer6TensorE at 0x7fff98f50100>
+data addr: 0x702677a3f1d0
+Shape: 1:1:1024:1024 [ FP32 : NCHW ]
+[1.05639 1.01568 0.783388 ... 0.95077 0.94696 1.14452]
+
+ output:<N9nntrainer6TensorE at 0x7fff98f50130>
+data addr: 0x702677e3f1d0
+Shape: 1:1:1024:1024 [ FP32 : NCHW ]
+[-0.01321 0.00450085 0.0225408 ... -0.0134476 0.0234534 -0.00729501]
+
+ gamma:<N9nntrainer6TensorE at 0x56e869b667d0>
+data addr: 0x702877f8ee10
+Shape: 1:1:1:1024 [ FP32 : NCHW ]
+[-0.0125732 0.00445557 0.0289307 ... -0.0142212 0.0249023 -0.00640869]
+
+Entered LoRA condition for the layer: layer11_ffn_up
+Entered LoRA condition for the layer: layer11_ffn_gate
+Entered LoRA condition for the layer: layer11_ffn_down
+layer12_attention_norm
+ input:<N9nntrainer6TensorE at 0x7fff98f50100>
+data addr: 0x70267b2501d0
+Shape: 1:1:1024:1024 [ FP32 : NCHW ]
+[1.05593 1.01486 0.782773 ... 0.950619 0.947173 1.14427]
+
+ output:<N9nntrainer6TensorE at 0x7fff98f50130>
+data addr: 0x70267ba581d0
+Shape: 1:1:1024:1024 [ FP32 : NCHW ]
+[0.000560842 -0.0215611 -0.0262284 ... 0.053549 -0.0374864 -0.0229213]
+
+ gamma:<N9nntrainer6TensorE at 0x56e869ca9690>
+data addr: 0x70287fc63810
+Shape: 1:1:1:1024 [ FP32 : NCHW ]
+[0.000534058 -0.0213623 -0.0336914 ... 0.0566406 -0.0397949 -0.0201416]
+
+layer12_ffn_norm
+ input:<N9nntrainer6TensorE at 0x7fff98f50100>
+data addr: 0x7026836711d0
+Shape: 1:1:1024:1024 [ FP32 : NCHW ]
+[1.05555 1.02364 0.790353 ... 0.95555 0.907645 1.13883]
+
+ output:<N9nntrainer6TensorE at 0x7fff98f50130>
+data addr: 0x702683a711d0
+Shape: 1:1:1024:1024 [ FP32 : NCHW ]
+[0.0317832 -0.00293618 0.00964389 ... 0.0175184 0.00843029 0.00102837]
+
+ gamma:<N9nntrainer6TensorE at 0x56e869c82af0>
+data addr: 0x70287e462410
+Shape: 1:1:1:1024 [ FP32 : NCHW ]
+[0.0302734 -0.00288391 0.0122681 ... 0.0184326 0.00933838 0.000907898]
+
+Entered LoRA condition for the layer: layer12_ffn_up
+Entered LoRA condition for the layer: layer12_ffn_gate
+Entered LoRA condition for the layer: layer12_ffn_down
+layer13_attention_norm
+ input:<N9nntrainer6TensorE at 0x7fff98f50100>
+data addr: 0x702686e821d0
+Shape: 1:1:1024:1024 [ FP32 : NCHW ]
+[1.05555 1.0235 0.790389 ... 0.955901 0.907788 1.1394]
+
+ output:<N9nntrainer6TensorE at 0x7fff98f50130>
+data addr: 0x70268768a1d0
+Shape: 1:1:1024:1024 [ FP32 : NCHW ]
+[0.00126567 -0.0618899 0.00940527 ... 0.0164818 -0.00738521 0.0101688]
+
+ gamma:<N9nntrainer6TensorE at 0x56e869e1d980>
+data addr: 0x70287b409410
+Shape: 1:1:1:1024 [ FP32 : NCHW ]
+[0.00120544 -0.060791 0.0119629 ... 0.017334 -0.00817871 0.00897217]
+
+layer13_ffn_norm
+ input:<N9nntrainer6TensorE at 0x7fff98f50100>
+data addr: 0x70268f2a31d0
+Shape: 1:1:1024:1024 [ FP32 : NCHW ]
+[1.01455 1.09453 0.798723 ... 0.959469 0.944212 1.08996]
+
+ output:<N9nntrainer6TensorE at 0x7fff98f50130>
+data addr: 0x70268f6a31d0
+Shape: 1:1:1024:1024 [ FP32 : NCHW ]
+[0.00184796 -0.0399721 0.022215 ... 0.0343435 0.0310571 -0.0107421]
+
+ gamma:<N9nntrainer6TensorE at 0x56e869acb890>
+data addr: 0x70286feb3810
+Shape: 1:1:1:1024 [ FP32 : NCHW ]
+[0.00183868 -0.0368652 0.0280762 ... 0.0361328 0.0332031 -0.00994873]
+
+Entered LoRA condition for the layer: layer13_ffn_up
+Entered LoRA condition for the layer: layer13_ffn_gate
+Entered LoRA condition for the layer: layer13_ffn_down
+layer14_attention_norm
+ input:<N9nntrainer6TensorE at 0x7fff98f50100>
+data addr: 0x702692ab41d0
+Shape: 1:1:1024:1024 [ FP32 : NCHW ]
+[1.01417 1.0934 0.798983 ... 0.959382 0.943799 1.08915]
+
+ output:<N9nntrainer6TensorE at 0x7fff98f50130>
+data addr: 0x7026932bc1d0
+Shape: 1:1:1024:1024 [ FP32 : NCHW ]
+[-0.00435381 -0.0191724 -0.0112562 ... -0.0118337 0.0406311 -0.0227857]
+
+ gamma:<N9nntrainer6TensorE at 0x56e869c3ae10>
+data addr: 0x70286e64a810
+Shape: 1:1:1:1024 [ FP32 : NCHW ]
+[-0.0043335 -0.0177002 -0.0142212 ... -0.0124512 0.043457 -0.0211182]
+
+layer14_ffn_norm
+ input:<N9nntrainer6TensorE at 0x7fff98f50100>
+data addr: 0x70269aed51d0
+Shape: 1:1:1024:1024 [ FP32 : NCHW ]
+[1.02286 1.12253 0.823514 ... 0.934027 0.947719 1.09366]
+
+ output:<N9nntrainer6TensorE at 0x7fff98f50130>
+data addr: 0x70269b2d51d0
+Shape: 1:1:1024:1024 [ FP32 : NCHW ]
+[0.0331048 0.0109805 -0.0399794 ... -0.00538607 0.00892718 -0.0163113]
+
+ gamma:<N9nntrainer6TensorE at 0x56e869c1eeb0>
+data addr: 0x70286ce49410
+Shape: 1:1:1:1024 [ FP32 : NCHW ]
+[0.0327148 0.0098877 -0.0490723 ... -0.00582886 0.00952148 -0.0150757]
+
+Entered LoRA condition for the layer: layer14_ffn_up
+Entered LoRA condition for the layer: layer14_ffn_gate
+Entered LoRA condition for the layer: layer14_ffn_down
+layer15_attention_norm
+ input:<N9nntrainer6TensorE at 0x7fff98f50100>
+data addr: 0x70269e6e61d0
+Shape: 1:1:1024:1024 [ FP32 : NCHW ]
+[1.02246 1.12276 0.823957 ... 0.934829 0.948135 1.0946]
+
+ output:<N9nntrainer6TensorE at 0x7fff98f50130>
+data addr: 0x70269eeee1d0
+Shape: 1:1:1024:1024 [ FP32 : NCHW ]
+[0.0227228 -0.00183071 0.00915571 ... 0.0289049 -0.0225599 0.02036]
+
+ gamma:<N9nntrainer6TensorE at 0x56e869c86350>
+data addr: 0x702873ef5e10
+Shape: 1:1:1:1024 [ FP32 : NCHW ]
+[0.0224609 -0.00164795 0.0112305 ... 0.03125 -0.0240479 0.0187988]
+
+layer15_ffn_norm
+ input:<N9nntrainer6TensorE at 0x7fff98f50100>
+data addr: 0x7026a6b071d0
+Shape: 1:1:1024:1024 [ FP32 : NCHW ]
+[1.03939 1.12799 0.823542 ... 0.930235 0.951682 1.06843]
+
+ output:<N9nntrainer6TensorE at 0x7fff98f50130>
+data addr: 0x7026a6f071d0
+Shape: 1:1:1024:1024 [ FP32 : NCHW ]
+[0.00532941 -0.0183718 -0.00118607 ... -0.0118401 0.0219299 -0.0595522]
+
+ gamma:<N9nntrainer6TensorE at 0x56e869bc4300>
+data addr: 0x7028726f4a10
+Shape: 1:1:1:1024 [ FP32 : NCHW ]
+[0.00518799 -0.0164795 -0.00145721 ... -0.0128784 0.0233154 -0.0563965]
+
+Entered LoRA condition for the layer: layer15_ffn_up
+Entered LoRA condition for the layer: layer15_ffn_gate
+Entered LoRA condition for the layer: layer15_ffn_down
+layer16_attention_norm
+ input:<N9nntrainer6TensorE at 0x7fff98f50100>
+data addr: 0x7026aa3181d0
+Shape: 1:1:1024:1024 [ FP32 : NCHW ]
+[1.03975 1.12771 0.827604 ... 0.930269 0.951769 1.06893]
+
+ output:<N9nntrainer6TensorE at 0x7fff98f50130>
+data addr: 0x7026aab201d0
+Shape: 1:1:1024:1024 [ FP32 : NCHW ]
+[0.00263432 0.0135376 -0.0250622 ... -0.00653773 -0.00970311 -0.00954343]
+
+ gamma:<N9nntrainer6TensorE at 0x56e869b4a530>
+data addr: 0x70288e9f4610
+Shape: 1:1:1:1024 [ FP32 : NCHW ]
+[0.00256348 0.012146 -0.0306396 ... -0.0071106 -0.0103149 -0.0090332]
+
+layer16_ffn_norm
+ input:<N9nntrainer6TensorE at 0x7fff98f50100>
+data addr: 0x7026b27391d0
+Shape: 1:1:1024:1024 [ FP32 : NCHW ]
+[0.984594 1.15087 0.817543 ... 0.949942 0.957199 1.08137]
+
+ output:<N9nntrainer6TensorE at 0x7fff98f50130>
+data addr: 0x7026b2b391d0
+Shape: 1:1:1024:1024 [ FP32 : NCHW ]
+[0.0574033 -0.015804 -0.0113744 ... 0.0434825 -0.0507328 0.0298294]
+
+ gamma:<N9nntrainer6TensorE at 0x56e869cc27d0>
+data addr: 0x70288d1f3210
+Shape: 1:1:1:1024 [ FP32 : NCHW ]
+[0.059082 -0.013916 -0.0140991 ... 0.0463867 -0.0537109 0.0279541]
+
+Entered LoRA condition for the layer: layer16_ffn_up
+Entered LoRA condition for the layer: layer16_ffn_gate
+Entered LoRA condition for the layer: layer16_ffn_down
+layer17_attention_norm
+ input:<N9nntrainer6TensorE at 0x7fff98f50100>
+data addr: 0x7026b5f4a1d0
+Shape: 1:1:1024:1024 [ FP32 : NCHW ]
+[0.985707 1.15062 0.817962 ... 0.950229 0.958523 1.08101]
+
+ output:<N9nntrainer6TensorE at 0x7fff98f50130>
+data addr: 0x7026b67521d0
+Shape: 1:1:1024:1024 [ FP32 : NCHW ]
+[0.00644155 -0.00460856 0.00514827 ... 0.0462437 0.00802472 -0.0116545]
+
+ gamma:<N9nntrainer6TensorE at 0x56e869b28cb0>
+data addr: 0x70288b592210
+Shape: 1:1:1:1024 [ FP32 : NCHW ]
+[0.00662231 -0.00405884 0.00637817 ... 0.0493164 0.00848389 -0.0109253]
+
+layer17_ffn_norm
+ input:<N9nntrainer6TensorE at 0x7fff98f50100>
+data addr: 0x7026be36b1d0
+Shape: 1:1:1024:1024 [ FP32 : NCHW ]
+[0.947382 1.19912 0.836772 ... 0.987253 0.966181 1.07458]
+
+ output:<N9nntrainer6TensorE at 0x7fff98f50130>
+data addr: 0x7026be76b1d0
+Shape: 1:1:1024:1024 [ FP32 : NCHW ]
+[0.0207468 0.0313096 -0.0559805 ... -0.0515553 0.0181359 0.00956809]
+
+ gamma:<N9nntrainer6TensorE at 0x56e869bb3730>
+data addr: 0x70289267fa10
+Shape: 1:1:1:1024 [ FP32 : NCHW ]
+[0.0222168 0.0264893 -0.0678711 ... -0.0529785 0.019043 0.0090332]
+
+Entered LoRA condition for the layer: layer17_ffn_up
+Entered LoRA condition for the layer: layer17_ffn_gate
+Entered LoRA condition for the layer: layer17_ffn_down
+layer18_attention_norm
+ input:<N9nntrainer6TensorE at 0x7fff98f50100>
+data addr: 0x7026c1b7c1d0
+Shape: 1:1:1024:1024 [ FP32 : NCHW ]
+[0.946892 1.20021 0.837628 ... 0.98599 0.967619 1.07583]
+
+ output:<N9nntrainer6TensorE at 0x7fff98f50130>
+data addr: 0x7026c23841d0
+Shape: 1:1:1024:1024 [ FP32 : NCHW ]
+[-0.0219894 0.0238286 -0.0318489 ... 0.0208805 0.0554202 -0.0150809]
+
+ gamma:<N9nntrainer6TensorE at 0x56e869c60710>
+data addr: 0x702890e16a10
+Shape: 1:1:1:1024 [ FP32 : NCHW ]
+[-0.0235596 0.0201416 -0.0385742 ... 0.0214844 0.0581055 -0.0142212]
+
+layer18_ffn_norm
+ input:<N9nntrainer6TensorE at 0x7fff98f50100>
+data addr: 0x7026c9f9d1d0
+Shape: 1:1:1024:1024 [ FP32 : NCHW ]
+[0.951384 1.20664 0.873158 ... 1.02159 0.991853 1.0738]
+
+ output:<N9nntrainer6TensorE at 0x7fff98f50130>
+data addr: 0x7026ca39d1d0
+Shape: 1:1:1024:1024 [ FP32 : NCHW ]
+[-0.00862749 -0.0202903 -0.0339797 ... 0.0478545 0.0264473 -0.00902822]
+
+ gamma:<N9nntrainer6TensorE at 0x56e869b790b0>
+data addr: 0x70288f615610
+Shape: 1:1:1:1024 [ FP32 : NCHW ]
+[-0.00921631 -0.0170898 -0.0395508 ... 0.0476074 0.0270996 -0.00854492]
+
+Entered LoRA condition for the layer: layer18_ffn_up
+Entered LoRA condition for the layer: layer18_ffn_gate
+Entered LoRA condition for the layer: layer18_ffn_down
+layer19_attention_norm
+ input:<N9nntrainer6TensorE at 0x7fff98f50100>
+data addr: 0x7026cd7ae1d0
+Shape: 1:1:1024:1024 [ FP32 : NCHW ]
+[0.950261 1.20579 0.872742 ... 1.02172 0.991852 1.07326]
+
+ output:<N9nntrainer6TensorE at 0x7fff98f50130>
+data addr: 0x7026cdfb61d0
+Shape: 1:1:1024:1024 [ FP32 : NCHW ]
+[-0.0203165 -0.0521387 0.0245294 ... -0.00262315 0.00288897 -0.0358374]
+
+ gamma:<N9nntrainer6TensorE at 0x56e869a2dab0>
+data addr: 0x7028838adc10
+Shape: 1:1:1:1024 [ FP32 : NCHW ]
+[-0.0217285 -0.0439453 0.0285645 ... -0.00260925 0.00296021 -0.0339355]
+
+layer19_ffn_norm
+ input:<N9nntrainer6TensorE at 0x7fff98f50100>
+data addr: 0x7026d5bcf1d0
+Shape: 1:1:1024:1024 [ FP32 : NCHW ]
+[0.997454 1.18941 0.952416 ... 1.02117 0.955498 1.09614]
+
+ output:<N9nntrainer6TensorE at 0x7fff98f50130>
+data addr: 0x7026d5fcf1d0
+Shape: 1:1:1024:1024 [ FP32 : NCHW ]
+[-0.0898716 -0.00708983 -0.00479278 ... 0.0187197 0.0251863 -0.00978436]
+
+ gamma:<N9nntrainer6TensorE at 0x56e869a93990>
+data addr: 0x7028814aca10
+Shape: 1:1:1:1024 [ FP32 : NCHW ]
+[-0.0917969 -0.006073 -0.00512695 ... 0.0186768 0.0268555 -0.00909424]
+
+Entered LoRA condition for the layer: layer19_ffn_up
+Entered LoRA condition for the layer: layer19_ffn_gate
+Entered LoRA condition for the layer: layer19_ffn_down
+layer20_attention_norm
+ input:<N9nntrainer6TensorE at 0x7fff98f50100>
+data addr: 0x7026d93e01d0
+Shape: 1:1:1024:1024 [ FP32 : NCHW ]
+[0.998101 1.19077 0.95202 ... 1.01917 0.956192 1.09615]
+
+ output:<N9nntrainer6TensorE at 0x7fff98f50130>
+data addr: 0x7026d9be81d0
+Shape: 1:1:1024:1024 [ FP32 : NCHW ]
+[0.0552545 -0.0856111 0.0176819 ... -0.0542226 -0.0240611 0.00761812]
+
+ gamma:<N9nntrainer6TensorE at 0x56e869c0c670>
+data addr: 0x70288a171010
+Shape: 1:1:1:1024 [ FP32 : NCHW ]
+[0.0563965 -0.0732422 0.0189209 ... -0.0541992 -0.0256348 0.00708008]
+
+layer20_ffn_norm
+ input:<N9nntrainer6TensorE at 0x7fff98f50100>
+data addr: 0x7026e18011d0
+Shape: 1:1:1024:1024 [ FP32 : NCHW ]
+[0.992429 1.17809 0.926822 ... 1.04486 0.958724 1.08363]
+
+ output:<N9nntrainer6TensorE at 0x7fff98f50130>
+data addr: 0x7026e1c011d0
+Shape: 1:1:1024:1024 [ FP32 : NCHW ]
+[-0.0428962 -0.0200856 -0.0454019 ... 0.023083 0.0425904 0.00281356]
+
+ gamma:<N9nntrainer6TensorE at 0x56e869a35c10>
+data addr: 0x70288896fc10
+Shape: 1:1:1:1024 [ FP32 : NCHW ]
+[-0.0439453 -0.017334 -0.0498047 ... 0.0224609 0.045166 0.00263977]
+
+Entered LoRA condition for the layer: layer20_ffn_up
+Entered LoRA condition for the layer: layer20_ffn_gate
+Entered LoRA condition for the layer: layer20_ffn_down
+layer21_attention_norm
+ input:<N9nntrainer6TensorE at 0x7fff98f50100>
+data addr: 0x7026e50121d0
+Shape: 1:1:1024:1024 [ FP32 : NCHW ]
+[0.991888 1.17992 0.928953 ... 1.04429 0.958741 1.08389]
+
+ output:<N9nntrainer6TensorE at 0x7fff98f50130>
+data addr: 0x7026e581a1d0
+Shape: 1:1:1024:1024 [ FP32 : NCHW ]
+[0.030727 0.00704828 0.0319005 ... 0.0144197 0.010821 -0.00735312]
+
+ gamma:<N9nntrainer6TensorE at 0x56e869f1e5c0>
+data addr: 0x70288650ec10
+Shape: 1:1:1:1024 [ FP32 : NCHW ]
+[0.0314941 0.006073 0.0349121 ... 0.0140381 0.0114746 -0.00689697]
+
+layer21_ffn_norm
+ input:<N9nntrainer6TensorE at 0x7fff98f50100>
+data addr: 0x7026ed4331d0
+Shape: 1:1:1024:1024 [ FP32 : NCHW ]
+[0.965631 1.14036 0.938905 ... 1.06206 0.957594 1.08057]
+
+ output:<N9nntrainer6TensorE at 0x7fff98f50130>
+data addr: 0x7026ed8331d0
+Shape: 1:1:1024:1024 [ FP32 : NCHW ]
+[0.0260194 -0.0724291 0.0370453 ... -0.0863641 -0.0322536 0.0670721]
+
+ gamma:<N9nntrainer6TensorE at 0x56e869fb5c60>
+data addr: 0x7028f0c10210
+Shape: 1:1:1:1024 [ FP32 : NCHW ]
+[0.0273438 -0.0644531 0.0400391 ... -0.0825195 -0.0341797 0.0629883]
+
+Entered LoRA condition for the layer: layer21_ffn_up
+Entered LoRA condition for the layer: layer21_ffn_gate
+Entered LoRA condition for the layer: layer21_ffn_down
+layer22_attention_norm
+ input:<N9nntrainer6TensorE at 0x7fff98f50100>
+data addr: 0x7026f0c441d0
+Shape: 1:1:1024:1024 [ FP32 : NCHW ]
+[0.965097 1.14101 0.94012 ... 1.06187 0.95685 1.08055]
+
+ output:<N9nntrainer6TensorE at 0x7fff98f50130>
+data addr: 0x7026f144c1d0
+Shape: 1:1:1024:1024 [ FP32 : NCHW ]
+[-0.0283235 -0.0347212 0.0291735 ... 0.00743966 -0.0455747 0.00324914]
+
+ gamma:<N9nntrainer6TensorE at 0x56e869d6d500>
+data addr: 0x7028edbc7210
+Shape: 1:1:1:1024 [ FP32 : NCHW ]
+[-0.0297852 -0.0308838 0.0314941 ... 0.0071106 -0.0483398 0.00305176]
+
+layer22_ffn_norm
+ input:<N9nntrainer6TensorE at 0x7fff98f50100>
+data addr: 0x7026f90651d0
+Shape: 1:1:1024:1024 [ FP32 : NCHW ]
+[0.959321 1.06189 0.861611 ... 0.987762 0.933747 1.12493]
+
+ output:<N9nntrainer6TensorE at 0x7fff98f50130>
+data addr: 0x7026f94651d0
+Shape: 1:1:1024:1024 [ FP32 : NCHW ]
+[-0.00245046 -0.0416123 -0.00613654 ... 0.00119477 0.0372642 -0.0757251]
+
+ gamma:<N9nntrainer6TensorE at 0x56e869cc3bf0>
+data addr: 0x7028ec3c5e10
+Shape: 1:1:1:1024 [ FP32 : NCHW ]
+[-0.00259399 -0.0397949 -0.00723267 ... 0.00122833 0.0405273 -0.0683594]
+
+Entered LoRA condition for the layer: layer22_ffn_up
+Entered LoRA condition for the layer: layer22_ffn_gate
+Entered LoRA condition for the layer: layer22_ffn_down
+layer23_attention_norm
+ input:<N9nntrainer6TensorE at 0x7fff98f50100>
+data addr: 0x7026fc8761d0
+Shape: 1:1:1024:1024 [ FP32 : NCHW ]
+[0.959996 1.06241 0.861659 ... 0.987493 0.933588 1.12498]
+
+ output:<N9nntrainer6TensorE at 0x7fff98f50130>
+data addr: 0x7026fd07e1d0
+Shape: 1:1:1024:1024 [ FP32 : NCHW ]
+[0.015231 -0.0321792 -0.00302932 ... 0.013056 0.0209836 -0.0338041]
+
+ gamma:<N9nntrainer6TensorE at 0x56e869f6dc60>
+data addr: 0x7028f4c3b810
+Shape: 1:1:1:1024 [ FP32 : NCHW ]
+[0.0161133 -0.0307617 -0.00357056 ... 0.0134277 0.0228271 -0.0305176]
+
+layer23_ffn_norm
+ input:<N9nntrainer6TensorE at 0x7fff98f50100>
+data addr: 0x702704c971d0
+Shape: 1:1:1024:1024 [ FP32 : NCHW ]
+[0.960006 1.10655 0.89464 ... 1.01514 0.954645 1.08503]
+
+ output:<N9nntrainer6TensorE at 0x7fff98f50130>
+data addr: 0x7027050971d0
+Shape: 1:1:1024:1024 [ FP32 : NCHW ]
+[-0.0209728 0.0584432 0.0457476 ... -0.050691 0.0129488 0.00143267]
+
+ gamma:<N9nntrainer6TensorE at 0x56e869198ee0>
+data addr: 0x7028f3439610
+Shape: 1:1:1:1024 [ FP32 : NCHW ]
+[-0.0222168 0.0537109 0.052002 ... -0.0507812 0.0137939 0.00134277]
+
+Entered LoRA condition for the layer: layer23_ffn_up
+Entered LoRA condition for the layer: layer23_ffn_gate
+Entered LoRA condition for the layer: layer23_ffn_down
+layer24_attention_norm
+ input:<N9nntrainer6TensorE at 0x7fff98f50100>
+data addr: 0x7027084a81d0
+Shape: 1:1:1024:1024 [ FP32 : NCHW ]
+[0.96003 1.10618 0.893963 ... 1.01492 0.955048 1.08516]
+
+ output:<N9nntrainer6TensorE at 0x7fff98f50130>
+data addr: 0x702708cb01d0
+Shape: 1:1:1024:1024 [ FP32 : NCHW ]
+[0.00230471 0.0144064 -0.021461 ... -0.0242429 0.00438487 -0.00527532]
+
+ gamma:<N9nntrainer6TensorE at 0x56e868fe1da0>
+data addr: 0x7028e6b12810
+Shape: 1:1:1:1024 [ FP32 : NCHW ]
+[0.00244141 0.0132446 -0.0244141 ... -0.024292 0.00466919 -0.00494385]
+
+layer24_ffn_norm
+ input:<N9nntrainer6TensorE at 0x7fff98f50100>
+data addr: 0x7027108c91d0
+Shape: 1:1:1024:1024 [ FP32 : NCHW ]
+[1.05244 1.14194 0.870416 ... 1.02393 0.945077 1.07396]
+
+ output:<N9nntrainer6TensorE at 0x7fff98f50130>
+data addr: 0x702710cc91d0
+Shape: 1:1:1024:1024 [ FP32 : NCHW ]
+[0.0157294 -0.0212482 -0.0157779 ... 0.0200356 0.00162379 -0.0458969]
+
+ gamma:<N9nntrainer6TensorE at 0x56e86971e340>
+data addr: 0x7028e26b0210
+Shape: 1:1:1:1024 [ FP32 : NCHW ]
+[0.0151978 -0.0189209 -0.0184326 ... 0.0198975 0.00174713 -0.043457]
+
+Entered LoRA condition for the layer: layer24_ffn_up
+Entered LoRA condition for the layer: layer24_ffn_gate
+Entered LoRA condition for the layer: layer24_ffn_down
+layer25_attention_norm
+ input:<N9nntrainer6TensorE at 0x7fff98f50100>
+data addr: 0x7027140da1d0
+Shape: 1:1:1024:1024 [ FP32 : NCHW ]
+[1.05271 1.14204 0.870327 ... 1.02428 0.945181 1.07389]
+
+ output:<N9nntrainer6TensorE at 0x7fff98f50130>
+data addr: 0x7027148e21d0
+Shape: 1:1:1024:1024 [ FP32 : NCHW ]
+[-0.00720362 0.0104884 -0.025912 ... -0.0175841 -0.0105527 -0.032875]
+
+ gamma:<N9nntrainer6TensorE at 0x56e8695a3900>
+data addr: 0x7028e2eb1210
+Shape: 1:1:1:1024 [ FP32 : NCHW ]
+[-0.00695801 0.00933838 -0.0302734 ... -0.0174561 -0.0113525 -0.0311279]
+
+^C^C^C^C^C
+root@437e46614157:/nntrainerPranjal# ^C
+root@437e46614157:/nntrainerPranjal# ^C
+root@437e46614157:/nntrainerPranjal# ninja -C build
+ninja: Entering directory `build'
+[1/24] Compiling C++ object Applications/CausalLM/libcausallm.so.p/_nntrainerPranjal_Applications_CausalLM_models_qwen2_qwen2_embedding.cpp.o
+FAILED: Applications/CausalLM/libcausallm.so.p/_nntrainerPranjal_Applications_CausalLM_models_qwen2_qwen2_embedding.cpp.o
+c++ -IApplications/CausalLM/libcausallm.so.p -IApplications/CausalLM -I../Applications/CausalLM -IApplications/CausalLM/models -I../Applications/CausalLM/models -IApplications/CausalLM/models/gpt_oss -I../Applications/CausalLM/models/gpt_oss -IAppli
+cations/CausalLM/models/gpt_oss_cached_slim -I../Applications/CausalLM/models/gpt_oss_cached_slim -IApplications/CausalLM/models/qwen2 -I../Applications/CausalLM/models/qwen2 -IApplications/CausalLM/models/qwen3 -I../Applications/CausalLM/models/qwe
+n3 -IApplications/CausalLM/models/qwen3_moe -I../Applications/CausalLM/models/qwen3_moe -IApplications/CausalLM/models/qwen3_slim_moe -I../Applications/CausalLM/models/qwen3_slim_moe -IApplications/CausalLM/models/qwen3_cached_slim_moe -I../Applicat
+ions/CausalLM/models/qwen3_cached_slim_moe -IApplications/CausalLM/models/gemma3 -I../Applications/CausalLM/models/gemma3 -Inntrainer -I../nntrainer -Iapi -I../api -I../api/ccapi/include -Inntrainer/compiler -I../nntrainer/compiler -Inntrainer/schem
+a -I../nntrainer/schema -Inntrainer/dataset -I../nntrainer/dataset -Inntrainer/layers/loss -I../nntrainer/layers/loss -Inntrainer/layers -I../nntrainer/layers -Inntrainer/models -I../nntrainer/models -Inntrainer/optimizers -I../nntrainer/optimizers
+-Inntrainer/tensor/cpu_backend/fallback -I../nntrainer/tensor/cpu_backend/fallback -Inntrainer/tensor/cpu_backend/ggml_interface/nntr_ggml_impl -I../nntrainer/tensor/cpu_backend/ggml_interface/nntr_ggml_impl -Inntrainer/tensor/cpu_backend/ggml_inter
+face -I../nntrainer/tensor/cpu_backend/ggml_interface -Inntrainer/tensor/cpu_backend/cblas_interface -I../nntrainer/tensor/cpu_backend/cblas_interface -Inntrainer/tensor/cpu_backend/x86 -I../nntrainer/tensor/cpu_backend/x86 -Inntrainer/tensor/cpu_ba
+ckend -I../nntrainer/tensor/cpu_backend -Inntrainer/tensor -I../nntrainer/tensor -Inntrainer/utils -I../nntrainer/utils -Inntrainer/graph -I../nntrainer/graph -IApplications/CausalLM/layers -I../Applications/CausalLM/layers -I/usr/include/x86_64-lin
+ux-gnu/openblas-pthread/ -I/usr/include/nnstreamer -I/usr/include/tensorflow2/ -fdiagnostics-color=always -D_FILE_OFFSET_BITS=64 -Wall -Winvalid-pch -Wnon-virtual-dtor -Werror -std=c++17 -g '-DVERSION="0.6.0"' -DVERSION_MAJOR=0 -DVERSION_MINOR=6 -DV
+ERSION_MICRO=0 -DENABLE_TRANSFORMER=1 -march=native -mavx2 -mfma -Wredundant-decls -Wwrite-strings -Wformat -Wformat-nonliteral -Wformat-security -Winit-self -Waddress -Wvla -Wpointer-arith -Wno-error=varargs -Wno-error=ignored-attributes -Wno-error
+=sign-compare -ftree-vectorize -Wno-unused-variable -Wno-comment -Wno-ignored-attributes -Wno-sign-compare -Wno-maybe-uninitialized -DMIN_CPP_VERSION=201703L -DMMAP_READ=1 -DKERNEL_CACHE=0 -DUSE_MMAP=1 -DOPENCL_KERNEL_PATH=nntrainer_opencl_kernels -
+DML_API_COMMON=1 -DNNSTREAMER_AVAILABLE=1 -DUSE_BLAS=1 -DHGEMM_EXPERIMENTAL_KERNEL=false -DNNTR_NUM_THREADS=1 -DOMP_NUM_THREADS=6 -DDEBUG=1 -D__LOGGING__=1 -DENABLE_TEST=1 -DREDUCE_TOLERANCE=1 -DENABLE_TFLITE_BACKBONE=1 -DENABLE_TFLITE_INTERPRETER=1
+ '-DNNTRAINER_CONF_PATH="/usr/local/etc/nntrainer.ini"' -fPIC -pthread -fopenmp -DPLUGGABLE -MD -MQ Applications/CausalLM/libcausallm.so.p/_nntrainerPranjal_Applications_CausalLM_models_qwen2_qwen2_embedding.cpp.o -MF Applications/CausalLM/libcausal
+lm.so.p/_nntrainerPranjal_Applications_CausalLM_models_qwen2_qwen2_embedding.cpp.o.d -o Applications/CausalLM/libcausallm.so.p/_nntrainerPranjal_Applications_CausalLM_models_qwen2_qwen2_embedding.cpp.o -c /nntrainerPranjal/Applications/CausalLM/mode
+ls/qwen2/qwen2_embedding.cpp
+In file included from /nntrainerPranjal/Applications/CausalLM/models/qwen2/qwen2_embedding.h:16,
+                 from /nntrainerPranjal/Applications/CausalLM/models/qwen2/qwen2_embedding.cpp:12:
+../Applications/CausalLM/models/qwen2/qwen2_causallm.h:34:28: error: 'std::vector<std::shared_ptr<ml::train::Layer> > causallm::Qwen2Transformer::createAttention(int, int, int, int, std::string, std::string, std::string)' marked 'override', but does
+ not override
+   34 |   std::vector<LayerHandle> createAttention(const int layer_id, int seq_len,
+      |                            ^~~~~~~~~~~~~~~
+[2/24] Compiling C++ object Applications/CausalLM/libcausallm.so.p/_nntrainerPranjal_Applications_CausalLM_models_qwen3_qwen3_embedding.cpp.o
+FAILED: Applications/CausalLM/libcausallm.so.p/_nntrainerPranjal_Applications_CausalLM_models_qwen3_qwen3_embedding.cpp.o
+c++ -IApplications/CausalLM/libcausallm.so.p -IApplications/CausalLM -I../Applications/CausalLM -IApplications/CausalLM/models -I../Applications/CausalLM/models -IApplications/CausalLM/models/gpt_oss -I../Applications/CausalLM/models/gpt_oss -IAppli
+cations/CausalLM/models/gpt_oss_cached_slim -I../Applications/CausalLM/models/gpt_oss_cached_slim -IApplications/CausalLM/models/qwen2 -I../Applications/CausalLM/models/qwen2 -IApplications/CausalLM/models/qwen3 -I../Applications/CausalLM/models/qwe
+n3 -IApplications/CausalLM/models/qwen3_moe -I../Applications/CausalLM/models/qwen3_moe -IApplications/CausalLM/models/qwen3_slim_moe -I../Applications/CausalLM/models/qwen3_slim_moe -IApplications/CausalLM/models/qwen3_cached_slim_moe -I../Applicat
+ions/CausalLM/models/qwen3_cached_slim_moe -IApplications/CausalLM/models/gemma3 -I../Applications/CausalLM/models/gemma3 -Inntrainer -I../nntrainer -Iapi -I../api -I../api/ccapi/include -Inntrainer/compiler -I../nntrainer/compiler -Inntrainer/schem
+a -I../nntrainer/schema -Inntrainer/dataset -I../nntrainer/dataset -Inntrainer/layers/loss -I../nntrainer/layers/loss -Inntrainer/layers -I../nntrainer/layers -Inntrainer/models -I../nntrainer/models -Inntrainer/optimizers -I../nntrainer/optimizers
+-Inntrainer/tensor/cpu_backend/fallback -I../nntrainer/tensor/cpu_backend/fallback -Inntrainer/tensor/cpu_backend/ggml_interface/nntr_ggml_impl -I../nntrainer/tensor/cpu_backend/ggml_interface/nntr_ggml_impl -Inntrainer/tensor/cpu_backend/ggml_inter
+face -I../nntrainer/tensor/cpu_backend/ggml_interface -Inntrainer/tensor/cpu_backend/cblas_interface -I../nntrainer/tensor/cpu_backend/cblas_interface -Inntrainer/tensor/cpu_backend/x86 -I../nntrainer/tensor/cpu_backend/x86 -Inntrainer/tensor/cpu_ba
+ckend -I../nntrainer/tensor/cpu_backend -Inntrainer/tensor -I../nntrainer/tensor -Inntrainer/utils -I../nntrainer/utils -Inntrainer/graph -I../nntrainer/graph -IApplications/CausalLM/layers -I../Applications/CausalLM/layers -I/usr/include/x86_64-lin
+ux-gnu/openblas-pthread/ -I/usr/include/nnstreamer -I/usr/include/tensorflow2/ -fdiagnostics-color=always -D_FILE_OFFSET_BITS=64 -Wall -Winvalid-pch -Wnon-virtual-dtor -Werror -std=c++17 -g '-DVERSION="0.6.0"' -DVERSION_MAJOR=0 -DVERSION_MINOR=6 -DV
+ERSION_MICRO=0 -DENABLE_TRANSFORMER=1 -march=native -mavx2 -mfma -Wredundant-decls -Wwrite-strings -Wformat -Wformat-nonliteral -Wformat-security -Winit-self -Waddress -Wvla -Wpointer-arith -Wno-error=varargs -Wno-error=ignored-attributes -Wno-error
+=sign-compare -ftree-vectorize -Wno-unused-variable -Wno-comment -Wno-ignored-attributes -Wno-sign-compare -Wno-maybe-uninitialized -DMIN_CPP_VERSION=201703L -DMMAP_READ=1 -DKERNEL_CACHE=0 -DUSE_MMAP=1 -DOPENCL_KERNEL_PATH=nntrainer_opencl_kernels -
+DML_API_COMMON=1 -DNNSTREAMER_AVAILABLE=1 -DUSE_BLAS=1 -DHGEMM_EXPERIMENTAL_KERNEL=false -DNNTR_NUM_THREADS=1 -DOMP_NUM_THREADS=6 -DDEBUG=1 -D__LOGGING__=1 -DENABLE_TEST=1 -DREDUCE_TOLERANCE=1 -DENABLE_TFLITE_BACKBONE=1 -DENABLE_TFLITE_INTERPRETER=1
+ '-DNNTRAINER_CONF_PATH="/usr/local/etc/nntrainer.ini"' -fPIC -pthread -fopenmp -DPLUGGABLE -MD -MQ Applications/CausalLM/libcausallm.so.p/_nntrainerPranjal_Applications_CausalLM_models_qwen3_qwen3_embedding.cpp.o -MF Applications/CausalLM/libcausal
+lm.so.p/_nntrainerPranjal_Applications_CausalLM_models_qwen3_qwen3_embedding.cpp.o.d -o Applications/CausalLM/libcausallm.so.p/_nntrainerPranjal_Applications_CausalLM_models_qwen3_qwen3_embedding.cpp.o -c /nntrainerPranjal/Applications/CausalLM/mode
+ls/qwen3/qwen3_embedding.cpp
+In file included from ../Applications/CausalLM/models/qwen3/qwen3_embedding.h:17,
+                 from /nntrainerPranjal/Applications/CausalLM/models/qwen3/qwen3_embedding.cpp:13:
+../Applications/CausalLM/models/qwen3/qwen3_causallm.h:33:28: error: 'std::vector<std::shared_ptr<ml::train::Layer> > causallm::Qwen3Transformer::createAttention(int, int, int, int, std::string, std::string, std::string)' marked 'override', but does
+ not override
+   33 |   std::vector<LayerHandle> createAttention(const int layer_id, int seq_len,
+      |                            ^~~~~~~~~~~~~~~
+[3/24] Compiling C++ object Applications/CausalLM/libcausallm.so.p/_nntrainerPranjal_Applications_CausalLM_models_gemma3_embedding_gemma.cpp.o
+FAILED: Applications/CausalLM/libcausallm.so.p/_nntrainerPranjal_Applications_CausalLM_models_gemma3_embedding_gemma.cpp.o
+c++ -IApplications/CausalLM/libcausallm.so.p -IApplications/CausalLM -I../Applications/CausalLM -IApplications/CausalLM/models -I../Applications/CausalLM/models -IApplications/CausalLM/models/gpt_oss -I../Applications/CausalLM/models/gpt_oss -IAppli
+cations/CausalLM/models/gpt_oss_cached_slim -I../Applications/CausalLM/models/gpt_oss_cached_slim -IApplications/CausalLM/models/qwen2 -I../Applications/CausalLM/models/qwen2 -IApplications/CausalLM/models/qwen3 -I../Applications/CausalLM/models/qwe
+n3 -IApplications/CausalLM/models/qwen3_moe -I../Applications/CausalLM/models/qwen3_moe -IApplications/CausalLM/models/qwen3_slim_moe -I../Applications/CausalLM/models/qwen3_slim_moe -IApplications/CausalLM/models/qwen3_cached_slim_moe -I../Applicat
+ions/CausalLM/models/qwen3_cached_slim_moe -IApplications/CausalLM/models/gemma3 -I../Applications/CausalLM/models/gemma3 -Inntrainer -I../nntrainer -Iapi -I../api -I../api/ccapi/include -Inntrainer/compiler -I../nntrainer/compiler -Inntrainer/schem
+a -I../nntrainer/schema -Inntrainer/dataset -I../nntrainer/dataset -Inntrainer/layers/loss -I../nntrainer/layers/loss -Inntrainer/layers -I../nntrainer/layers -Inntrainer/models -I../nntrainer/models -Inntrainer/optimizers -I../nntrainer/optimizers
+-Inntrainer/tensor/cpu_backend/fallback -I../nntrainer/tensor/cpu_backend/fallback -Inntrainer/tensor/cpu_backend/ggml_interface/nntr_ggml_impl -I../nntrainer/tensor/cpu_backend/ggml_interface/nntr_ggml_impl -Inntrainer/tensor/cpu_backend/ggml_inter
+face -I../nntrainer/tensor/cpu_backend/ggml_interface -Inntrainer/tensor/cpu_backend/cblas_interface -I../nntrainer/tensor/cpu_backend/cblas_interface -Inntrainer/tensor/cpu_backend/x86 -I../nntrainer/tensor/cpu_backend/x86 -Inntrainer/tensor/cpu_ba
+ckend -I../nntrainer/tensor/cpu_backend -Inntrainer/tensor -I../nntrainer/tensor -Inntrainer/utils -I../nntrainer/utils -Inntrainer/graph -I../nntrainer/graph -IApplications/CausalLM/layers -I../Applications/CausalLM/layers -I/usr/include/x86_64-lin
+ux-gnu/openblas-pthread/ -I/usr/include/nnstreamer -I/usr/include/tensorflow2/ -fdiagnostics-color=always -D_FILE_OFFSET_BITS=64 -Wall -Winvalid-pch -Wnon-virtual-dtor -Werror -std=c++17 -g '-DVERSION="0.6.0"' -DVERSION_MAJOR=0 -DVERSION_MINOR=6 -DV
+ERSION_MICRO=0 -DENABLE_TRANSFORMER=1 -march=native -mavx2 -mfma -Wredundant-decls -Wwrite-strings -Wformat -Wformat-nonliteral -Wformat-security -Winit-self -Waddress -Wvla -Wpointer-arith -Wno-error=varargs -Wno-error=ignored-attributes -Wno-error
+=sign-compare -ftree-vectorize -Wno-unused-variable -Wno-comment -Wno-ignored-attributes -Wno-sign-compare -Wno-maybe-uninitialized -DMIN_CPP_VERSION=201703L -DMMAP_READ=1 -DKERNEL_CACHE=0 -DUSE_MMAP=1 -DOPENCL_KERNEL_PATH=nntrainer_opencl_kernels -
+DML_API_COMMON=1 -DNNSTREAMER_AVAILABLE=1 -DUSE_BLAS=1 -DHGEMM_EXPERIMENTAL_KERNEL=false -DNNTR_NUM_THREADS=1 -DOMP_NUM_THREADS=6 -DDEBUG=1 -D__LOGGING__=1 -DENABLE_TEST=1 -DREDUCE_TOLERANCE=1 -DENABLE_TFLITE_BACKBONE=1 -DENABLE_TFLITE_INTERPRETER=1
+ '-DNNTRAINER_CONF_PATH="/usr/local/etc/nntrainer.ini"' -fPIC -pthread -fopenmp -DPLUGGABLE -MD -MQ Applications/CausalLM/libcausallm.so.p/_nntrainerPranjal_Applications_CausalLM_models_gemma3_embedding_gemma.cpp.o -MF Applications/CausalLM/libcausa
+llm.so.p/_nntrainerPranjal_Applications_CausalLM_models_gemma3_embedding_gemma.cpp.o.d -o Applications/CausalLM/libcausallm.so.p/_nntrainerPranjal_Applications_CausalLM_models_gemma3_embedding_gemma.cpp.o -c /nntrainerPranjal/Applications/CausalLM/m
+odels/gemma3/embedding_gemma.cpp
+In file included from ../Applications/CausalLM/models/gemma3/embedding_gemma.h:17,
+                 from /nntrainerPranjal/Applications/CausalLM/models/gemma3/embedding_gemma.cpp:13:
+../Applications/CausalLM/models/gemma3/gemma3_causallm.h:45:28: error: 'std::vector<std::shared_ptr<ml::train::Layer> > causallm::Gemma3Transformer::createAttention(int, int, int, int, std::string, std::string, std::string)' marked 'override', but d
+oes not override
+   45 |   std::vector<LayerHandle> createAttention(const int layer_id, int seq_len,
+      |                            ^~~~~~~~~~~~~~~
+[4/24] Compiling C++ object Applications/CausalLM/nntr_qwen3_lora_master.p/train_qwen3_lora_master.cpp.o
+FAILED: Applications/CausalLM/nntr_qwen3_lora_master.p/train_qwen3_lora_master.cpp.o
+c++ -IApplications/CausalLM/nntr_qwen3_lora_master.p -IApplications/CausalLM -I../Applications/CausalLM -IApplications/CausalLM/models -I../Applications/CausalLM/models -IApplications/CausalLM/models/gpt_oss -I../Applications/CausalLM/models/gpt_oss
+ -IApplications/CausalLM/models/gpt_oss_cached_slim -I../Applications/CausalLM/models/gpt_oss_cached_slim -IApplications/CausalLM/models/qwen2 -I../Applications/CausalLM/models/qwen2 -IApplications/CausalLM/models/qwen3 -I../Applications/CausalLM/mo
+dels/qwen3 -IApplications/CausalLM/models/qwen3_moe -I../Applications/CausalLM/models/qwen3_moe -IApplications/CausalLM/models/qwen3_slim_moe -I../Applications/CausalLM/models/qwen3_slim_moe -IApplications/CausalLM/models/qwen3_cached_slim_moe -I../
+Applications/CausalLM/models/qwen3_cached_slim_moe -IApplications/CausalLM/models/gemma3 -I../Applications/CausalLM/models/gemma3 -Inntrainer -I../nntrainer -Iapi -I../api -I../api/ccapi/include -Inntrainer/compiler -I../nntrainer/compiler -Inntrain
+er/schema -I../nntrainer/schema -Inntrainer/dataset -I../nntrainer/dataset -Inntrainer/layers/loss -I../nntrainer/layers/loss -Inntrainer/layers -I../nntrainer/layers -Inntrainer/models -I../nntrainer/models -Inntrainer/optimizers -I../nntrainer/opt
+imizers -Inntrainer/tensor/cpu_backend/fallback -I../nntrainer/tensor/cpu_backend/fallback -Inntrainer/tensor/cpu_backend/ggml_interface/nntr_ggml_impl -I../nntrainer/tensor/cpu_backend/ggml_interface/nntr_ggml_impl -Inntrainer/tensor/cpu_backend/gg
+ml_interface -I../nntrainer/tensor/cpu_backend/ggml_interface -Inntrainer/tensor/cpu_backend/cblas_interface -I../nntrainer/tensor/cpu_backend/cblas_interface -Inntrainer/tensor/cpu_backend/x86 -I../nntrainer/tensor/cpu_backend/x86 -Inntrainer/tenso
+r/cpu_backend -I../nntrainer/tensor/cpu_backend -Inntrainer/tensor -I../nntrainer/tensor -Inntrainer/utils -I../nntrainer/utils -Inntrainer/graph -I../nntrainer/graph -IApplications/CausalLM/layers -I../Applications/CausalLM/layers -I/usr/include/x8
+6_64-linux-gnu/openblas-pthread/ -I/usr/include/nnstreamer -I/usr/include/tensorflow2/ -fdiagnostics-color=always -D_FILE_OFFSET_BITS=64 -Wall -Winvalid-pch -Wnon-virtual-dtor -Werror -std=c++17 -g '-DVERSION="0.6.0"' -DVERSION_MAJOR=0 -DVERSION_MIN
+OR=6 -DVERSION_MICRO=0 -DENABLE_TRANSFORMER=1 -march=native -mavx2 -mfma -Wredundant-decls -Wwrite-strings -Wformat -Wformat-nonliteral -Wformat-security -Winit-self -Waddress -Wvla -Wpointer-arith -Wno-error=varargs -Wno-error=ignored-attributes -W
+no-error=sign-compare -ftree-vectorize -Wno-unused-variable -Wno-comment -Wno-ignored-attributes -Wno-sign-compare -Wno-maybe-uninitialized -DMIN_CPP_VERSION=201703L -DMMAP_READ=1 -DKERNEL_CACHE=0 -DUSE_MMAP=1 -DOPENCL_KERNEL_PATH=nntrainer_opencl_k
+ernels -DML_API_COMMON=1 -DNNSTREAMER_AVAILABLE=1 -DUSE_BLAS=1 -DHGEMM_EXPERIMENTAL_KERNEL=false -DNNTR_NUM_THREADS=1 -DOMP_NUM_THREADS=6 -DDEBUG=1 -D__LOGGING__=1 -DENABLE_TEST=1 -DREDUCE_TOLERANCE=1 -DENABLE_TFLITE_BACKBONE=1 -DENABLE_TFLITE_INTER
+PRETER=1 '-DNNTRAINER_CONF_PATH="/usr/local/etc/nntrainer.ini"' -pthread -fopenmp -MD -MQ Applications/CausalLM/nntr_qwen3_lora_master.p/train_qwen3_lora_master.cpp.o -MF Applications/CausalLM/nntr_qwen3_lora_master.p/train_qwen3_lora_master.cpp.o.d
+ -o Applications/CausalLM/nntr_qwen3_lora_master.p/train_qwen3_lora_master.cpp.o -c ../Applications/CausalLM/train_qwen3_lora_master.cpp
+In file included from ../Applications/CausalLM/train_qwen3_lora_master.cpp:15:
+../Applications/CausalLM/models/qwen3/qwen3_causallm.h:33:28: error: 'std::vector<std::shared_ptr<ml::train::Layer> > causallm::Qwen3Transformer::createAttention(int, int, int, int, std::string, std::string, std::string)' marked 'override', but does
+ not override
+   33 |   std::vector<LayerHandle> createAttention(const int layer_id, int seq_len,
+      |                            ^~~~~~~~~~~~~~~
+[5/24] Compiling C++ object Applications/CausalLM/nntr_causallm_lora_train.p/_nntrainerPranjal_Applications_CausalLM_main_lora_train.cpp.o
+FAILED: Applications/CausalLM/nntr_causallm_lora_train.p/_nntrainerPranjal_Applications_CausalLM_main_lora_train.cpp.o
+c++ -IApplications/CausalLM/nntr_causallm_lora_train.p -IApplications/CausalLM -I../Applications/CausalLM -IApplications/CausalLM/models -I../Applications/CausalLM/models -IApplications/CausalLM/models/gpt_oss -I../Applications/CausalLM/models/gpt_o
+ss -IApplications/CausalLM/models/gpt_oss_cached_slim -I../Applications/CausalLM/models/gpt_oss_cached_slim -IApplications/CausalLM/models/qwen2 -I../Applications/CausalLM/models/qwen2 -IApplications/CausalLM/models/qwen3 -I../Applications/CausalLM/
+models/qwen3 -IApplications/CausalLM/models/qwen3_moe -I../Applications/CausalLM/models/qwen3_moe -IApplications/CausalLM/models/qwen3_slim_moe -I../Applications/CausalLM/models/qwen3_slim_moe -IApplications/CausalLM/models/qwen3_cached_slim_moe -I.
+./Applications/CausalLM/models/qwen3_cached_slim_moe -IApplications/CausalLM/models/gemma3 -I../Applications/CausalLM/models/gemma3 -Inntrainer -I../nntrainer -Iapi -I../api -I../api/ccapi/include -Inntrainer/compiler -I../nntrainer/compiler -Inntra
+iner/schema -I../nntrainer/schema -Inntrainer/dataset -I../nntrainer/dataset -Inntrainer/layers/loss -I../nntrainer/layers/loss -Inntrainer/layers -I../nntrainer/layers -Inntrainer/models -I../nntrainer/models -Inntrainer/optimizers -I../nntrainer/o
+ptimizers -Inntrainer/tensor/cpu_backend/fallback -I../nntrainer/tensor/cpu_backend/fallback -Inntrainer/tensor/cpu_backend/ggml_interface/nntr_ggml_impl -I../nntrainer/tensor/cpu_backend/ggml_interface/nntr_ggml_impl -Inntrainer/tensor/cpu_backend/
+ggml_interface -I../nntrainer/tensor/cpu_backend/ggml_interface -Inntrainer/tensor/cpu_backend/cblas_interface -I../nntrainer/tensor/cpu_backend/cblas_interface -Inntrainer/tensor/cpu_backend/x86 -I../nntrainer/tensor/cpu_backend/x86 -Inntrainer/ten
+sor/cpu_backend -I../nntrainer/tensor/cpu_backend -Inntrainer/tensor -I../nntrainer/tensor -Inntrainer/utils -I../nntrainer/utils -Inntrainer/graph -I../nntrainer/graph -IApplications/CausalLM/layers -I../Applications/CausalLM/layers -I/usr/include/
+x86_64-linux-gnu/openblas-pthread/ -I/usr/include/nnstreamer -I/usr/include/tensorflow2/ -fdiagnostics-color=always -D_FILE_OFFSET_BITS=64 -Wall -Winvalid-pch -Wnon-virtual-dtor -Werror -std=c++17 -g '-DVERSION="0.6.0"' -DVERSION_MAJOR=0 -DVERSION_M
+INOR=6 -DVERSION_MICRO=0 -DENABLE_TRANSFORMER=1 -march=native -mavx2 -mfma -Wredundant-decls -Wwrite-strings -Wformat -Wformat-nonliteral -Wformat-security -Winit-self -Waddress -Wvla -Wpointer-arith -Wno-error=varargs -Wno-error=ignored-attributes
+-Wno-error=sign-compare -ftree-vectorize -Wno-unused-variable -Wno-comment -Wno-ignored-attributes -Wno-sign-compare -Wno-maybe-uninitialized -DMIN_CPP_VERSION=201703L -DMMAP_READ=1 -DKERNEL_CACHE=0 -DUSE_MMAP=1 -DOPENCL_KERNEL_PATH=nntrainer_opencl
+_kernels -DML_API_COMMON=1 -DNNSTREAMER_AVAILABLE=1 -DUSE_BLAS=1 -DHGEMM_EXPERIMENTAL_KERNEL=false -DNNTR_NUM_THREADS=1 -DOMP_NUM_THREADS=6 -DDEBUG=1 -D__LOGGING__=1 -DENABLE_TEST=1 -DREDUCE_TOLERANCE=1 -DENABLE_TFLITE_BACKBONE=1 -DENABLE_TFLITE_INT
+ERPRETER=1 '-DNNTRAINER_CONF_PATH="/usr/local/etc/nntrainer.ini"' -pthread -fopenmp -MD -MQ Applications/CausalLM/nntr_causallm_lora_train.p/_nntrainerPranjal_Applications_CausalLM_main_lora_train.cpp.o -MF Applications/CausalLM/nntr_causallm_lora_t
+rain.p/_nntrainerPranjal_Applications_CausalLM_main_lora_train.cpp.o.d -o Applications/CausalLM/nntr_causallm_lora_train.p/_nntrainerPranjal_Applications_CausalLM_main_lora_train.cpp.o -c /nntrainerPranjal/Applications/CausalLM/main_lora_train.cpp
+In file included from ../Applications/CausalLM/models/gemma3/embedding_gemma.h:17,
+                 from /nntrainerPranjal/Applications/CausalLM/main_lora_train.cpp:24:
+../Applications/CausalLM/models/gemma3/gemma3_causallm.h:45:28: error: 'std::vector<std::shared_ptr<ml::train::Layer> > causallm::Gemma3Transformer::createAttention(int, int, int, int, std::string, std::string, std::string)' marked 'override', but d
+oes not override
+   45 |   std::vector<LayerHandle> createAttention(const int layer_id, int seq_len,
+      |                            ^~~~~~~~~~~~~~~
+In file included from /nntrainerPranjal/Applications/CausalLM/main_lora_train.cpp:26:
+../Applications/CausalLM/models/gpt_oss_cached_slim/gptoss_cached_slim_causallm.h:40:28: error: 'std::vector<std::shared_ptr<ml::train::Layer> > causallm::GptOssCachedSlimCausalLM::createAttention(int, int, int, int, std::string, std::string, std::s
+tring)' marked 'override', but does not override
+   40 |   std::vector<LayerHandle> createAttention(const int layer_id, int seq_len,
+      |                            ^~~~~~~~~~~~~~~
+In file included from /nntrainerPranjal/Applications/CausalLM/main_lora_train.cpp:27:
+../Applications/CausalLM/models/gpt_oss/gptoss_causallm.h:40:28: error: 'std::vector<std::shared_ptr<ml::train::Layer> > causallm::GptOssForCausalLM::createAttention(int, int, int, int, std::string, std::string, std::string)' marked 'override', but
+does not override
+   40 |   std::vector<LayerHandle> createAttention(const int layer_id, int seq_len,
+      |                            ^~~~~~~~~~~~~~~
+In file included from /nntrainerPranjal/Applications/CausalLM/main_lora_train.cpp:29:
+../Applications/CausalLM/models/qwen2/qwen2_causallm.h:34:28: error: 'std::vector<std::shared_ptr<ml::train::Layer> > causallm::Qwen2Transformer::createAttention(int, int, int, int, std::string, std::string, std::string)' marked 'override', but does
+ not override
+   34 |   std::vector<LayerHandle> createAttention(const int layer_id, int seq_len,
+      |                            ^~~~~~~~~~~~~~~
+In file included from ../Applications/CausalLM/models/qwen3_cached_slim_moe/qwen3_cached_slim_moe_causallm.h:17,
+                 from /nntrainerPranjal/Applications/CausalLM/main_lora_train.cpp:31:
+../Applications/CausalLM/models/qwen3/qwen3_causallm.h:33:28: error: 'std::vector<std::shared_ptr<ml::train::Layer> > causallm::Qwen3Transformer::createAttention(int, int, int, int, std::string, std::string, std::string)' marked 'override', but does
+ not override
+   33 |   std::vector<LayerHandle> createAttention(const int layer_id, int seq_len,
+      |                            ^~~~~~~~~~~~~~~
+[6/24] Compiling C++ object Applications/CausalLM/libcausallm.so.p/_nntrainerPranjal_Applications_CausalLM_api_causal_lm_api.cpp.o
+FAILED: Applications/CausalLM/libcausallm.so.p/_nntrainerPranjal_Applications_CausalLM_api_causal_lm_api.cpp.o
+c++ -IApplications/CausalLM/libcausallm.so.p -IApplications/CausalLM -I../Applications/CausalLM -IApplications/CausalLM/models -I../Applications/CausalLM/models -IApplications/CausalLM/models/gpt_oss -I../Applications/CausalLM/models/gpt_oss -IAppli
+cations/CausalLM/models/gpt_oss_cached_slim -I../Applications/CausalLM/models/gpt_oss_cached_slim -IApplications/CausalLM/models/qwen2 -I../Applications/CausalLM/models/qwen2 -IApplications/CausalLM/models/qwen3 -I../Applications/CausalLM/models/qwe
+n3 -IApplications/CausalLM/models/qwen3_moe -I../Applications/CausalLM/models/qwen3_moe -IApplications/CausalLM/models/qwen3_slim_moe -I../Applications/CausalLM/models/qwen3_slim_moe -IApplications/CausalLM/models/qwen3_cached_slim_moe -I../Applicat
+ions/CausalLM/models/qwen3_cached_slim_moe -IApplications/CausalLM/models/gemma3 -I../Applications/CausalLM/models/gemma3 -Inntrainer -I../nntrainer -Iapi -I../api -I../api/ccapi/include -Inntrainer/compiler -I../nntrainer/compiler -Inntrainer/schem
+a -I../nntrainer/schema -Inntrainer/dataset -I../nntrainer/dataset -Inntrainer/layers/loss -I../nntrainer/layers/loss -Inntrainer/layers -I../nntrainer/layers -Inntrainer/models -I../nntrainer/models -Inntrainer/optimizers -I../nntrainer/optimizers
+-Inntrainer/tensor/cpu_backend/fallback -I../nntrainer/tensor/cpu_backend/fallback -Inntrainer/tensor/cpu_backend/ggml_interface/nntr_ggml_impl -I../nntrainer/tensor/cpu_backend/ggml_interface/nntr_ggml_impl -Inntrainer/tensor/cpu_backend/ggml_inter
+face -I../nntrainer/tensor/cpu_backend/ggml_interface -Inntrainer/tensor/cpu_backend/cblas_interface -I../nntrainer/tensor/cpu_backend/cblas_interface -Inntrainer/tensor/cpu_backend/x86 -I../nntrainer/tensor/cpu_backend/x86 -Inntrainer/tensor/cpu_ba
+ckend -I../nntrainer/tensor/cpu_backend -Inntrainer/tensor -I../nntrainer/tensor -Inntrainer/utils -I../nntrainer/utils -Inntrainer/graph -I../nntrainer/graph -IApplications/CausalLM/layers -I../Applications/CausalLM/layers -I/usr/include/x86_64-lin
+ux-gnu/openblas-pthread/ -I/usr/include/nnstreamer -I/usr/include/tensorflow2/ -fdiagnostics-color=always -D_FILE_OFFSET_BITS=64 -Wall -Winvalid-pch -Wnon-virtual-dtor -Werror -std=c++17 -g '-DVERSION="0.6.0"' -DVERSION_MAJOR=0 -DVERSION_MINOR=6 -DV
+ERSION_MICRO=0 -DENABLE_TRANSFORMER=1 -march=native -mavx2 -mfma -Wredundant-decls -Wwrite-strings -Wformat -Wformat-nonliteral -Wformat-security -Winit-self -Waddress -Wvla -Wpointer-arith -Wno-error=varargs -Wno-error=ignored-attributes -Wno-error
+=sign-compare -ftree-vectorize -Wno-unused-variable -Wno-comment -Wno-ignored-attributes -Wno-sign-compare -Wno-maybe-uninitialized -DMIN_CPP_VERSION=201703L -DMMAP_READ=1 -DKERNEL_CACHE=0 -DUSE_MMAP=1 -DOPENCL_KERNEL_PATH=nntrainer_opencl_kernels -
+DML_API_COMMON=1 -DNNSTREAMER_AVAILABLE=1 -DUSE_BLAS=1 -DHGEMM_EXPERIMENTAL_KERNEL=false -DNNTR_NUM_THREADS=1 -DOMP_NUM_THREADS=6 -DDEBUG=1 -D__LOGGING__=1 -DENABLE_TEST=1 -DREDUCE_TOLERANCE=1 -DENABLE_TFLITE_BACKBONE=1 -DENABLE_TFLITE_INTERPRETER=1
+ '-DNNTRAINER_CONF_PATH="/usr/local/etc/nntrainer.ini"' -fPIC -pthread -fopenmp -DPLUGGABLE -MD -MQ Applications/CausalLM/libcausallm.so.p/_nntrainerPranjal_Applications_CausalLM_api_causal_lm_api.cpp.o -MF Applications/CausalLM/libcausallm.so.p/_nn
+trainerPranjal_Applications_CausalLM_api_causal_lm_api.cpp.o.d -o Applications/CausalLM/libcausallm.so.p/_nntrainerPranjal_Applications_CausalLM_api_causal_lm_api.cpp.o -c /nntrainerPranjal/Applications/CausalLM/api/causal_lm_api.cpp
+In file included from /nntrainerPranjal/Applications/CausalLM/api/causal_lm_api.cpp:24:
+../Applications/CausalLM/models/gemma3/gemma3_causallm.h:45:28: error: 'std::vector<std::shared_ptr<ml::train::Layer> > causallm::Gemma3Transformer::createAttention(int, int, int, int, std::string, std::string, std::string)' marked 'override', but d
+oes not override
+   45 |   std::vector<LayerHandle> createAttention(const int layer_id, int seq_len,
+      |                            ^~~~~~~~~~~~~~~
+In file included from /nntrainerPranjal/Applications/CausalLM/api/causal_lm_api.cpp:25:
+../Applications/CausalLM/models/gpt_oss_cached_slim/gptoss_cached_slim_causallm.h:40:28: error: 'std::vector<std::shared_ptr<ml::train::Layer> > causallm::GptOssCachedSlimCausalLM::createAttention(int, int, int, int, std::string, std::string, std::s
+tring)' marked 'override', but does not override
+   40 |   std::vector<LayerHandle> createAttention(const int layer_id, int seq_len,
+      |                            ^~~~~~~~~~~~~~~
+In file included from /nntrainerPranjal/Applications/CausalLM/api/causal_lm_api.cpp:26:
+../Applications/CausalLM/models/gpt_oss/gptoss_causallm.h:40:28: error: 'std::vector<std::shared_ptr<ml::train::Layer> > causallm::GptOssForCausalLM::createAttention(int, int, int, int, std::string, std::string, std::string)' marked 'override', but
+does not override
+   40 |   std::vector<LayerHandle> createAttention(const int layer_id, int seq_len,
+      |                            ^~~~~~~~~~~~~~~
+In file included from /nntrainerPranjal/Applications/CausalLM/api/causal_lm_api.cpp:29:
+../Applications/CausalLM/models/qwen2/qwen2_causallm.h:34:28: error: 'std::vector<std::shared_ptr<ml::train::Layer> > causallm::Qwen2Transformer::createAttention(int, int, int, int, std::string, std::string, std::string)' marked 'override', but does
+ not override
+   34 |   std::vector<LayerHandle> createAttention(const int layer_id, int seq_len,
+      |                            ^~~~~~~~~~~~~~~
+In file included from ../Applications/CausalLM/models/qwen3_cached_slim_moe/qwen3_cached_slim_moe_causallm.h:17,
+                 from /nntrainerPranjal/Applications/CausalLM/api/causal_lm_api.cpp:30:
+../Applications/CausalLM/models/qwen3/qwen3_causallm.h:33:28: error: 'std::vector<std::shared_ptr<ml::train::Layer> > causallm::Qwen3Transformer::createAttention(int, int, int, int, std::string, std::string, std::string)' marked 'override', but does
+ not override
+   33 |   std::vector<LayerHandle> createAttention(const int layer_id, int seq_len,
+      |                            ^~~~~~~~~~~~~~~
+[7/24] Compiling C++ object Applications/CausalLM/libcausallm.so.p/_nntrainerPranjal_Applications_CausalLM_models_qwen3_cached_slim_moe_qwen3_cached_slim_moe_causallm.cpp.o
+FAILED: Applications/CausalLM/libcausallm.so.p/_nntrainerPranjal_Applications_CausalLM_models_qwen3_cached_slim_moe_qwen3_cached_slim_moe_causallm.cpp.o
+c++ -IApplications/CausalLM/libcausallm.so.p -IApplications/CausalLM -I../Applications/CausalLM -IApplications/CausalLM/models -I../Applications/CausalLM/models -IApplications/CausalLM/models/gpt_oss -I../Applications/CausalLM/models/gpt_oss -IAppli
+cations/CausalLM/models/gpt_oss_cached_slim -I../Applications/CausalLM/models/gpt_oss_cached_slim -IApplications/CausalLM/models/qwen2 -I../Applications/CausalLM/models/qwen2 -IApplications/CausalLM/models/qwen3 -I../Applications/CausalLM/models/qwe
+n3 -IApplications/CausalLM/models/qwen3_moe -I../Applications/CausalLM/models/qwen3_moe -IApplications/CausalLM/models/qwen3_slim_moe -I../Applications/CausalLM/models/qwen3_slim_moe -IApplications/CausalLM/models/qwen3_cached_slim_moe -I../Applicat
+ions/CausalLM/models/qwen3_cached_slim_moe -IApplications/CausalLM/models/gemma3 -I../Applications/CausalLM/models/gemma3 -Inntrainer -I../nntrainer -Iapi -I../api -I../api/ccapi/include -Inntrainer/compiler -I../nntrainer/compiler -Inntrainer/schem
+a -I../nntrainer/schema -Inntrainer/dataset -I../nntrainer/dataset -Inntrainer/layers/loss -I../nntrainer/layers/loss -Inntrainer/layers -I../nntrainer/layers -Inntrainer/models -I../nntrainer/models -Inntrainer/optimizers -I../nntrainer/optimizers
+-Inntrainer/tensor/cpu_backend/fallback -I../nntrainer/tensor/cpu_backend/fallback -Inntrainer/tensor/cpu_backend/ggml_interface/nntr_ggml_impl -I../nntrainer/tensor/cpu_backend/ggml_interface/nntr_ggml_impl -Inntrainer/tensor/cpu_backend/ggml_inter
+face -I../nntrainer/tensor/cpu_backend/ggml_interface -Inntrainer/tensor/cpu_backend/cblas_interface -I../nntrainer/tensor/cpu_backend/cblas_interface -Inntrainer/tensor/cpu_backend/x86 -I../nntrainer/tensor/cpu_backend/x86 -Inntrainer/tensor/cpu_ba
+ckend -I../nntrainer/tensor/cpu_backend -Inntrainer/tensor -I../nntrainer/tensor -Inntrainer/utils -I../nntrainer/utils -Inntrainer/graph -I../nntrainer/graph -IApplications/CausalLM/layers -I../Applications/CausalLM/layers -I/usr/include/x86_64-lin
+ux-gnu/openblas-pthread/ -I/usr/include/nnstreamer -I/usr/include/tensorflow2/ -fdiagnostics-color=always -D_FILE_OFFSET_BITS=64 -Wall -Winvalid-pch -Wnon-virtual-dtor -Werror -std=c++17 -g '-DVERSION="0.6.0"' -DVERSION_MAJOR=0 -DVERSION_MINOR=6 -DV
+ERSION_MICRO=0 -DENABLE_TRANSFORMER=1 -march=native -mavx2 -mfma -Wredundant-decls -Wwrite-strings -Wformat -Wformat-nonliteral -Wformat-security -Winit-self -Waddress -Wvla -Wpointer-arith -Wno-error=varargs -Wno-error=ignored-attributes -Wno-error
+=sign-compare -ftree-vectorize -Wno-unused-variable -Wno-comment -Wno-ignored-attributes -Wno-sign-compare -Wno-maybe-uninitialized -DMIN_CPP_VERSION=201703L -DMMAP_READ=1 -DKERNEL_CACHE=0 -DUSE_MMAP=1 -DOPENCL_KERNEL_PATH=nntrainer_opencl_kernels -
+DML_API_COMMON=1 -DNNSTREAMER_AVAILABLE=1 -DUSE_BLAS=1 -DHGEMM_EXPERIMENTAL_KERNEL=false -DNNTR_NUM_THREADS=1 -DOMP_NUM_THREADS=6 -DDEBUG=1 -D__LOGGING__=1 -DENABLE_TEST=1 -DREDUCE_TOLERANCE=1 -DENABLE_TFLITE_BACKBONE=1 -DENABLE_TFLITE_INTERPRETER=1
+ '-DNNTRAINER_CONF_PATH="/usr/local/etc/nntrainer.ini"' -fPIC -pthread -fopenmp -DPLUGGABLE -MD -MQ Applications/CausalLM/libcausallm.so.p/_nntrainerPranjal_Applications_CausalLM_models_qwen3_cached_slim_moe_qwen3_cached_slim_moe_causallm.cpp.o -MF
+Applications/CausalLM/libcausallm.so.p/_nntrainerPranjal_Applications_CausalLM_models_qwen3_cached_slim_moe_qwen3_cached_slim_moe_causallm.cpp.o.d -o Applications/CausalLM/libcausallm.so.p/_nntrainerPranjal_Applications_CausalLM_models_qwen3_cached_
+slim_moe_qwen3_cached_slim_moe_causallm.cpp.o -c /nntrainerPranjal/Applications/CausalLM/models/qwen3_cached_slim_moe/qwen3_cached_slim_moe_causallm.cpp
+In file included from ../Applications/CausalLM/models/qwen3_cached_slim_moe/qwen3_cached_slim_moe_causallm.h:17,
+                 from /nntrainerPranjal/Applications/CausalLM/models/qwen3_cached_slim_moe/qwen3_cached_slim_moe_causallm.cpp:25:
+../Applications/CausalLM/models/qwen3/qwen3_causallm.h:33:28: error: 'std::vector<std::shared_ptr<ml::train::Layer> > causallm::Qwen3Transformer::createAttention(int, int, int, int, std::string, std::string, std::string)' marked 'override', but does
+ not override
+   33 |   std::vector<LayerHandle> createAttention(const int layer_id, int seq_len,
+      |                            ^~~~~~~~~~~~~~~
+[8/24] Compiling C++ object Applications/CausalLM/libcausallm.so.p/_nntrainerPranjal_Applications_CausalLM_models_qwen2_qwen2_causallm.cpp.o
+FAILED: Applications/CausalLM/libcausallm.so.p/_nntrainerPranjal_Applications_CausalLM_models_qwen2_qwen2_causallm.cpp.o
+c++ -IApplications/CausalLM/libcausallm.so.p -IApplications/CausalLM -I../Applications/CausalLM -IApplications/CausalLM/models -I../Applications/CausalLM/models -IApplications/CausalLM/models/gpt_oss -I../Applications/CausalLM/models/gpt_oss -IAppli
+cations/CausalLM/models/gpt_oss_cached_slim -I../Applications/CausalLM/models/gpt_oss_cached_slim -IApplications/CausalLM/models/qwen2 -I../Applications/CausalLM/models/qwen2 -IApplications/CausalLM/models/qwen3 -I../Applications/CausalLM/models/qwe
+n3 -IApplications/CausalLM/models/qwen3_moe -I../Applications/CausalLM/models/qwen3_moe -IApplications/CausalLM/models/qwen3_slim_moe -I../Applications/CausalLM/models/qwen3_slim_moe -IApplications/CausalLM/models/qwen3_cached_slim_moe -I../Applicat
+ions/CausalLM/models/qwen3_cached_slim_moe -IApplications/CausalLM/models/gemma3 -I../Applications/CausalLM/models/gemma3 -Inntrainer -I../nntrainer -Iapi -I../api -I../api/ccapi/include -Inntrainer/compiler -I../nntrainer/compiler -Inntrainer/schem
+a -I../nntrainer/schema -Inntrainer/dataset -I../nntrainer/dataset -Inntrainer/layers/loss -I../nntrainer/layers/loss -Inntrainer/layers -I../nntrainer/layers -Inntrainer/models -I../nntrainer/models -Inntrainer/optimizers -I../nntrainer/optimizers
+-Inntrainer/tensor/cpu_backend/fallback -I../nntrainer/tensor/cpu_backend/fallback -Inntrainer/tensor/cpu_backend/ggml_interface/nntr_ggml_impl -I../nntrainer/tensor/cpu_backend/ggml_interface/nntr_ggml_impl -Inntrainer/tensor/cpu_backend/ggml_inter
+face -I../nntrainer/tensor/cpu_backend/ggml_interface -Inntrainer/tensor/cpu_backend/cblas_interface -I../nntrainer/tensor/cpu_backend/cblas_interface -Inntrainer/tensor/cpu_backend/x86 -I../nntrainer/tensor/cpu_backend/x86 -Inntrainer/tensor/cpu_ba
+ckend -I../nntrainer/tensor/cpu_backend -Inntrainer/tensor -I../nntrainer/tensor -Inntrainer/utils -I../nntrainer/utils -Inntrainer/graph -I../nntrainer/graph -IApplications/CausalLM/layers -I../Applications/CausalLM/layers -I/usr/include/x86_64-lin
+ux-gnu/openblas-pthread/ -I/usr/include/nnstreamer -I/usr/include/tensorflow2/ -fdiagnostics-color=always -D_FILE_OFFSET_BITS=64 -Wall -Winvalid-pch -Wnon-virtual-dtor -Werror -std=c++17 -g '-DVERSION="0.6.0"' -DVERSION_MAJOR=0 -DVERSION_MINOR=6 -DV
+ERSION_MICRO=0 -DENABLE_TRANSFORMER=1 -march=native -mavx2 -mfma -Wredundant-decls -Wwrite-strings -Wformat -Wformat-nonliteral -Wformat-security -Winit-self -Waddress -Wvla -Wpointer-arith -Wno-error=varargs -Wno-error=ignored-attributes -Wno-error
+=sign-compare -ftree-vectorize -Wno-unused-variable -Wno-comment -Wno-ignored-attributes -Wno-sign-compare -Wno-maybe-uninitialized -DMIN_CPP_VERSION=201703L -DMMAP_READ=1 -DKERNEL_CACHE=0 -DUSE_MMAP=1 -DOPENCL_KERNEL_PATH=nntrainer_opencl_kernels -
+DML_API_COMMON=1 -DNNSTREAMER_AVAILABLE=1 -DUSE_BLAS=1 -DHGEMM_EXPERIMENTAL_KERNEL=false -DNNTR_NUM_THREADS=1 -DOMP_NUM_THREADS=6 -DDEBUG=1 -D__LOGGING__=1 -DENABLE_TEST=1 -DREDUCE_TOLERANCE=1 -DENABLE_TFLITE_BACKBONE=1 -DENABLE_TFLITE_INTERPRETER=1
+ '-DNNTRAINER_CONF_PATH="/usr/local/etc/nntrainer.ini"' -fPIC -pthread -fopenmp -DPLUGGABLE -MD -MQ Applications/CausalLM/libcausallm.so.p/_nntrainerPranjal_Applications_CausalLM_models_qwen2_qwen2_causallm.cpp.o -MF Applications/CausalLM/libcausall
+m.so.p/_nntrainerPranjal_Applications_CausalLM_models_qwen2_qwen2_causallm.cpp.o.d -o Applications/CausalLM/libcausallm.so.p/_nntrainerPranjal_Applications_CausalLM_models_qwen2_qwen2_causallm.cpp.o -c /nntrainerPranjal/Applications/CausalLM/models/
+qwen2/qwen2_causallm.cpp
+In file included from /nntrainerPranjal/Applications/CausalLM/models/qwen2/qwen2_causallm.cpp:14:
+../Applications/CausalLM/models/qwen2/qwen2_causallm.h:34:28: error: 'std::vector<std::shared_ptr<ml::train::Layer> > causallm::Qwen2Transformer::createAttention(int, int, int, int, std::string, std::string, std::string)' marked 'override', but does
+ not override
+   34 |   std::vector<LayerHandle> createAttention(const int layer_id, int seq_len,
+      |                            ^~~~~~~~~~~~~~~
+[9/24] Compiling C++ object Applications/CausalLM/nntr_causallm.p/_nntrainerPranjal_Applications_CausalLM_main.cpp.o
+FAILED: Applications/CausalLM/nntr_causallm.p/_nntrainerPranjal_Applications_CausalLM_main.cpp.o
+c++ -IApplications/CausalLM/nntr_causallm.p -IApplications/CausalLM -I../Applications/CausalLM -IApplications/CausalLM/models -I../Applications/CausalLM/models -IApplications/CausalLM/models/gpt_oss -I../Applications/CausalLM/models/gpt_oss -IApplic
+ations/CausalLM/models/gpt_oss_cached_slim -I../Applications/CausalLM/models/gpt_oss_cached_slim -IApplications/CausalLM/models/qwen2 -I../Applications/CausalLM/models/qwen2 -IApplications/CausalLM/models/qwen3 -I../Applications/CausalLM/models/qwen
+3 -IApplications/CausalLM/models/qwen3_moe -I../Applications/CausalLM/models/qwen3_moe -IApplications/CausalLM/models/qwen3_slim_moe -I../Applications/CausalLM/models/qwen3_slim_moe -IApplications/CausalLM/models/qwen3_cached_slim_moe -I../Applicati
+ons/CausalLM/models/qwen3_cached_slim_moe -IApplications/CausalLM/models/gemma3 -I../Applications/CausalLM/models/gemma3 -Inntrainer -I../nntrainer -Iapi -I../api -I../api/ccapi/include -Inntrainer/compiler -I../nntrainer/compiler -Inntrainer/schema
+ -I../nntrainer/schema -Inntrainer/dataset -I../nntrainer/dataset -Inntrainer/layers/loss -I../nntrainer/layers/loss -Inntrainer/layers -I../nntrainer/layers -Inntrainer/models -I../nntrainer/models -Inntrainer/optimizers -I../nntrainer/optimizers -
+Inntrainer/tensor/cpu_backend/fallback -I../nntrainer/tensor/cpu_backend/fallback -Inntrainer/tensor/cpu_backend/ggml_interface/nntr_ggml_impl -I../nntrainer/tensor/cpu_backend/ggml_interface/nntr_ggml_impl -Inntrainer/tensor/cpu_backend/ggml_interf
+ace -I../nntrainer/tensor/cpu_backend/ggml_interface -Inntrainer/tensor/cpu_backend/cblas_interface -I../nntrainer/tensor/cpu_backend/cblas_interface -Inntrainer/tensor/cpu_backend/x86 -I../nntrainer/tensor/cpu_backend/x86 -Inntrainer/tensor/cpu_bac
+kend -I../nntrainer/tensor/cpu_backend -Inntrainer/tensor -I../nntrainer/tensor -Inntrainer/utils -I../nntrainer/utils -Inntrainer/graph -I../nntrainer/graph -IApplications/CausalLM/layers -I../Applications/CausalLM/layers -I/usr/include/x86_64-linu
+x-gnu/openblas-pthread/ -I/usr/include/nnstreamer -I/usr/include/tensorflow2/ -fdiagnostics-color=always -D_FILE_OFFSET_BITS=64 -Wall -Winvalid-pch -Wnon-virtual-dtor -Werror -std=c++17 -g '-DVERSION="0.6.0"' -DVERSION_MAJOR=0 -DVERSION_MINOR=6 -DVE
+RSION_MICRO=0 -DENABLE_TRANSFORMER=1 -march=native -mavx2 -mfma -Wredundant-decls -Wwrite-strings -Wformat -Wformat-nonliteral -Wformat-security -Winit-self -Waddress -Wvla -Wpointer-arith -Wno-error=varargs -Wno-error=ignored-attributes -Wno-error=
+sign-compare -ftree-vectorize -Wno-unused-variable -Wno-comment -Wno-ignored-attributes -Wno-sign-compare -Wno-maybe-uninitialized -DMIN_CPP_VERSION=201703L -DMMAP_READ=1 -DKERNEL_CACHE=0 -DUSE_MMAP=1 -DOPENCL_KERNEL_PATH=nntrainer_opencl_kernels -D
+ML_API_COMMON=1 -DNNSTREAMER_AVAILABLE=1 -DUSE_BLAS=1 -DHGEMM_EXPERIMENTAL_KERNEL=false -DNNTR_NUM_THREADS=1 -DOMP_NUM_THREADS=6 -DDEBUG=1 -D__LOGGING__=1 -DENABLE_TEST=1 -DREDUCE_TOLERANCE=1 -DENABLE_TFLITE_BACKBONE=1 -DENABLE_TFLITE_INTERPRETER=1
+'-DNNTRAINER_CONF_PATH="/usr/local/etc/nntrainer.ini"' -pthread -fopenmp -MD -MQ Applications/CausalLM/nntr_causallm.p/_nntrainerPranjal_Applications_CausalLM_main.cpp.o -MF Applications/CausalLM/nntr_causallm.p/_nntrainerPranjal_Applications_Causal
+LM_main.cpp.o.d -o Applications/CausalLM/nntr_causallm.p/_nntrainerPranjal_Applications_CausalLM_main.cpp.o -c /nntrainerPranjal/Applications/CausalLM/main.cpp
+In file included from ../Applications/CausalLM/models/gemma3/embedding_gemma.h:17,
+                 from /nntrainerPranjal/Applications/CausalLM/main.cpp:33:
+../Applications/CausalLM/models/gemma3/gemma3_causallm.h:45:28: error: 'std::vector<std::shared_ptr<ml::train::Layer> > causallm::Gemma3Transformer::createAttention(int, int, int, int, std::string, std::string, std::string)' marked 'override', but d
+oes not override
+   45 |   std::vector<LayerHandle> createAttention(const int layer_id, int seq_len,
+      |                            ^~~~~~~~~~~~~~~
+In file included from /nntrainerPranjal/Applications/CausalLM/main.cpp:35:
+../Applications/CausalLM/models/gpt_oss_cached_slim/gptoss_cached_slim_causallm.h:40:28: error: 'std::vector<std::shared_ptr<ml::train::Layer> > causallm::GptOssCachedSlimCausalLM::createAttention(int, int, int, int, std::string, std::string, std::s
+tring)' marked 'override', but does not override
+   40 |   std::vector<LayerHandle> createAttention(const int layer_id, int seq_len,
+      |                            ^~~~~~~~~~~~~~~
+In file included from /nntrainerPranjal/Applications/CausalLM/main.cpp:36:
+../Applications/CausalLM/models/gpt_oss/gptoss_causallm.h:40:28: error: 'std::vector<std::shared_ptr<ml::train::Layer> > causallm::GptOssForCausalLM::createAttention(int, int, int, int, std::string, std::string, std::string)' marked 'override', but
+does not override
+   40 |   std::vector<LayerHandle> createAttention(const int layer_id, int seq_len,
+      |                            ^~~~~~~~~~~~~~~
+In file included from /nntrainerPranjal/Applications/CausalLM/main.cpp:37:
+../Applications/CausalLM/models/qwen2/qwen2_causallm.h:34:28: error: 'std::vector<std::shared_ptr<ml::train::Layer> > causallm::Qwen2Transformer::createAttention(int, int, int, int, std::string, std::string, std::string)' marked 'override', but does
+ not override
+   34 |   std::vector<LayerHandle> createAttention(const int layer_id, int seq_len,
+      |                            ^~~~~~~~~~~~~~~
+In file included from ../Applications/CausalLM/models/qwen3_cached_slim_moe/qwen3_cached_slim_moe_causallm.h:17,
+                 from /nntrainerPranjal/Applications/CausalLM/main.cpp:39:
+../Applications/CausalLM/models/qwen3/qwen3_causallm.h:33:28: error: 'std::vector<std::shared_ptr<ml::train::Layer> > causallm::Qwen3Transformer::createAttention(int, int, int, int, std::string, std::string, std::string)' marked 'override', but does
+ not override
+   33 |   std::vector<LayerHandle> createAttention(const int layer_id, int seq_len,
+      |                            ^~~~~~~~~~~~~~~
+[10/24] Compiling C++ object Applications/CausalLM/libcausallm.so.p/_nntrainerPranjal_Applications_CausalLM_models_qwen3_moe_qwen3_moe_causallm.cpp.o
+FAILED: Applications/CausalLM/libcausallm.so.p/_nntrainerPranjal_Applications_CausalLM_models_qwen3_moe_qwen3_moe_causallm.cpp.o
+c++ -IApplications/CausalLM/libcausallm.so.p -IApplications/CausalLM -I../Applications/CausalLM -IApplications/CausalLM/models -I../Applications/CausalLM/models -IApplications/CausalLM/models/gpt_oss -I../Applications/CausalLM/models/gpt_oss -IAppli
+cations/CausalLM/models/gpt_oss_cached_slim -I../Applications/CausalLM/models/gpt_oss_cached_slim -IApplications/CausalLM/models/qwen2 -I../Applications/CausalLM/models/qwen2 -IApplications/CausalLM/models/qwen3 -I../Applications/CausalLM/models/qwe
+n3 -IApplications/CausalLM/models/qwen3_moe -I../Applications/CausalLM/models/qwen3_moe -IApplications/CausalLM/models/qwen3_slim_moe -I../Applications/CausalLM/models/qwen3_slim_moe -IApplications/CausalLM/models/qwen3_cached_slim_moe -I../Applicat
+ions/CausalLM/models/qwen3_cached_slim_moe -IApplications/CausalLM/models/gemma3 -I../Applications/CausalLM/models/gemma3 -Inntrainer -I../nntrainer -Iapi -I../api -I../api/ccapi/include -Inntrainer/compiler -I../nntrainer/compiler -Inntrainer/schem
+a -I../nntrainer/schema -Inntrainer/dataset -I../nntrainer/dataset -Inntrainer/layers/loss -I../nntrainer/layers/loss -Inntrainer/layers -I../nntrainer/layers -Inntrainer/models -I../nntrainer/models -Inntrainer/optimizers -I../nntrainer/optimizers
+-Inntrainer/tensor/cpu_backend/fallback -I../nntrainer/tensor/cpu_backend/fallback -Inntrainer/tensor/cpu_backend/ggml_interface/nntr_ggml_impl -I../nntrainer/tensor/cpu_backend/ggml_interface/nntr_ggml_impl -Inntrainer/tensor/cpu_backend/ggml_inter
+face -I../nntrainer/tensor/cpu_backend/ggml_interface -Inntrainer/tensor/cpu_backend/cblas_interface -I../nntrainer/tensor/cpu_backend/cblas_interface -Inntrainer/tensor/cpu_backend/x86 -I../nntrainer/tensor/cpu_backend/x86 -Inntrainer/tensor/cpu_ba
+ckend -I../nntrainer/tensor/cpu_backend -Inntrainer/tensor -I../nntrainer/tensor -Inntrainer/utils -I../nntrainer/utils -Inntrainer/graph -I../nntrainer/graph -IApplications/CausalLM/layers -I../Applications/CausalLM/layers -I/usr/include/x86_64-lin
+ux-gnu/openblas-pthread/ -I/usr/include/nnstreamer -I/usr/include/tensorflow2/ -fdiagnostics-color=always -D_FILE_OFFSET_BITS=64 -Wall -Winvalid-pch -Wnon-virtual-dtor -Werror -std=c++17 -g '-DVERSION="0.6.0"' -DVERSION_MAJOR=0 -DVERSION_MINOR=6 -DV
+ERSION_MICRO=0 -DENABLE_TRANSFORMER=1 -march=native -mavx2 -mfma -Wredundant-decls -Wwrite-strings -Wformat -Wformat-nonliteral -Wformat-security -Winit-self -Waddress -Wvla -Wpointer-arith -Wno-error=varargs -Wno-error=ignored-attributes -Wno-error
+=sign-compare -ftree-vectorize -Wno-unused-variable -Wno-comment -Wno-ignored-attributes -Wno-sign-compare -Wno-maybe-uninitialized -DMIN_CPP_VERSION=201703L -DMMAP_READ=1 -DKERNEL_CACHE=0 -DUSE_MMAP=1 -DOPENCL_KERNEL_PATH=nntrainer_opencl_kernels -
+DML_API_COMMON=1 -DNNSTREAMER_AVAILABLE=1 -DUSE_BLAS=1 -DHGEMM_EXPERIMENTAL_KERNEL=false -DNNTR_NUM_THREADS=1 -DOMP_NUM_THREADS=6 -DDEBUG=1 -D__LOGGING__=1 -DENABLE_TEST=1 -DREDUCE_TOLERANCE=1 -DENABLE_TFLITE_BACKBONE=1 -DENABLE_TFLITE_INTERPRETER=1
+ '-DNNTRAINER_CONF_PATH="/usr/local/etc/nntrainer.ini"' -fPIC -pthread -fopenmp -DPLUGGABLE -MD -MQ Applications/CausalLM/libcausallm.so.p/_nntrainerPranjal_Applications_CausalLM_models_qwen3_moe_qwen3_moe_causallm.cpp.o -MF Applications/CausalLM/li
+bcausallm.so.p/_nntrainerPranjal_Applications_CausalLM_models_qwen3_moe_qwen3_moe_causallm.cpp.o.d -o Applications/CausalLM/libcausallm.so.p/_nntrainerPranjal_Applications_CausalLM_models_qwen3_moe_qwen3_moe_causallm.cpp.o -c /nntrainerPranjal/Appli
+cations/CausalLM/models/qwen3_moe/qwen3_moe_causallm.cpp
+In file included from ../Applications/CausalLM/models/qwen3_moe/qwen3_moe_causallm.h:17,
+                 from /nntrainerPranjal/Applications/CausalLM/models/qwen3_moe/qwen3_moe_causallm.cpp:25:
+../Applications/CausalLM/models/qwen3/qwen3_causallm.h:33:28: error: 'std::vector<std::shared_ptr<ml::train::Layer> > causallm::Qwen3Transformer::createAttention(int, int, int, int, std::string, std::string, std::string)' marked 'override', but does
+ not override
+   33 |   std::vector<LayerHandle> createAttention(const int layer_id, int seq_len,
+      |                            ^~~~~~~~~~~~~~~
+[11/24] Compiling C++ object Applications/CausalLM/libcausallm.so.p/_nntrainerPranjal_Applications_CausalLM_models_qwen3_qwen3_causallm.cpp.o
+FAILED: Applications/CausalLM/libcausallm.so.p/_nntrainerPranjal_Applications_CausalLM_models_qwen3_qwen3_causallm.cpp.o
+c++ -IApplications/CausalLM/libcausallm.so.p -IApplications/CausalLM -I../Applications/CausalLM -IApplications/CausalLM/models -I../Applications/CausalLM/models -IApplications/CausalLM/models/gpt_oss -I../Applications/CausalLM/models/gpt_oss -IAppli
+cations/CausalLM/models/gpt_oss_cached_slim -I../Applications/CausalLM/models/gpt_oss_cached_slim -IApplications/CausalLM/models/qwen2 -I../Applications/CausalLM/models/qwen2 -IApplications/CausalLM/models/qwen3 -I../Applications/CausalLM/models/qwe
+n3 -IApplications/CausalLM/models/qwen3_moe -I../Applications/CausalLM/models/qwen3_moe -IApplications/CausalLM/models/qwen3_slim_moe -I../Applications/CausalLM/models/qwen3_slim_moe -IApplications/CausalLM/models/qwen3_cached_slim_moe -I../Applicat
+ions/CausalLM/models/qwen3_cached_slim_moe -IApplications/CausalLM/models/gemma3 -I../Applications/CausalLM/models/gemma3 -Inntrainer -I../nntrainer -Iapi -I../api -I../api/ccapi/include -Inntrainer/compiler -I../nntrainer/compiler -Inntrainer/schem
+a -I../nntrainer/schema -Inntrainer/dataset -I../nntrainer/dataset -Inntrainer/layers/loss -I../nntrainer/layers/loss -Inntrainer/layers -I../nntrainer/layers -Inntrainer/models -I../nntrainer/models -Inntrainer/optimizers -I../nntrainer/optimizers
+-Inntrainer/tensor/cpu_backend/fallback -I../nntrainer/tensor/cpu_backend/fallback -Inntrainer/tensor/cpu_backend/ggml_interface/nntr_ggml_impl -I../nntrainer/tensor/cpu_backend/ggml_interface/nntr_ggml_impl -Inntrainer/tensor/cpu_backend/ggml_inter
+face -I../nntrainer/tensor/cpu_backend/ggml_interface -Inntrainer/tensor/cpu_backend/cblas_interface -I../nntrainer/tensor/cpu_backend/cblas_interface -Inntrainer/tensor/cpu_backend/x86 -I../nntrainer/tensor/cpu_backend/x86 -Inntrainer/tensor/cpu_ba
+ckend -I../nntrainer/tensor/cpu_backend -Inntrainer/tensor -I../nntrainer/tensor -Inntrainer/utils -I../nntrainer/utils -Inntrainer/graph -I../nntrainer/graph -IApplications/CausalLM/layers -I../Applications/CausalLM/layers -I/usr/include/x86_64-lin
+ux-gnu/openblas-pthread/ -I/usr/include/nnstreamer -I/usr/include/tensorflow2/ -fdiagnostics-color=always -D_FILE_OFFSET_BITS=64 -Wall -Winvalid-pch -Wnon-virtual-dtor -Werror -std=c++17 -g '-DVERSION="0.6.0"' -DVERSION_MAJOR=0 -DVERSION_MINOR=6 -DV
+ERSION_MICRO=0 -DENABLE_TRANSFORMER=1 -march=native -mavx2 -mfma -Wredundant-decls -Wwrite-strings -Wformat -Wformat-nonliteral -Wformat-security -Winit-self -Waddress -Wvla -Wpointer-arith -Wno-error=varargs -Wno-error=ignored-attributes -Wno-error
+=sign-compare -ftree-vectorize -Wno-unused-variable -Wno-comment -Wno-ignored-attributes -Wno-sign-compare -Wno-maybe-uninitialized -DMIN_CPP_VERSION=201703L -DMMAP_READ=1 -DKERNEL_CACHE=0 -DUSE_MMAP=1 -DOPENCL_KERNEL_PATH=nntrainer_opencl_kernels -
+DML_API_COMMON=1 -DNNSTREAMER_AVAILABLE=1 -DUSE_BLAS=1 -DHGEMM_EXPERIMENTAL_KERNEL=false -DNNTR_NUM_THREADS=1 -DOMP_NUM_THREADS=6 -DDEBUG=1 -D__LOGGING__=1 -DENABLE_TEST=1 -DREDUCE_TOLERANCE=1 -DENABLE_TFLITE_BACKBONE=1 -DENABLE_TFLITE_INTERPRETER=1
+ '-DNNTRAINER_CONF_PATH="/usr/local/etc/nntrainer.ini"' -fPIC -pthread -fopenmp -DPLUGGABLE -MD -MQ Applications/CausalLM/libcausallm.so.p/_nntrainerPranjal_Applications_CausalLM_models_qwen3_qwen3_causallm.cpp.o -MF Applications/CausalLM/libcausall
+m.so.p/_nntrainerPranjal_Applications_CausalLM_models_qwen3_qwen3_causallm.cpp.o.d -o Applications/CausalLM/libcausallm.so.p/_nntrainerPranjal_Applications_CausalLM_models_qwen3_qwen3_causallm.cpp.o -c /nntrainerPranjal/Applications/CausalLM/models/
+qwen3/qwen3_causallm.cpp
+In file included from /nntrainerPranjal/Applications/CausalLM/models/qwen3/qwen3_causallm.cpp:25:
+../Applications/CausalLM/models/qwen3/qwen3_causallm.h:33:28: error: 'std::vector<std::shared_ptr<ml::train::Layer> > causallm::Qwen3Transformer::createAttention(int, int, int, int, std::string, std::string, std::string)' marked 'override', but does
+ not override
+   33 |   std::vector<LayerHandle> createAttention(const int layer_id, int seq_len,
+      |                            ^~~~~~~~~~~~~~~
+[12/24] Compiling C++ object Applications/CausalLM/libcausallm.so.p/_nntrainerPranjal_Applications_CausalLM_models_gpt_oss_cached_slim_gptoss_cached_slim_causallm.cpp.o
+FAILED: Applications/CausalLM/libcausallm.so.p/_nntrainerPranjal_Applications_CausalLM_models_gpt_oss_cached_slim_gptoss_cached_slim_causallm.cpp.o
+c++ -IApplications/CausalLM/libcausallm.so.p -IApplications/CausalLM -I../Applications/CausalLM -IApplications/CausalLM/models -I../Applications/CausalLM/models -IApplications/CausalLM/models/gpt_oss -I../Applications/CausalLM/models/gpt_oss -IAppli
+cations/CausalLM/models/gpt_oss_cached_slim -I../Applications/CausalLM/models/gpt_oss_cached_slim -IApplications/CausalLM/models/qwen2 -I../Applications/CausalLM/models/qwen2 -IApplications/CausalLM/models/qwen3 -I../Applications/CausalLM/models/qwe
+n3 -IApplications/CausalLM/models/qwen3_moe -I../Applications/CausalLM/models/qwen3_moe -IApplications/CausalLM/models/qwen3_slim_moe -I../Applications/CausalLM/models/qwen3_slim_moe -IApplications/CausalLM/models/qwen3_cached_slim_moe -I../Applicat
+ions/CausalLM/models/qwen3_cached_slim_moe -IApplications/CausalLM/models/gemma3 -I../Applications/CausalLM/models/gemma3 -Inntrainer -I../nntrainer -Iapi -I../api -I../api/ccapi/include -Inntrainer/compiler -I../nntrainer/compiler -Inntrainer/schem
+a -I../nntrainer/schema -Inntrainer/dataset -I../nntrainer/dataset -Inntrainer/layers/loss -I../nntrainer/layers/loss -Inntrainer/layers -I../nntrainer/layers -Inntrainer/models -I../nntrainer/models -Inntrainer/optimizers -I../nntrainer/optimizers
+-Inntrainer/tensor/cpu_backend/fallback -I../nntrainer/tensor/cpu_backend/fallback -Inntrainer/tensor/cpu_backend/ggml_interface/nntr_ggml_impl -I../nntrainer/tensor/cpu_backend/ggml_interface/nntr_ggml_impl -Inntrainer/tensor/cpu_backend/ggml_inter
+face -I../nntrainer/tensor/cpu_backend/ggml_interface -Inntrainer/tensor/cpu_backend/cblas_interface -I../nntrainer/tensor/cpu_backend/cblas_interface -Inntrainer/tensor/cpu_backend/x86 -I../nntrainer/tensor/cpu_backend/x86 -Inntrainer/tensor/cpu_ba
+ckend -I../nntrainer/tensor/cpu_backend -Inntrainer/tensor -I../nntrainer/tensor -Inntrainer/utils -I../nntrainer/utils -Inntrainer/graph -I../nntrainer/graph -IApplications/CausalLM/layers -I../Applications/CausalLM/layers -I/usr/include/x86_64-lin
+ux-gnu/openblas-pthread/ -I/usr/include/nnstreamer -I/usr/include/tensorflow2/ -fdiagnostics-color=always -D_FILE_OFFSET_BITS=64 -Wall -Winvalid-pch -Wnon-virtual-dtor -Werror -std=c++17 -g '-DVERSION="0.6.0"' -DVERSION_MAJOR=0 -DVERSION_MINOR=6 -DV
+ERSION_MICRO=0 -DENABLE_TRANSFORMER=1 -march=native -mavx2 -mfma -Wredundant-decls -Wwrite-strings -Wformat -Wformat-nonliteral -Wformat-security -Winit-self -Waddress -Wvla -Wpointer-arith -Wno-error=varargs -Wno-error=ignored-attributes -Wno-error
+=sign-compare -ftree-vectorize -Wno-unused-variable -Wno-comment -Wno-ignored-attributes -Wno-sign-compare -Wno-maybe-uninitialized -DMIN_CPP_VERSION=201703L -DMMAP_READ=1 -DKERNEL_CACHE=0 -DUSE_MMAP=1 -DOPENCL_KERNEL_PATH=nntrainer_opencl_kernels -
+DML_API_COMMON=1 -DNNSTREAMER_AVAILABLE=1 -DUSE_BLAS=1 -DHGEMM_EXPERIMENTAL_KERNEL=false -DNNTR_NUM_THREADS=1 -DOMP_NUM_THREADS=6 -DDEBUG=1 -D__LOGGING__=1 -DENABLE_TEST=1 -DREDUCE_TOLERANCE=1 -DENABLE_TFLITE_BACKBONE=1 -DENABLE_TFLITE_INTERPRETER=1
+ '-DNNTRAINER_CONF_PATH="/usr/local/etc/nntrainer.ini"' -fPIC -pthread -fopenmp -DPLUGGABLE -MD -MQ Applications/CausalLM/libcausallm.so.p/_nntrainerPranjal_Applications_CausalLM_models_gpt_oss_cached_slim_gptoss_cached_slim_causallm.cpp.o -MF Appli
+cations/CausalLM/libcausallm.so.p/_nntrainerPranjal_Applications_CausalLM_models_gpt_oss_cached_slim_gptoss_cached_slim_causallm.cpp.o.d -o Applications/CausalLM/libcausallm.so.p/_nntrainerPranjal_Applications_CausalLM_models_gpt_oss_cached_slim_gpt
+oss_cached_slim_causallm.cpp.o -c /nntrainerPranjal/Applications/CausalLM/models/gpt_oss_cached_slim/gptoss_cached_slim_causallm.cpp
+In file included from /nntrainerPranjal/Applications/CausalLM/models/gpt_oss_cached_slim/gptoss_cached_slim_causallm.cpp:24:
+../Applications/CausalLM/models/gpt_oss_cached_slim/gptoss_cached_slim_causallm.h:40:28: error: 'std::vector<std::shared_ptr<ml::train::Layer> > causallm::GptOssCachedSlimCausalLM::createAttention(int, int, int, int, std::string, std::string, std::s
+tring)' marked 'override', but does not override
+   40 |   std::vector<LayerHandle> createAttention(const int layer_id, int seq_len,
+      |                            ^~~~~~~~~~~~~~~
+[13/24] Compiling C++ object Applications/CausalLM/libcausallm.so.p/_nntrainerPranjal_Applications_CausalLM_models_gpt_oss_gptoss_causallm.cpp.o
+FAILED: Applications/CausalLM/libcausallm.so.p/_nntrainerPranjal_Applications_CausalLM_models_gpt_oss_gptoss_causallm.cpp.o
+c++ -IApplications/CausalLM/libcausallm.so.p -IApplications/CausalLM -I../Applications/CausalLM -IApplications/CausalLM/models -I../Applications/CausalLM/models -IApplications/CausalLM/models/gpt_oss -I../Applications/CausalLM/models/gpt_oss -IAppli
+cations/CausalLM/models/gpt_oss_cached_slim -I../Applications/CausalLM/models/gpt_oss_cached_slim -IApplications/CausalLM/models/qwen2 -I../Applications/CausalLM/models/qwen2 -IApplications/CausalLM/models/qwen3 -I../Applications/CausalLM/models/qwe
+n3 -IApplications/CausalLM/models/qwen3_moe -I../Applications/CausalLM/models/qwen3_moe -IApplications/CausalLM/models/qwen3_slim_moe -I../Applications/CausalLM/models/qwen3_slim_moe -IApplications/CausalLM/models/qwen3_cached_slim_moe -I../Applicat
+ions/CausalLM/models/qwen3_cached_slim_moe -IApplications/CausalLM/models/gemma3 -I../Applications/CausalLM/models/gemma3 -Inntrainer -I../nntrainer -Iapi -I../api -I../api/ccapi/include -Inntrainer/compiler -I../nntrainer/compiler -Inntrainer/schem
+a -I../nntrainer/schema -Inntrainer/dataset -I../nntrainer/dataset -Inntrainer/layers/loss -I../nntrainer/layers/loss -Inntrainer/layers -I../nntrainer/layers -Inntrainer/models -I../nntrainer/models -Inntrainer/optimizers -I../nntrainer/optimizers
+-Inntrainer/tensor/cpu_backend/fallback -I../nntrainer/tensor/cpu_backend/fallback -Inntrainer/tensor/cpu_backend/ggml_interface/nntr_ggml_impl -I../nntrainer/tensor/cpu_backend/ggml_interface/nntr_ggml_impl -Inntrainer/tensor/cpu_backend/ggml_inter
+face -I../nntrainer/tensor/cpu_backend/ggml_interface -Inntrainer/tensor/cpu_backend/cblas_interface -I../nntrainer/tensor/cpu_backend/cblas_interface -Inntrainer/tensor/cpu_backend/x86 -I../nntrainer/tensor/cpu_backend/x86 -Inntrainer/tensor/cpu_ba
+ckend -I../nntrainer/tensor/cpu_backend -Inntrainer/tensor -I../nntrainer/tensor -Inntrainer/utils -I../nntrainer/utils -Inntrainer/graph -I../nntrainer/graph -IApplications/CausalLM/layers -I../Applications/CausalLM/layers -I/usr/include/x86_64-lin
+ux-gnu/openblas-pthread/ -I/usr/include/nnstreamer -I/usr/include/tensorflow2/ -fdiagnostics-color=always -D_FILE_OFFSET_BITS=64 -Wall -Winvalid-pch -Wnon-virtual-dtor -Werror -std=c++17 -g '-DVERSION="0.6.0"' -DVERSION_MAJOR=0 -DVERSION_MINOR=6 -DV
+ERSION_MICRO=0 -DENABLE_TRANSFORMER=1 -march=native -mavx2 -mfma -Wredundant-decls -Wwrite-strings -Wformat -Wformat-nonliteral -Wformat-security -Winit-self -Waddress -Wvla -Wpointer-arith -Wno-error=varargs -Wno-error=ignored-attributes -Wno-error
+=sign-compare -ftree-vectorize -Wno-unused-variable -Wno-comment -Wno-ignored-attributes -Wno-sign-compare -Wno-maybe-uninitialized -DMIN_CPP_VERSION=201703L -DMMAP_READ=1 -DKERNEL_CACHE=0 -DUSE_MMAP=1 -DOPENCL_KERNEL_PATH=nntrainer_opencl_kernels -
+DML_API_COMMON=1 -DNNSTREAMER_AVAILABLE=1 -DUSE_BLAS=1 -DHGEMM_EXPERIMENTAL_KERNEL=false -DNNTR_NUM_THREADS=1 -DOMP_NUM_THREADS=6 -DDEBUG=1 -D__LOGGING__=1 -DENABLE_TEST=1 -DREDUCE_TOLERANCE=1 -DENABLE_TFLITE_BACKBONE=1 -DENABLE_TFLITE_INTERPRETER=1
+ '-DNNTRAINER_CONF_PATH="/usr/local/etc/nntrainer.ini"' -fPIC -pthread -fopenmp -DPLUGGABLE -MD -MQ Applications/CausalLM/libcausallm.so.p/_nntrainerPranjal_Applications_CausalLM_models_gpt_oss_gptoss_causallm.cpp.o -MF Applications/CausalLM/libcaus
+allm.so.p/_nntrainerPranjal_Applications_CausalLM_models_gpt_oss_gptoss_causallm.cpp.o.d -o Applications/CausalLM/libcausallm.so.p/_nntrainerPranjal_Applications_CausalLM_models_gpt_oss_gptoss_causallm.cpp.o -c /nntrainerPranjal/Applications/CausalL
+M/models/gpt_oss/gptoss_causallm.cpp
+In file included from /nntrainerPranjal/Applications/CausalLM/models/gpt_oss/gptoss_causallm.cpp:24:
+../Applications/CausalLM/models/gpt_oss/gptoss_causallm.h:40:28: error: 'std::vector<std::shared_ptr<ml::train::Layer> > causallm::GptOssForCausalLM::createAttention(int, int, int, int, std::string, std::string, std::string)' marked 'override', but
+does not override
+   40 |   std::vector<LayerHandle> createAttention(const int layer_id, int seq_len,
+      |                            ^~~~~~~~~~~~~~~
+[14/24] Compiling C++ object Applications/CausalLM/libcausallm.so.p/_nntrainerPranjal_Applications_CausalLM_models_qwen3_slim_moe_qwen3_slim_moe_causallm.cpp.o
+FAILED: Applications/CausalLM/libcausallm.so.p/_nntrainerPranjal_Applications_CausalLM_models_qwen3_slim_moe_qwen3_slim_moe_causallm.cpp.o
+c++ -IApplications/CausalLM/libcausallm.so.p -IApplications/CausalLM -I../Applications/CausalLM -IApplications/CausalLM/models -I../Applications/CausalLM/models -IApplications/CausalLM/models/gpt_oss -I../Applications/CausalLM/models/gpt_oss -IAppli
+cations/CausalLM/models/gpt_oss_cached_slim -I../Applications/CausalLM/models/gpt_oss_cached_slim -IApplications/CausalLM/models/qwen2 -I../Applications/CausalLM/models/qwen2 -IApplications/CausalLM/models/qwen3 -I../Applications/CausalLM/models/qwe
+n3 -IApplications/CausalLM/models/qwen3_moe -I../Applications/CausalLM/models/qwen3_moe -IApplications/CausalLM/models/qwen3_slim_moe -I../Applications/CausalLM/models/qwen3_slim_moe -IApplications/CausalLM/models/qwen3_cached_slim_moe -I../Applicat
+ions/CausalLM/models/qwen3_cached_slim_moe -IApplications/CausalLM/models/gemma3 -I../Applications/CausalLM/models/gemma3 -Inntrainer -I../nntrainer -Iapi -I../api -I../api/ccapi/include -Inntrainer/compiler -I../nntrainer/compiler -Inntrainer/schem
+a -I../nntrainer/schema -Inntrainer/dataset -I../nntrainer/dataset -Inntrainer/layers/loss -I../nntrainer/layers/loss -Inntrainer/layers -I../nntrainer/layers -Inntrainer/models -I../nntrainer/models -Inntrainer/optimizers -I../nntrainer/optimizers
+-Inntrainer/tensor/cpu_backend/fallback -I../nntrainer/tensor/cpu_backend/fallback -Inntrainer/tensor/cpu_backend/ggml_interface/nntr_ggml_impl -I../nntrainer/tensor/cpu_backend/ggml_interface/nntr_ggml_impl -Inntrainer/tensor/cpu_backend/ggml_inter
+face -I../nntrainer/tensor/cpu_backend/ggml_interface -Inntrainer/tensor/cpu_backend/cblas_interface -I../nntrainer/tensor/cpu_backend/cblas_interface -Inntrainer/tensor/cpu_backend/x86 -I../nntrainer/tensor/cpu_backend/x86 -Inntrainer/tensor/cpu_ba
+ckend -I../nntrainer/tensor/cpu_backend -Inntrainer/tensor -I../nntrainer/tensor -Inntrainer/utils -I../nntrainer/utils -Inntrainer/graph -I../nntrainer/graph -IApplications/CausalLM/layers -I../Applications/CausalLM/layers -I/usr/include/x86_64-lin
+ux-gnu/openblas-pthread/ -I/usr/include/nnstreamer -I/usr/include/tensorflow2/ -fdiagnostics-color=always -D_FILE_OFFSET_BITS=64 -Wall -Winvalid-pch -Wnon-virtual-dtor -Werror -std=c++17 -g '-DVERSION="0.6.0"' -DVERSION_MAJOR=0 -DVERSION_MINOR=6 -DV
+ERSION_MICRO=0 -DENABLE_TRANSFORMER=1 -march=native -mavx2 -mfma -Wredundant-decls -Wwrite-strings -Wformat -Wformat-nonliteral -Wformat-security -Winit-self -Waddress -Wvla -Wpointer-arith -Wno-error=varargs -Wno-error=ignored-attributes -Wno-error
+=sign-compare -ftree-vectorize -Wno-unused-variable -Wno-comment -Wno-ignored-attributes -Wno-sign-compare -Wno-maybe-uninitialized -DMIN_CPP_VERSION=201703L -DMMAP_READ=1 -DKERNEL_CACHE=0 -DUSE_MMAP=1 -DOPENCL_KERNEL_PATH=nntrainer_opencl_kernels -
+DML_API_COMMON=1 -DNNSTREAMER_AVAILABLE=1 -DUSE_BLAS=1 -DHGEMM_EXPERIMENTAL_KERNEL=false -DNNTR_NUM_THREADS=1 -DOMP_NUM_THREADS=6 -DDEBUG=1 -D__LOGGING__=1 -DENABLE_TEST=1 -DREDUCE_TOLERANCE=1 -DENABLE_TFLITE_BACKBONE=1 -DENABLE_TFLITE_INTERPRETER=1
+ '-DNNTRAINER_CONF_PATH="/usr/local/etc/nntrainer.ini"' -fPIC -pthread -fopenmp -DPLUGGABLE -MD -MQ Applications/CausalLM/libcausallm.so.p/_nntrainerPranjal_Applications_CausalLM_models_qwen3_slim_moe_qwen3_slim_moe_causallm.cpp.o -MF Applications/C
+ausalLM/libcausallm.so.p/_nntrainerPranjal_Applications_CausalLM_models_qwen3_slim_moe_qwen3_slim_moe_causallm.cpp.o.d -o Applications/CausalLM/libcausallm.so.p/_nntrainerPranjal_Applications_CausalLM_models_qwen3_slim_moe_qwen3_slim_moe_causallm.cp
+p.o -c /nntrainerPranjal/Applications/CausalLM/models/qwen3_slim_moe/qwen3_slim_moe_causallm.cpp
+In file included from ../Applications/CausalLM/models/qwen3_slim_moe/qwen3_slim_moe_causallm.h:17,
+                 from /nntrainerPranjal/Applications/CausalLM/models/qwen3_slim_moe/qwen3_slim_moe_causallm.cpp:25:
+../Applications/CausalLM/models/qwen3/qwen3_causallm.h:33:28: error: 'std::vector<std::shared_ptr<ml::train::Layer> > causallm::Qwen3Transformer::createAttention(int, int, int, int, std::string, std::string, std::string)' marked 'override', but does
+ not override
+   33 |   std::vector<LayerHandle> createAttention(const int layer_id, int seq_len,
+      |                            ^~~~~~~~~~~~~~~
+[15/24] Compiling C++ object Applications/CausalLM/libcausallm.so.p/_nntrainerPranjal_Applications_CausalLM_models_gemma3_gemma3_causallm.cpp.o
+FAILED: Applications/CausalLM/libcausallm.so.p/_nntrainerPranjal_Applications_CausalLM_models_gemma3_gemma3_causallm.cpp.o
+c++ -IApplications/CausalLM/libcausallm.so.p -IApplications/CausalLM -I../Applications/CausalLM -IApplications/CausalLM/models -I../Applications/CausalLM/models -IApplications/CausalLM/models/gpt_oss -I../Applications/CausalLM/models/gpt_oss -IAppli
+cations/CausalLM/models/gpt_oss_cached_slim -I../Applications/CausalLM/models/gpt_oss_cached_slim -IApplications/CausalLM/models/qwen2 -I../Applications/CausalLM/models/qwen2 -IApplications/CausalLM/models/qwen3 -I../Applications/CausalLM/models/qwe
+n3 -IApplications/CausalLM/models/qwen3_moe -I../Applications/CausalLM/models/qwen3_moe -IApplications/CausalLM/models/qwen3_slim_moe -I../Applications/CausalLM/models/qwen3_slim_moe -IApplications/CausalLM/models/qwen3_cached_slim_moe -I../Applicat
+ions/CausalLM/models/qwen3_cached_slim_moe -IApplications/CausalLM/models/gemma3 -I../Applications/CausalLM/models/gemma3 -Inntrainer -I../nntrainer -Iapi -I../api -I../api/ccapi/include -Inntrainer/compiler -I../nntrainer/compiler -Inntrainer/schem
+a -I../nntrainer/schema -Inntrainer/dataset -I../nntrainer/dataset -Inntrainer/layers/loss -I../nntrainer/layers/loss -Inntrainer/layers -I../nntrainer/layers -Inntrainer/models -I../nntrainer/models -Inntrainer/optimizers -I../nntrainer/optimizers
+-Inntrainer/tensor/cpu_backend/fallback -I../nntrainer/tensor/cpu_backend/fallback -Inntrainer/tensor/cpu_backend/ggml_interface/nntr_ggml_impl -I../nntrainer/tensor/cpu_backend/ggml_interface/nntr_ggml_impl -Inntrainer/tensor/cpu_backend/ggml_inter
+face -I../nntrainer/tensor/cpu_backend/ggml_interface -Inntrainer/tensor/cpu_backend/cblas_interface -I../nntrainer/tensor/cpu_backend/cblas_interface -Inntrainer/tensor/cpu_backend/x86 -I../nntrainer/tensor/cpu_backend/x86 -Inntrainer/tensor/cpu_ba
+ckend -I../nntrainer/tensor/cpu_backend -Inntrainer/tensor -I../nntrainer/tensor -Inntrainer/utils -I../nntrainer/utils -Inntrainer/graph -I../nntrainer/graph -IApplications/CausalLM/layers -I../Applications/CausalLM/layers -I/usr/include/x86_64-lin
+ux-gnu/openblas-pthread/ -I/usr/include/nnstreamer -I/usr/include/tensorflow2/ -fdiagnostics-color=always -D_FILE_OFFSET_BITS=64 -Wall -Winvalid-pch -Wnon-virtual-dtor -Werror -std=c++17 -g '-DVERSION="0.6.0"' -DVERSION_MAJOR=0 -DVERSION_MINOR=6 -DV
+ERSION_MICRO=0 -DENABLE_TRANSFORMER=1 -march=native -mavx2 -mfma -Wredundant-decls -Wwrite-strings -Wformat -Wformat-nonliteral -Wformat-security -Winit-self -Waddress -Wvla -Wpointer-arith -Wno-error=varargs -Wno-error=ignored-attributes -Wno-error
+=sign-compare -ftree-vectorize -Wno-unused-variable -Wno-comment -Wno-ignored-attributes -Wno-sign-compare -Wno-maybe-uninitialized -DMIN_CPP_VERSION=201703L -DMMAP_READ=1 -DKERNEL_CACHE=0 -DUSE_MMAP=1 -DOPENCL_KERNEL_PATH=nntrainer_opencl_kernels -
+DML_API_COMMON=1 -DNNSTREAMER_AVAILABLE=1 -DUSE_BLAS=1 -DHGEMM_EXPERIMENTAL_KERNEL=false -DNNTR_NUM_THREADS=1 -DOMP_NUM_THREADS=6 -DDEBUG=1 -D__LOGGING__=1 -DENABLE_TEST=1 -DREDUCE_TOLERANCE=1 -DENABLE_TFLITE_BACKBONE=1 -DENABLE_TFLITE_INTERPRETER=1
+ '-DNNTRAINER_CONF_PATH="/usr/local/etc/nntrainer.ini"' -fPIC -pthread -fopenmp -DPLUGGABLE -MD -MQ Applications/CausalLM/libcausallm.so.p/_nntrainerPranjal_Applications_CausalLM_models_gemma3_gemma3_causallm.cpp.o -MF Applications/CausalLM/libcausa
+llm.so.p/_nntrainerPranjal_Applications_CausalLM_models_gemma3_gemma3_causallm.cpp.o.d -o Applications/CausalLM/libcausallm.so.p/_nntrainerPranjal_Applications_CausalLM_models_gemma3_gemma3_causallm.cpp.o -c /nntrainerPranjal/Applications/CausalLM/m
+odels/gemma3/gemma3_causallm.cpp
+In file included from /nntrainerPranjal/Applications/CausalLM/models/gemma3/gemma3_causallm.cpp:13:
+../Applications/CausalLM/models/gemma3/gemma3_causallm.h:45:28: error: 'std::vector<std::shared_ptr<ml::train::Layer> > causallm::Gemma3Transformer::createAttention(int, int, int, int, std::string, std::string, std::string)' marked 'override', but d
+oes not override
+   45 |   std::vector<LayerHandle> createAttention(const int layer_id, int seq_len,
+      |                            ^~~~~~~~~~~~~~~
+[18/24] Compiling C++ object Applications/CausalLM/libcausallm.so.p/_nntrainerPranjal_Applications_CausalLM_models_sentence_transformer.cpp.o
+ninja: build stopped: subcommand failed.
+root@437e46614157:/nntrainerPranjal#

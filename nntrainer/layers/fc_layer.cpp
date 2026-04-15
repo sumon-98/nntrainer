@@ -227,6 +227,7 @@ void FullyConnectedLayer::forwarding(RunLayerContext &context, bool training) {
     hidden_tmp_lora.dot(loraB, hidden_out_lora, false, false);
     hidden_out_lora.multiply_i(lora_scaling);
     hidden_.add_i(hidden_out_lora);
+    std::cout << "Entered LoRA condition for the layer: " << context.getName() << std::endl;
   }
 
   if (auto &disable_bias = std::get<props::DisableBias>(*layer_impl_props);
