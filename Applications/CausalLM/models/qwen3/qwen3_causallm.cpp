@@ -34,7 +34,7 @@ std::vector<LayerHandle> Qwen3Transformer::createAttention(
   const int layer_id, int seq_len, int n_heads, int head_dim,
   std::string query_name, std::string key_name, std::string value_name) {
   
-  std::cout << "Entered qwen3_casaullm.cpp's createAttention function." << std::endl;
+  std::cout << "Entered qwen3_causallm.cpp's createAttention function." << std::endl;
     
   std::vector<LayerHandle> layers;
   auto Q = "layer" + std::to_string(layer_id) + "_wq";
@@ -45,44 +45,54 @@ std::vector<LayerHandle> Qwen3Transformer::createAttention(
   auto A = "layer" + std::to_string(layer_id) + "_attention";
   auto O = "layer" + std::to_string(layer_id) + "_attention_out";
 
-  // Q layer
+  // Q layer with LoRA support
   std::vector<std::string> q_params = {
     withKey("name", Q), withKey("unit", head_dim * n_heads),
     withKey("disable_bias", "true"), withKey("input_layers", query_name),
     withKey("weight_initializer", "ones")};
+  if (isLoRATarget("wq")) {  // Add this check
+    q_params.push_back(withKey("lora_rank", LORA_RANK));
+    q_params.push_back(withKey("lora_alpha", LORA_ALPHA));
+  }
   layers.push_back(createLayer("fully_connected", q_params));
 
-  // Q-reshaped-norm layer
-  // q_norm(q_proj.view(hidden_shape))
+  // Q-reshaped-norm layer (no LoRA needed for norm layers)
   std::vector<std::string> q_norm_params = {
     withKey("name", Q_norm), withKey("input_layers", Q),
     withKey("packed", "false"), withKey("epsilon", std::to_string(NORM_EPS)),
     withKey("feature_size", std::to_string(head_dim))};
   layers.push_back(createLayer("reshaped_rms_norm", q_norm_params));
 
-  // K layer
+  // K layer with LoRA support
   std::vector<std::string> k_params = {
     withKey("name", K), withKey("unit", head_dim * n_heads / GQA_SIZE),
     withKey("disable_bias", "true"), withKey("input_layers", key_name),
     withKey("weight_initializer", "ones")};
+  if (isLoRATarget("wk")) {  // Add this check
+    k_params.push_back(withKey("lora_rank", LORA_RANK));
+    k_params.push_back(withKey("lora_alpha", LORA_ALPHA));
+  }
   layers.push_back(createLayer("fully_connected", k_params));
 
-  // K-reshaped-norm layer
-  // k_norm(k_proj.view(hidden_shape))
+  // K-reshaped-norm layer (no LoRA needed for norm layers)
   std::vector<std::string> k_norm_params = {
     withKey("name", K_norm), withKey("input_layers", K),
     withKey("packed", "false"), withKey("epsilon", std::to_string(NORM_EPS)),
     withKey("feature_size", std::to_string(head_dim))};
   layers.push_back(createLayer("reshaped_rms_norm", k_norm_params));
 
-  // V layer
+  // V layer with LoRA support
   std::vector<std::string> v_params = {
     withKey("name", V), withKey("unit", head_dim * n_heads / GQA_SIZE),
     withKey("disable_bias", "true"), withKey("input_layers", value_name),
     withKey("weight_initializer", "ones")};
+  if (isLoRATarget("wv")) {  // Add this check
+    v_params.push_back(withKey("lora_rank", LORA_RANK));
+    v_params.push_back(withKey("lora_alpha", LORA_ALPHA));
+  }
   layers.push_back(createLayer("fully_connected", v_params));
 
-  // Attention core layer
+  // Attention core layer (no LoRA needed for attention core)
   std::vector<std::string> a_params = {
     withKey("name", A),
     withKey("num_heads", n_heads),
@@ -95,14 +105,19 @@ std::vector<LayerHandle> Qwen3Transformer::createAttention(
     withKey("input_layers", {Q_norm, K_norm, V})};
   layers.push_back(createLayer("mha_core", a_params));
 
-  // O layer
+  // O layer with LoRA support
   std::vector<std::string> o_params = {
     withKey("name", O), withKey("unit", DIM), withKey("disable_bias", "true"),
     withKey("input_layers", A), withKey("weight_initializer", "ones")};
+  if (isLoRATarget("wo")) {  // Add this check
+    o_params.push_back(withKey("lora_rank", LORA_RANK));
+    o_params.push_back(withKey("lora_alpha", LORA_ALPHA));
+  }
   layers.push_back(createLayer("fully_connected", o_params));
 
   return layers;
 }
+
 
 void Qwen3Transformer::registerCustomLayers() {
   ///
