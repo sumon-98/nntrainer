@@ -370,12 +370,19 @@ public:
       }
     } else {
       // @note shared weights are only be saved at the first access
+      std::cout << "Layer name inside: " << run_context.getName() << std::endl;
+      std::cout << "FC layer weights: " << run_context.getNumWeights() << std::endl;
       for (unsigned int i = 0; i < run_context.getNumWeights(); ++i) {
         if (run_context.isGradientFirstAccess(i)) {
           auto &weight = run_context.getWeight(i);
+          std::cout << "Weight Name: " << weight.getName() << std::endl;
           if (dtype == TensorDim::DataType::NONE ||
-              weight.getDataType() == dtype)
-            weight.save(file);
+              weight.getDataType() == dtype) {
+                if(weight.getName().find("lora") != std::string::npos) {
+                  std::cout << "Saving weights..." << std::endl;
+                  weight.save(file);
+                }
+              }
           else {
             if (dtype == TensorDim::DataType::Q4_0) {
               NNTR_THROW_IF(weight.getDataType() != TensorDim::DataType::FP32,

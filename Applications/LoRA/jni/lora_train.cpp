@@ -128,17 +128,40 @@ std::vector<LayerHandle> createSimpleGraph(unsigned int lora_rank,
     createLayer("input", {nntrainer::withKey("name", "input0"),
                           nntrainer::withKey("input_shape", "1:1:784")}));
 
-  // Hidden layer with LoRA
+  // First hidden layer with LoRA
   layers.push_back(createLayer(
     "fully_connected",
     {
-      nntrainer::withKey("unit", 256),
+      nntrainer::withKey("unit", 64),
       nntrainer::withKey("weight_initializer", "xavier_uniform"),
       nntrainer::withKey("activation", "relu"),
-      // nntrainer::withKey("lora_rank", std::to_string(lora_rank)),
-      // nntrainer::withKey("lora_alpha", std::to_string(lora_alpha))
+      nntrainer::withKey("lora_rank", std::to_string(lora_rank)),
+      nntrainer::withKey("lora_alpha", std::to_string(lora_alpha))
     }));
 
+  layers.push_back(
+    createLayer("reshape", {
+      nntrainer::withKey("target_shape", "1:1:8:8"),
+    })
+  );
+    
+  layers.push_back(
+    createLayer("conv2d", {
+                            nntrainer::withKey("name", "conv0"),
+                            nntrainer::withKey("filters", 1),
+                            nntrainer::withKey("kernel_size", {8, 8}),
+                            nntrainer::withKey("stride", {1, 1}),
+                            nntrainer::withKey("padding", "same"),
+                            nntrainer::withKey("bias_initializer", "zeros"),
+                            nntrainer::withKey("weight_initializer", "xavier_uniform"),
+                          }));
+
+ layers.push_back(
+    createLayer("reshape", {
+      nntrainer::withKey("target_shape", "1:1:1:64"),
+    })
+  );
+  
   // Output layer with softmax activation for classification (no LoRA for output
   // layer)
   layers.push_back(
@@ -389,17 +412,17 @@ int main(int argc, char **argv) {
     return 1;
   }
 
-  try {
-    model->load(pretrained_model_path,
-                ml::train::ModelFormat::MODEL_FORMAT_BIN);
-    std::cout << "Pre-trained model loaded successfully." << std::endl;
-  } catch (const std::exception &e) {
-    std::cerr << "Error loading pre-trained model: " << e.what() << std::endl;
-    std::cerr << "Please make sure the pre-trained model exists and was "
-                 "trained with compatible architecture."
-              << std::endl;
-    return 1;
-  }
+  // try {
+  //   model->load(pretrained_model_path,
+  //               ml::train::ModelFormat::MODEL_FORMAT_BIN);
+  //   std::cout << "Pre-trained model loaded successfully." << std::endl;
+  // } catch (const std::exception &e) {
+  //   std::cerr << "Error loading pre-trained model: " << e.what() << std::endl;
+  //   std::cerr << "Please make sure the pre-trained model exists and was "
+  //                "trained with compatible architecture."
+  //             << std::endl;
+  //   return 1;
+  // }
   // Create DataInformation objects for training data (using only first
   // train_samples)
   auto train_user_data =

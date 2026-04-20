@@ -642,7 +642,9 @@ void NeuralNetwork::save(
       const auto &layer_node = *iter;
       auto it = layer_dtype_map.find(layer_node->getName());
       auto target_dtype = (it != layer_dtype_map.end()) ? it->second : dtype;
-      layer_node->save(model_file, false, exec_mode, target_dtype);
+      std::cout << "Layer Name: " << layer_node->getType() << std::endl;
+      if(layer_node->getType() == "fully_connected")
+        layer_node->save(model_file, false, exec_mode, target_dtype);
     }
 
     if (opt && istrequal(opt->getType(), "adam")) {
@@ -650,11 +652,12 @@ void NeuralNetwork::save(
       model_file.write(adam.c_str(), 4);
       for (auto iter = model_graph.cbegin(); iter != model_graph.cend();
            iter++) {
+        if(0)
         (*iter)->save(model_file, true);
       }
     }
 
-    if (exec_mode == ml::train::ExecutionMode::TRAIN) {
+    if (exec_mode == ml::train::ExecutionMode::TRAIN && 0) {
       model_file.write((char *)&epoch_idx, sizeof(epoch_idx));
       model_file.write((char *)&iter, sizeof(iter));
     }
