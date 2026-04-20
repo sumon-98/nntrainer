@@ -91,6 +91,9 @@ int main(int argc, char *argv[]) {
     }
 
     model->initializeForTraining(lr, epochs);
+    // For checking if only LoRA layers are being updated or not
+    std::cout << "\n=== Saving model weights BEFORE training ===" << std::endl;
+    model->exportWeightsToFile("model_weights_before_training.txt");
 
     if (!skip_weights && nntr_cfg.contains("model_file_name")) {
       std::string weight_path = model_dir + "/" + nntr_cfg["model_file_name"].get<std::string>();
@@ -135,11 +138,19 @@ int main(int argc, char *argv[]) {
 
     std::cout << "\n=== Starting Qwen3 LoRA full model training ===" << std::endl;
     auto train_start = std::chrono::steady_clock::now();
+    
+    std::cout << "\n=== NNTrainer Model Summary (Checking Trainable vs Frozen Layers) ===" << std::endl;
+    model->summarize(std::cout, ML_TRAIN_SUMMARY_TENSOR);
+    std::cout << "==================================================================\n" << std::endl;
+
     model->train();
     auto train_end = std::chrono::steady_clock::now();
     double elapsed_sec = std::chrono::duration<double>(train_end - train_start).count();
 
     std::cout << "\nTraining completed in " << elapsed_sec << " seconds." << std::endl;
+    // For checking if only LoRA layers are being updated or not
+    std::cout << "\n=== Saving model weights AFTER training ===" << std::endl;
+    model->exportWeightsToFile("model_weights_after_training.txt");
 
     model->save_weight(output_path);
     std::cout << "LoRA Weights saved to: " << output_path << std::endl;
