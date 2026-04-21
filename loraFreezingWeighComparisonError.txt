@@ -1,0 +1,72 @@
+python compare_weights.py /data/Pranjal/QZO/ARFWork/nnTrainerRepo_Copy3/nnTrainerRepo_Copy2/nntrainer/modelWeightsTrainingDifferenceQwen3/thirdAttempt_ProperFreezing/model_weights_before_training_FULLTRAINING.txt /data/Pran
+jal/QZO/ARFWork/nnTrainerRepo_Copy3/nnTrainerRepo_Copy2/nntrainer/modelWeightsTrainingDifferenceQwen3/thirdAttempt_ProperFreezing/model_weights_after_training_F
+ULLTRAINING.txt 
+Threshold: 1e-06
+Parsing: /data/Pranjal/QZO/ARFWork/nnTrainerRepo_Copy3/nnTrainerRepo_Copy2/nntrainer/modelWeightsTrainingDifferenceQwen3/thirdAttempt_ProperFreezing/model_weights_before_training_FULLTRAINING.txt
+  Found 539 layers
+Parsing: /data/Pranjal/QZO/ARFWork/nnTrainerRepo_Copy3/nnTrainerRepo_Copy2/nntrainer/modelWeightsTrainingDifferenceQwen3/thirdAttempt_ProperFreezing/model_weights_after_training_FULLTRAINING.txt
+  Found 539 layers
+Auto-detected mode: normal
+
+==========================================================================================
+  WEIGHT COMPARISON RESULTS
+==========================================================================================
+
+============================================================
+  SUMMARY BY WEIGHT CLASS
+============================================================
+  Class            Total    Changed    Frozen    
+  --------------------------------------------
+  base_weight      196      133        63        
+  bias             1        0          1         
+  gamma            113      57         56        
+  embedding        3        2          1         
+
+============================================================
+  VERDICT (mode=normal)
+============================================================
+  ⚠️  WARN: 63/196 'base_weight' weights did NOT change
+  ⚠️  WARN: 1/1 'bias' weights did NOT change
+  ⚠️  WARN: 56/113 'gamma' weights did NOT change
+
+  🎉 All checks passed for normal mode!
+
+
+  ---------------------------
+
+  python compare_weights.py /data/Pranjal/QZO/ARFWork/nnTrainerRepo_Copy3/nnTrainerRepo_Copy2/nntrainer/modelWeightsTrainingDifferenceQwen3/thirdAttempt_ProperFreezing/model_weights_before_training_LORA.txt /data/Pranjal/QZO/
+ARFWork/nnTrainerRepo_Copy3/nnTrainerRepo_Copy2/nntrainer/modelWeightsTrainingDifferenceQwen3/thirdAttempt_ProperFreezing/model_weights_after_training_LORA.txt 
+Threshold: 1e-06
+Parsing: /data/Pranjal/QZO/ARFWork/nnTrainerRepo_Copy3/nnTrainerRepo_Copy2/nntrainer/modelWeightsTrainingDifferenceQwen3/thirdAttempt_ProperFreezing/model_weights_before_training_LORA.txt
+  Found 539 layers
+Parsing: /data/Pranjal/QZO/ARFWork/nnTrainerRepo_Copy3/nnTrainerRepo_Copy2/nntrainer/modelWeightsTrainingDifferenceQwen3/thirdAttempt_ProperFreezing/model_weights_after_training_LORA.txt
+  Found 539 layers
+Auto-detected mode: lora
+
+==========================================================================================
+  WEIGHT COMPARISON RESULTS
+==========================================================================================
+
+============================================================
+  SUMMARY BY WEIGHT CLASS
+============================================================
+  Class            Total    Changed    Frozen    
+  --------------------------------------------
+  base_weight      196      0          196       
+  bias             1        0          1         
+  loraA            196      195        1         
+  loraB            196      187        9         
+  gamma            113      0          113       
+  embedding        3        2          1         
+
+============================================================
+  VERDICT (mode=lora)
+============================================================
+  ✅ PASS: All 196 'base_weight' weights are FROZEN
+  ✅ PASS: All 1 'bias' weights are FROZEN
+  ✅ PASS: All 113 'gamma' weights are FROZEN
+  ❌ FAIL: 2 'embedding' weights CHANGED (should be frozen)
+  ⚠️  WARN: 1 'loraA' weights did NOT change
+  ⚠️  WARN: 9 'loraB' weights did NOT change
+
+  ⛔ Some checks FAILED — review the details above
