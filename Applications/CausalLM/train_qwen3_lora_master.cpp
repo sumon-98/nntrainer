@@ -16,6 +16,7 @@
 
 #include <dataset.h>
 #include <model.h>
+#include <profiler.h>
 
 using json = nlohmann::json;
 
@@ -52,6 +53,10 @@ int main(int argc, char *argv[]) {
   }
 
   try {
+    // Setup built-in NNTrainer memory profiler (active only with -Denable-profile=true)
+    auto profiler_listener = std::make_shared<nntrainer::profile::GenericProfileListener>();
+    PROFILE_BEGIN(profiler_listener);
+
     std::string config_path = model_dir + "/config.json";
     std::string gen_config_path = model_dir + "/generation_config.json";
     std::string nntr_config_path = model_dir + "/nntr_config.json";
@@ -142,7 +147,7 @@ int main(int argc, char *argv[]) {
 
     // For checking if only LoRA layers are being updated or not
     std::cout << "\n=== Saving model weights BEFORE training ===" << std::endl;
-    model->exportWeightsToFile("model_weights_before_training.txt");
+    model->exportWeightsToFile("model_weights_before_training_LORA.txt");
 
     model->train();
     auto train_end = std::chrono::steady_clock::now();
@@ -151,10 +156,15 @@ int main(int argc, char *argv[]) {
     std::cout << "\nTraining completed in " << elapsed_sec << " seconds." << std::endl;
     // For checking if only LoRA layers are being updated or not
     std::cout << "\n=== Saving model weights AFTER training ===" << std::endl;
-    model->exportWeightsToFile("model_weights_after_training.txt");
+    model->exportWeightsToFile("model_weights_after_training_LORA.txt");
 
     model->save_weight(output_path);
     std::cout << "LoRA Weights saved to: " << output_path << std::endl;
+
+    // Print memory profiling report (only produces output with -Denable-profile=true)
+    std::cout << "\n=== NNTrainer Memory Profile Report (LoRA Training) ===" << std::endl;
+    PROFILE_END(profiler_listener);
+    std::cout << "======================================================\n" << std::endl;
 
   } catch (const std::exception &e) {
     std::cerr << "Error: " << e.what() << std::endl;

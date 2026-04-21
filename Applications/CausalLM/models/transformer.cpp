@@ -17,10 +17,10 @@
 #include <engine.h>
 #include <model.h>
 
-#include <layer.h>
 #include <llm_util.hpp>
 #include <tokenizers_cpp.h>
 #include <transformer.h>
+#include <layer.h>
 
 #include <embedding_layer.h>
 #include <mha_core.h>
@@ -199,7 +199,8 @@ void Transformer::initializeForTraining(float lr, unsigned int epochs) {
 
   // setup model property
   std::vector<std::string> model_props = {
-    withKey("batch_size", BATCH_SIZE), withKey("epochs", epochs),
+    withKey("batch_size", BATCH_SIZE),
+    withKey("epochs", epochs),
     withKey("model_tensor_type", MODEL_TENSOR_TYPE)};
 
   model->setProperty(model_props);
@@ -239,11 +240,14 @@ void Transformer::constructModel() {
   const std::string embedding_type =
     TIE_WORD_EMBEDDINGS ? "tie_word_embeddings" : "embedding_layer";
 
-  layers.push_back(createLayer(
-    embedding_type,
-    {"name=embedding0", "in_dim=" + std::to_string(NUM_VOCAB),
-     "weight_dtype=" + EMBEDDING_DTYPE, "out_dim=" + std::to_string(DIM),
-     "scale=" + std::to_string(EMBEDDING_SCALE)}));
+  std::vector<std::string> embed_params = {
+    "name=embedding0", "in_dim=" + std::to_string(NUM_VOCAB),
+    "weight_dtype=" + EMBEDDING_DTYPE, "out_dim=" + std::to_string(DIM),
+    "scale=" + std::to_string(EMBEDDING_SCALE)};
+  if (LORA_RANK > 0) {
+    embed_params.push_back(withKey("trainable", "false"));
+  }
+  layers.push_back(createLayer(embedding_type, embed_params));
 
   // create transformer layers
   for (int i = 0; i < NUM_LAYERS; ++i) {
@@ -257,21 +261,28 @@ void Transformer::constructModel() {
   }
 
   // create rms_norm
-  layers.push_back(createLayer(
-    "rms_norm",
-    {withKey("name", "output_norm"),
-     withKey("epsilon", std::to_string(NORM_EPS)),
-     withKey("input_layers",
-             "layer" + std::to_string(NUM_LAYERS - 1) + "_decoder_output"),
-     withKey("packed", "false")}));
+  std::vector<std::string> out_norm_params = {
+    withKey("name", "output_norm"),
+    withKey("epsilon", std::to_string(NORM_EPS)),
+    withKey("input_layers",
+            "layer" + std::to_string(NUM_LAYERS - 1) + "_decoder_output"),
+    withKey("packed", "false")};
+  if (LORA_RANK > 0) {
+    out_norm_params.push_back(withKey("trainable", "false"));
+  }
+  layers.push_back(createLayer("rms_norm", out_norm_params));
 
   // create lm_head
   const std::string lm_head_type =
     TIE_WORD_EMBEDDINGS ? "tie_word_embeddings" : "fully_connected";
-  layers.push_back(createLayer(
-    lm_head_type, {"name=lm_head", "unit=" + std::to_string(NUM_VOCAB),
-                   "weight_dtype=" + EMBEDDING_DTYPE, "bias_initializer=zeros",
-                   "input_layers=output_norm"}));
+  std::vector<std::string> lm_head_params = {
+    "name=lm_head", "unit=" + std::to_string(NUM_VOCAB),
+    "weight_dtype=" + EMBEDDING_DTYPE,
+    "bias_initializer=zeros", "input_layers=output_norm"};
+  if (LORA_RANK > 0) {
+    lm_head_params.push_back(withKey("trainable", "false"));
+  }
+  layers.push_back(createLayer(lm_head_type, lm_head_params));
 
   // add created layers into the model
   for (auto &layer : layers) {
@@ -311,26 +322,6 @@ void Transformer::save_weight(const std::string &weight_path) {
   }
 };
 
-void Transformer::save_weight(
-  const std::string &weight_path, ml::train::TensorDim::DataType dtype,
-  const std::map<std::string, ml::train::TensorDim::DataType>
-    &layer_dtype_map) {
-
-  if (!is_initialized) {
-    throw std::runtime_error(
-      "Transformer model is not initialized. Please call "
-      "initialize() before save_weight().");
-  }
-
-  try {
-    model->save(weight_path, ml::train::ModelFormat::MODEL_FORMAT_BIN, dtype,
-                layer_dtype_map);
-  } catch (const std::exception &e) {
-    throw std::runtime_error("Failed to save model weights with dtype: " +
-                             std::string(e.what()));
-  }
-};
-
 void Transformer::run(const WSTR prompt, bool do_sample,
                       const WSTR system_prompt, const WSTR tail_prompt,
                       bool log_output) {
@@ -349,12 +340,15 @@ Transformer::createTransformerDecoderBlock(const int layer_id,
 
   std::vector<LayerHandle> layers;
 
-  layers.push_back(createLayer(
-    "rms_norm",
-    {withKey("name", "layer" + std::to_string(layer_id) + "_attention_norm"),
-     withKey("input_layers", input_name),
-     withKey("epsilon", std::to_string(NORM_EPS)),
-     withKey("packed", "false")}));
+  std::vector<std::string> attn_norm_params = {
+    withKey("name", "layer" + std::to_string(layer_id) + "_attention_norm"),
+    withKey("input_layers", input_name),
+    withKey("epsilon", std::to_string(NORM_EPS)),
+    withKey("packed", "false")};
+  if (LORA_RANK > 0) {
+    attn_norm_params.push_back(withKey("trainable", "false"));
+  }
+  layers.push_back(createLayer("rms_norm", attn_norm_params));
 
   auto att_layer =
     createAttention(layer_id, INIT_SEQ_LEN, NUM_HEADS, HEAD_DIM,
@@ -364,30 +358,39 @@ Transformer::createTransformerDecoderBlock(const int layer_id,
 
   layers.insert(layers.end(), att_layer.begin(), att_layer.end());
 
-  layers.push_back(createLayer(
-    "addition",
-    {withKey("name", "layer" + std::to_string(layer_id) + "_decoder_add"),
-     withKey("input_layers", input_name + ",layer" + std::to_string(layer_id) +
-                               "_attention_out")}));
+  std::vector<std::string> dec_add_params = {
+    withKey("name", "layer" + std::to_string(layer_id) + "_decoder_add"),
+    withKey("input_layers", input_name + ",layer" + std::to_string(layer_id) +
+                               "_attention_out")};
+  if (LORA_RANK > 0) {
+    dec_add_params.push_back(withKey("trainable", "false"));
+  }
+  layers.push_back(createLayer("addition", dec_add_params));
 
-  layers.push_back(createLayer(
-    "rms_norm",
-    {withKey("name", "layer" + std::to_string(layer_id) + "_ffn_norm"),
-     withKey("input_layers",
-             "layer" + std::to_string(layer_id) + "_decoder_add"),
-     withKey("epsilon", std::to_string(NORM_EPS)),
-     withKey("packed", "false")}));
+  std::vector<std::string> ffn_norm_params = {
+    withKey("name", "layer" + std::to_string(layer_id) + "_ffn_norm"),
+    withKey("input_layers",
+            "layer" + std::to_string(layer_id) + "_decoder_add"),
+    withKey("epsilon", std::to_string(NORM_EPS)),
+    withKey("packed", "false")};
+  if (LORA_RANK > 0) {
+    ffn_norm_params.push_back(withKey("trainable", "false"));
+  }
+  layers.push_back(createLayer("rms_norm", ffn_norm_params));
 
   auto ffn_layer = createMlp(layer_id, DIM, INTERMEDIATE_SIZE,
                              "layer" + std::to_string(layer_id) + "_ffn_norm");
   layers.insert(layers.end(), ffn_layer.begin(), ffn_layer.end());
 
-  layers.push_back(createLayer(
-    "addition",
-    {withKey("name", "layer" + std::to_string(layer_id) + "_decoder_output"),
-     withKey("input_layers", "layer" + std::to_string(layer_id) +
+  std::vector<std::string> dec_out_params = {
+    withKey("name", "layer" + std::to_string(layer_id) + "_decoder_output"),
+    withKey("input_layers", "layer" + std::to_string(layer_id) +
                                "_decoder_add,layer" + std::to_string(layer_id) +
-                               "_ffn_down")}));
+                               "_ffn_down")};
+  if (LORA_RANK > 0) {
+    dec_out_params.push_back(withKey("trainable", "false"));
+  }
+  layers.push_back(createLayer("addition", dec_out_params));
 
   return layers;
 }
@@ -423,6 +426,8 @@ Transformer::createAttention(const int layer_id, int seq_len, int n_heads,
   if (isLoRATarget("wq")) {
     q_params.push_back(withKey("lora_rank", LORA_RANK));
     q_params.push_back(withKey("lora_alpha", LORA_ALPHA));
+  } else if (LORA_RANK > 0) {
+    q_params.push_back(withKey("trainable", "false"));
   }
   layers.push_back(createLayer("fully_connected", q_params));
 
@@ -434,6 +439,8 @@ Transformer::createAttention(const int layer_id, int seq_len, int n_heads,
   if (isLoRATarget("wk")) {
     k_params.push_back(withKey("lora_rank", LORA_RANK));
     k_params.push_back(withKey("lora_alpha", LORA_ALPHA));
+  } else if (LORA_RANK > 0) {
+    k_params.push_back(withKey("trainable", "false"));
   }
   layers.push_back(createLayer("fully_connected", k_params));
 
@@ -445,6 +452,8 @@ Transformer::createAttention(const int layer_id, int seq_len, int n_heads,
   if (isLoRATarget("wv")) {
     v_params.push_back(withKey("lora_rank", LORA_RANK));
     v_params.push_back(withKey("lora_alpha", LORA_ALPHA));
+  } else if (LORA_RANK > 0) {
+    v_params.push_back(withKey("trainable", "false"));
   }
   layers.push_back(createLayer("fully_connected", v_params));
 
@@ -461,6 +470,9 @@ Transformer::createAttention(const int layer_id, int seq_len, int n_heads,
     withKey("max_new_tokens", std::to_string(NUM_TO_GENERATE)),
     withKey("is_causal", IS_CAUSAL ? "true" : "false"),
     withKey("input_layers", {Q, K, V})};
+  if (LORA_RANK > 0) {
+    a_params.push_back(withKey("trainable", "false"));
+  }
   layers.push_back(createLayer("mha_core", a_params));
 
   // O layer
@@ -470,6 +482,8 @@ Transformer::createAttention(const int layer_id, int seq_len, int n_heads,
   if (isLoRATarget("wo")) {
     o_params.push_back(withKey("lora_rank", LORA_RANK));
     o_params.push_back(withKey("lora_alpha", LORA_ALPHA));
+  } else if (LORA_RANK > 0) {
+    o_params.push_back(withKey("trainable", "false"));
   }
   layers.push_back(createLayer("fully_connected", o_params));
 
@@ -485,38 +499,50 @@ std::vector<LayerHandle> Transformer::createMlp(const int layer_id, int dim,
   std::vector<std::string> up_params = {
     withKey("name", "layer" + std::to_string(layer_id) + "_ffn_up"),
     withKey("unit", hidden_dim), withKey("disable_bias", "true"),
-    withKey("input_layers", input_name), withKey("weight_initializer", "ones")};
+    withKey("input_layers", input_name),
+    withKey("weight_initializer", "ones")};
   if (isLoRATarget("ffn_up")) {
     up_params.push_back(withKey("lora_rank", LORA_RANK));
     up_params.push_back(withKey("lora_alpha", LORA_ALPHA));
+  } else if (LORA_RANK > 0) {
+    up_params.push_back(withKey("trainable", "false"));
   }
   layers.push_back(createLayer("fully_connected", up_params));
 
   std::vector<std::string> gate_params = {
     withKey("name", "layer" + std::to_string(layer_id) + "_ffn_gate"),
     withKey("unit", hidden_dim), withKey("disable_bias", "true"),
-    withKey("input_layers", input_name), withKey("weight_initializer", "ones")};
+    withKey("input_layers", input_name),
+    withKey("weight_initializer", "ones")};
   if (isLoRATarget("ffn_gate")) {
     gate_params.push_back(withKey("lora_rank", LORA_RANK));
     gate_params.push_back(withKey("lora_alpha", LORA_ALPHA));
+  } else if (LORA_RANK > 0) {
+    gate_params.push_back(withKey("trainable", "false"));
   }
   layers.push_back(createLayer("fully_connected", gate_params));
 
-  layers.push_back(createLayer(
-    "swiglu",
-    {withKey("name", "layer" + std::to_string(layer_id) + "_ffn_swiglu"),
-     withKey("input_layers", "layer" + std::to_string(layer_id) + "_ffn_gate," +
+  std::vector<std::string> swiglu_params = {
+    withKey("name", "layer" + std::to_string(layer_id) + "_ffn_swiglu"),
+    withKey("input_layers", "layer" + std::to_string(layer_id) + "_ffn_gate," +
                                "layer" + std::to_string(layer_id) +
-                               "_ffn_up")}));
+                               "_ffn_up")};
+  if (LORA_RANK > 0) {
+    swiglu_params.push_back(withKey("trainable", "false"));
+  }
+  layers.push_back(createLayer("swiglu", swiglu_params));
 
   std::vector<std::string> down_params = {
     withKey("name", "layer" + std::to_string(layer_id) + "_ffn_down"),
     withKey("unit", dim), withKey("disable_bias", "true"),
-    withKey("input_layers", "layer" + std::to_string(layer_id) + "_ffn_swiglu"),
+    withKey("input_layers",
+            "layer" + std::to_string(layer_id) + "_ffn_swiglu"),
     withKey("weight_initializer", "ones")};
   if (isLoRATarget("ffn_down")) {
     down_params.push_back(withKey("lora_rank", LORA_RANK));
     down_params.push_back(withKey("lora_alpha", LORA_ALPHA));
+  } else if (LORA_RANK > 0) {
+    down_params.push_back(withKey("trainable", "false"));
   }
   layers.push_back(createLayer("fully_connected", down_params));
 
@@ -544,6 +570,76 @@ void Transformer::registerCustomLayers() {
     std::cerr << "failed to register factory, reason: " << e.what()
               << std::endl;
   }
+}
+
+// LoRA Debugging
+void Transformer::exportWeightsToFile(const std::string& filename) const {
+  std::ofstream outfile(filename);
+  if (!outfile.is_open()) {
+    std::cerr << "Failed to open file for writing: " << filename << std::endl;
+    return;
+  }
+  
+  outfile << std::fixed << std::setprecision(6);
+  outfile << "=== Detailed Model Weights Export ===" << std::endl;
+  outfile << "Export Time: " << std::time(nullptr) << std::endl;
+  outfile << "=====================================" << std::endl << std::endl;
+  
+  if (!model) {
+    outfile << "Error: Model is not initialized" << std::endl;
+    outfile.close();
+    return;
+  }
+  
+  // Use the forEachLayer method to iterate through all layers
+  model->forEachLayer(
+    [](ml::train::Layer &layer, nntrainer::RunLayerContext &rc, void *user_data) {
+      std::ofstream &outfile = *static_cast<std::ofstream*>(user_data);
+      
+      outfile << "Layer: " << layer.getName() << " (Type: " << layer.getType() << ")\n";
+      
+      try {
+        // Get weights using the layer interface
+        std::vector<float*> weights;
+        std::vector<ml::train::TensorDim> weight_dims;
+        layer.getWeights(weights, weight_dims);
+        
+        for (size_t i = 0; i < weights.size(); ++i) {
+          if (weights[i] && weight_dims[i].getFeatureLen() > 0) {
+            outfile << "  Weight " << i << " (Name: " << layer.getWeightName(i) 
+                    << ", Dim: " << weight_dims[i].getFeatureLen() << "): ";
+            
+            // Print first 10 and last 10 values for large weights
+            size_t len = weight_dims[i].getFeatureLen();
+            size_t print_count = std::min(len, (size_t)20);
+            
+            for (size_t j = 0; j < std::min(print_count/2, len); ++j) {
+              outfile << weights[i][j] << " ";
+            }
+            
+            if (len > print_count) {
+              outfile << "... ";
+              for (size_t j = len - print_count/2; j < len; ++j) {
+                outfile << weights[i][j] << " ";
+              }
+            } else {
+              for (size_t j = print_count/2; j < len; ++j) {
+                outfile << weights[i][j] << " ";
+              }
+            }
+            outfile << "\n";
+          }
+        }
+      } catch (const std::exception& e) {
+        outfile << "  Error accessing weights: " << e.what() << "\n";
+      }
+      outfile << "\n";
+    },
+    &outfile
+  );
+  
+  outfile.close();
+  std::cout << "Detailed model weights exported to: " << filename << std::endl;
 }
 
 } // namespace causallm

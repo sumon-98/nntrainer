@@ -59,7 +59,7 @@ public:
   virtual ~Qwen3CausalLM() = default;
 
   void registerCustomLayers() override;
-  void exportWeightsToFile(const std::string& filename) const; // LoRA Debugging
+  // void exportWeightsToFile(const std::string& filename) const; // LoRA Debugging
 
 private:
 };

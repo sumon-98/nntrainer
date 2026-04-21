@@ -35,7 +35,6 @@
 #endif
 
 #include <layer.h>
-#include <map>
 #include <model.h>
 #include <random>
 
@@ -103,17 +102,17 @@ public:
    */
   virtual void save_weight(const std::string &weight_path);
 
-  /**
-   * @brief Save the weight to a file with type conversion
-   * @param weight_path Path to save the weight file
-   * @param dtype Global target data type for all layers (NONE = keep original)
-   * @param layer_dtype_map Per-layer data type overrides (layer_name -> dtype)
-   */
-  virtual void
-  save_weight(const std::string &weight_path,
-              ml::train::TensorDim::DataType dtype,
-              const std::map<std::string, ml::train::TensorDim::DataType>
-                &layer_dtype_map = {});
+  // /**
+  //  * @brief Save the weight to a file with type conversion
+  //  * @param weight_path Path to save the weight file
+  //  * @param dtype Global target data type for all layers (NONE = keep original)
+  //  * @param layer_dtype_map Per-layer data type overrides (layer_name -> dtype)
+  //  */
+  // virtual void
+  // save_weight(const std::string &weight_path,
+  //             ml::train::TensorDim::DataType dtype,
+  //             const std::map<std::string, ml::train::TensorDim::DataType>
+  //               &layer_dtype_map = {});
 
   /**
    * @brief run the Transformer model
@@ -130,12 +129,27 @@ public:
   }
 
   /**
+   * @brief Summarize model structure and trainable parameters
+   */
+  void summarize(std::ostream &out, ml_train_summary_type_e verbosity = ML_TRAIN_SUMMARY_LAYER) {
+    if (model) {
+      model->summarize(out, verbosity);
+    }
+  }
+
+  /**
+   * @brief Get the training loss from the underlying nntrainer model
+   */
+  float getTrainingLoss() const {
+    if (!model) return 0.0f;
+    return model->getTrainingLoss();
+  }
+
+  /**
    * @brief Configure dataset for the model
    */
-  virtual void setDataset(ml::train::DatasetModeType mode,
-                          std::shared_ptr<ml::train::Dataset> dataset) {
-    if (!model)
-      throw std::invalid_argument("Model is not initialized");
+  virtual void setDataset(ml::train::DatasetModeType mode, std::shared_ptr<ml::train::Dataset> dataset) {
+    if (!model) throw std::invalid_argument("Model is not initialized");
     model->setDataset(mode, std::move(dataset));
   }
 
@@ -147,6 +161,11 @@ public:
       throw std::invalid_argument("Model is not initialized");
     model->train(values);
   }
+
+  /**
+   * @brief LoRA Debugging
+   */
+  void exportWeightsToFile(const std::string& filename) const; 
 
 protected:
   /**
@@ -225,9 +244,9 @@ protected:
   bool IS_CAUSAL = true;
 
   /** LoRA parameters */
-  unsigned int LORA_RANK = 0;            /**< LoRA rank (0 = disabled) */
-  unsigned int LORA_ALPHA = 0;           /**< LoRA alpha for scaling */
-  std::vector<std::string> LORA_TARGETS; /**< Target layer names for LoRA */
+  unsigned int LORA_RANK = 0;             /**< LoRA rank (0 = disabled) */
+  unsigned int LORA_ALPHA = 0;            /**< LoRA alpha for scaling */
+  std::vector<std::string> LORA_TARGETS;  /**< Target layer names for LoRA */
 
   /**
    * @brief Check if LoRA should be applied to a layer

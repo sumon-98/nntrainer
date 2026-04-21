@@ -33,9 +33,7 @@ namespace causallm {
 std::vector<LayerHandle> Qwen3Transformer::createAttention(
   const int layer_id, int seq_len, int n_heads, int head_dim,
   std::string query_name, std::string key_name, std::string value_name) {
-  
-  std::cout << "Entered qwen3_causallm.cpp's createAttention function." << std::endl;
-    
+
   std::vector<LayerHandle> layers;
   auto Q = "layer" + std::to_string(layer_id) + "_wq";
   auto Q_norm = "layer" + std::to_string(layer_id) + "_q_norm";
@@ -61,8 +59,10 @@ std::vector<LayerHandle> Qwen3Transformer::createAttention(
   std::vector<std::string> q_norm_params = {
     withKey("name", Q_norm), withKey("input_layers", Q),
     withKey("packed", "false"), withKey("epsilon", std::to_string(NORM_EPS)),
-    withKey("feature_size", std::to_string(head_dim)),
-    withKey("trainable", "false")};
+    withKey("feature_size", std::to_string(head_dim))};
+  if (LORA_RANK > 0) {
+    q_norm_params.push_back(withKey("trainable", "false"));
+  }
   layers.push_back(createLayer("reshaped_rms_norm", q_norm_params));
 
   // K layer
@@ -81,8 +81,10 @@ std::vector<LayerHandle> Qwen3Transformer::createAttention(
   std::vector<std::string> k_norm_params = {
     withKey("name", K_norm), withKey("input_layers", K),
     withKey("packed", "false"), withKey("epsilon", std::to_string(NORM_EPS)),
-    withKey("feature_size", std::to_string(head_dim)),
-    withKey("trainable", "false")};
+    withKey("feature_size", std::to_string(head_dim))};
+  if (LORA_RANK > 0) {
+    k_norm_params.push_back(withKey("trainable", "false"));
+  }
   layers.push_back(createLayer("reshaped_rms_norm", k_norm_params));
 
   // V layer
@@ -106,8 +108,10 @@ std::vector<LayerHandle> Qwen3Transformer::createAttention(
     withKey("rope_theta", ROPE_THETA),
     withKey("max_position_embeddings", MAX_POSITION_EMBEDDINGS),
     withKey("max_new_tokens", std::to_string(NUM_TO_GENERATE)),
-    withKey("input_layers", {Q_norm, K_norm, V}),
-    withKey("trainable", "false")};
+    withKey("input_layers", {Q_norm, K_norm, V})};
+  if (LORA_RANK > 0) {
+    a_params.push_back(withKey("trainable", "false"));
+  }
   layers.push_back(createLayer("mha_core", a_params));
 
   // O layer
@@ -143,74 +147,74 @@ void Qwen3CausalLM::registerCustomLayers() {
   Qwen3Transformer::registerCustomLayers();
 }
 
-// LoRA Debugging
-void Qwen3CausalLM::exportWeightsToFile(const std::string& filename) const {
-  std::ofstream outfile(filename);
-  if (!outfile.is_open()) {
-    std::cerr << "Failed to open file for writing: " << filename << std::endl;
-    return;
-  }
+// // LoRA Debugging
+// void Qwen3CausalLM::exportWeightsToFile(const std::string& filename) const {
+//   std::ofstream outfile(filename);
+//   if (!outfile.is_open()) {
+//     std::cerr << "Failed to open file for writing: " << filename << std::endl;
+//     return;
+//   }
   
-  outfile << std::fixed << std::setprecision(6);
-  outfile << "=== Detailed Model Weights Export ===" << std::endl;
-  outfile << "Export Time: " << std::time(nullptr) << std::endl;
-  outfile << "=====================================" << std::endl << std::endl;
+//   outfile << std::fixed << std::setprecision(6);
+//   outfile << "=== Detailed Model Weights Export ===" << std::endl;
+//   outfile << "Export Time: " << std::time(nullptr) << std::endl;
+//   outfile << "=====================================" << std::endl << std::endl;
   
-  if (!model) {
-    outfile << "Error: Model is not initialized" << std::endl;
-    outfile.close();
-    return;
-  }
+//   if (!model) {
+//     outfile << "Error: Model is not initialized" << std::endl;
+//     outfile.close();
+//     return;
+//   }
   
-  // Use the forEachLayer method to iterate through all layers
-  model->forEachLayer(
-    [](ml::train::Layer &layer, nntrainer::RunLayerContext &rc, void *user_data) {
-      std::ofstream &outfile = *static_cast<std::ofstream*>(user_data);
+//   // Use the forEachLayer method to iterate through all layers
+//   model->forEachLayer(
+//     [](ml::train::Layer &layer, nntrainer::RunLayerContext &rc, void *user_data) {
+//       std::ofstream &outfile = *static_cast<std::ofstream*>(user_data);
       
-      outfile << "Layer: " << layer.getName() << " (Type: " << layer.getType() << ")\n";
+//       outfile << "Layer: " << layer.getName() << " (Type: " << layer.getType() << ")\n";
       
-      try {
-        // Get weights using the layer interface
-        std::vector<float*> weights;
-        std::vector<ml::train::TensorDim> weight_dims;
-        layer.getWeights(weights, weight_dims);
+//       try {
+//         // Get weights using the layer interface
+//         std::vector<float*> weights;
+//         std::vector<ml::train::TensorDim> weight_dims;
+//         layer.getWeights(weights, weight_dims);
         
-        for (size_t i = 0; i < weights.size(); ++i) {
-          if (weights[i] && weight_dims[i].getFeatureLen() > 0) {
-            outfile << "  Weight " << i << " (Name: " << layer.getWeightName(i) 
-                    << ", Dim: " << weight_dims[i].getFeatureLen() << "): ";
+//         for (size_t i = 0; i < weights.size(); ++i) {
+//           if (weights[i] && weight_dims[i].getFeatureLen() > 0) {
+//             outfile << "  Weight " << i << " (Name: " << layer.getWeightName(i) 
+//                     << ", Dim: " << weight_dims[i].getFeatureLen() << "): ";
             
-            // Print first 10 and last 10 values for large weights
-            size_t len = weight_dims[i].getFeatureLen();
-            size_t print_count = std::min(len, (size_t)20);
+//             // Print first 10 and last 10 values for large weights
+//             size_t len = weight_dims[i].getFeatureLen();
+//             size_t print_count = std::min(len, (size_t)20);
             
-            for (size_t j = 0; j < std::min(print_count/2, len); ++j) {
-              outfile << weights[i][j] << " ";
-            }
+//             for (size_t j = 0; j < std::min(print_count/2, len); ++j) {
+//               outfile << weights[i][j] << " ";
+//             }
             
-            if (len > print_count) {
-              outfile << "... ";
-              for (size_t j = len - print_count/2; j < len; ++j) {
-                outfile << weights[i][j] << " ";
-              }
-            } else {
-              for (size_t j = print_count/2; j < len; ++j) {
-                outfile << weights[i][j] << " ";
-              }
-            }
-            outfile << "\n";
-          }
-        }
-      } catch (const std::exception& e) {
-        outfile << "  Error accessing weights: " << e.what() << "\n";
-      }
-      outfile << "\n";
-    },
-    &outfile
-  );
+//             if (len > print_count) {
+//               outfile << "... ";
+//               for (size_t j = len - print_count/2; j < len; ++j) {
+//                 outfile << weights[i][j] << " ";
+//               }
+//             } else {
+//               for (size_t j = print_count/2; j < len; ++j) {
+//                 outfile << weights[i][j] << " ";
+//               }
+//             }
+//             outfile << "\n";
+//           }
+//         }
+//       } catch (const std::exception& e) {
+//         outfile << "  Error accessing weights: " << e.what() << "\n";
+//       }
+//       outfile << "\n";
+//     },
+//     &outfile
+//   );
   
-  outfile.close();
-  std::cout << "Detailed model weights exported to: " << filename << std::endl;
-}
+//   outfile.close();
+//   std::cout << "Detailed model weights exported to: " << filename << std::endl;
+// }
 
 } // namespace causallm
