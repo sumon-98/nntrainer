@@ -91,9 +91,6 @@ int main(int argc, char *argv[]) {
     }
 
     model->initializeForTraining(lr, epochs);
-    // For checking if only LoRA layers are being updated or not
-    std::cout << "\n=== Saving model weights BEFORE training ===" << std::endl;
-    model->exportWeightsToFile("model_weights_before_training.txt");
 
     if (!skip_weights && nntr_cfg.contains("model_file_name")) {
       std::string weight_path = model_dir + "/" + nntr_cfg["model_file_name"].get<std::string>();
@@ -142,6 +139,10 @@ int main(int argc, char *argv[]) {
     std::cout << "\n=== NNTrainer Model Summary (Checking Trainable vs Frozen Layers) ===" << std::endl;
     model->summarize(std::cout, ML_TRAIN_SUMMARY_TENSOR);
     std::cout << "==================================================================\n" << std::endl;
+
+    // For checking if only LoRA layers are being updated or not
+    std::cout << "\n=== Saving model weights BEFORE training ===" << std::endl;
+    model->exportWeightsToFile("model_weights_before_training.txt");
 
     model->train();
     auto train_end = std::chrono::steady_clock::now();
