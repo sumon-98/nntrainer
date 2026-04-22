@@ -140,7 +140,7 @@ int main(int argc, char *argv[]) {
 
     std::cout << "\n=== Starting Qwen3 LoRA full model training ===" << std::endl;
     auto train_start = std::chrono::steady_clock::now();
-    
+
     std::cout << "\n=== NNTrainer Model Summary (Checking Trainable vs Frozen Layers) ===" << std::endl;
     model->summarize(std::cout, ML_TRAIN_SUMMARY_TENSOR);
     std::cout << "==================================================================\n" << std::endl;
@@ -157,14 +157,19 @@ int main(int argc, char *argv[]) {
     // For checking if only LoRA layers are being updated or not
     std::cout << "\n=== Saving model weights AFTER training ===" << std::endl;
     model->exportWeightsToFile("model_weights_after_training_LORA.txt");
-
-    model->save_weight(output_path);
-    std::cout << "LoRA Weights saved to: " << output_path << std::endl;
-
+    
     // Print memory profiling report (only produces output with -Denable-profile=true)
     std::cout << "\n=== NNTrainer Memory Profile Report (LoRA Training) ===" << std::endl;
     PROFILE_END(profiler_listener);
     std::cout << "======================================================\n" << std::endl;
+
+    try {
+      model->save_weight(output_path);
+      std::cout << "LoRA Weights saved to: " << output_path << std::endl;
+    } catch (const std::exception &e) {
+      std::cerr << "Warning: Could not save binary weights: " << e.what() << std::endl;
+      std::cerr << "  (Text weight exports above are still valid for comparison.)" << std::endl;
+    }
 
   } catch (const std::exception &e) {
     std::cerr << "Error: " << e.what() << std::endl;
