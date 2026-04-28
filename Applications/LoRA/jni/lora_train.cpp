@@ -128,42 +128,17 @@ std::vector<LayerHandle> createSimpleGraph(unsigned int lora_rank,
     createLayer("input", {nntrainer::withKey("name", "input0"),
                           nntrainer::withKey("input_shape", "1:1:784")}));
 
-  // First hidden layer with LoRA
-  layers.push_back(createLayer(
-    "fully_connected",
-    {
-      nntrainer::withKey("unit", 64),
-      nntrainer::withKey("weight_initializer", "xavier_uniform"),
-      nntrainer::withKey("activation", "relu"),
-      nntrainer::withKey("lora_rank", std::to_string(lora_rank)),
-      nntrainer::withKey("lora_alpha", std::to_string(lora_alpha))
-    }));
-
+  // Hidden layer
   layers.push_back(
-    createLayer("reshape", {
-      nntrainer::withKey("target_shape", "1:1:8:8"),
-    })
-  );
-    
-  layers.push_back(
-    createLayer("conv2d", {
-                            nntrainer::withKey("name", "conv0"),
-                            nntrainer::withKey("filters", 1),
-                            nntrainer::withKey("kernel_size", {8, 8}),
-                            nntrainer::withKey("stride", {1, 1}),
-                            nntrainer::withKey("padding", "same"),
-                            nntrainer::withKey("bias_initializer", "zeros"),
-                            nntrainer::withKey("weight_initializer", "xavier_uniform"),
-                          }));
+    createLayer("fully_connected",
+                {nntrainer::withKey("unit", 256),
+                 nntrainer::withKey("weight_initializer", "xavier_uniform"),
+                 nntrainer::withKey("activation", "relu"),
+                 nntrainer::withKey("lora_rank", std::to_string(lora_rank)),
+                 nntrainer::withKey("lora_alpha", std::to_string(lora_alpha))
+                }));
 
- layers.push_back(
-    createLayer("reshape", {
-      nntrainer::withKey("target_shape", "1:1:1:64"),
-    })
-  );
-  
-  // Output layer with softmax activation for classification (no LoRA for output
-  // layer)
+  // Output layer with softmax activation for classification
   layers.push_back(
     createLayer("fully_connected",
                 {nntrainer::withKey("unit", 10),
@@ -333,26 +308,26 @@ int main(int argc, char **argv) {
             << test_samples << " samples for testing" << std::endl;
 
   // Print first 10 samples of the dataset
-  int samples_to_print = std::min(10, static_cast<int>(total_samples));
-  if (total_samples > 0) {
-    std::cout << "\nFirst " << samples_to_print << " samples:" << std::endl;
-    for (int sample_idx = 0; sample_idx < samples_to_print; ++sample_idx) {
-      std::cout << "\nSample " << sample_idx << ":" << std::endl;
-      std::cout << "Label: " << labels[sample_idx] << std::endl;
-      std::cout << "Image (28x28):" << std::endl;
+  // int samples_to_print = std::min(10, static_cast<int>(total_samples));
+  // if (total_samples > 0) {
+  //   std::cout << "\nFirst " << samples_to_print << " samples:" << std::endl;
+  //   for (int sample_idx = 0; sample_idx < samples_to_print; ++sample_idx) {
+  //     std::cout << "\nSample " << sample_idx << ":" << std::endl;
+  //     std::cout << "Label: " << labels[sample_idx] << std::endl;
+  //     std::cout << "Image (28x28):" << std::endl;
 
-      // Print the entire image data (784 pixels)
-      for (int i = 0; i < 784; ++i) {
-        // Convert normalized value back to approximate pixel value for display
-        float pixel_value = images[sample_idx * 784 + i] * 0.3081f +
-                            0.1307f; // Reverse normalization
-        int display_value = static_cast<int>(pixel_value * 255.0f);
-        std::cout << std::setw(4) << display_value;
-        if ((i + 1) % 28 == 0)
-          std::cout << std::endl;
-      }
-    }
-  }
+  //     // Print the entire image data (784 pixels)
+  //     for (int i = 0; i < 784; ++i) {
+  //       // Convert normalized value back to approximate pixel value for display
+  //       float pixel_value = images[sample_idx * 784 + i] * 0.3081f +
+  //                           0.1307f; // Reverse normalization
+  //       int display_value = static_cast<int>(pixel_value * 255.0f);
+  //       std::cout << std::setw(4) << display_value;
+  //       if ((i + 1) % 28 == 0)
+  //         std::cout << std::endl;
+  //     }
+  //   }
+  // }
 
   // Load pre-trained model
   std::cout << "\nLoading pre-trained model from " << pretrained_model_path

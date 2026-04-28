@@ -275,25 +275,25 @@ int main(int argc, char **argv) {
   std::cout << "Loaded " << total_samples << " samples (normalized)" << std::endl;
   std::cout << "Using " << train_samples << " samples for training and " << test_samples << " samples for testing" << std::endl;
 
-  // Print first 10 samples of the dataset
-  int samples_to_print = std::min(10, static_cast<int>(total_samples));
-  if (total_samples > 0) {
-    std::cout << "\nFirst " << samples_to_print << " samples:" << std::endl;
-    for (int sample_idx = 0; sample_idx < samples_to_print; ++sample_idx) {
-      std::cout << "\nSample " << sample_idx << ":" << std::endl;
-      std::cout << "Label: " << labels[sample_idx] << std::endl;
-      std::cout << "Image (28x28):" << std::endl;
+  // // Print first 10 samples of the dataset
+  // int samples_to_print = std::min(10, static_cast<int>(total_samples));
+  // if (total_samples > 0) {
+  //   std::cout << "\nFirst " << samples_to_print << " samples:" << std::endl;
+  //   for (int sample_idx = 0; sample_idx < samples_to_print; ++sample_idx) {
+  //     std::cout << "\nSample " << sample_idx << ":" << std::endl;
+  //     std::cout << "Label: " << labels[sample_idx] << std::endl;
+  //     std::cout << "Image (28x28):" << std::endl;
       
-      // Print the entire image data (784 pixels)
-      for (int i = 0; i < 784; ++i) {
-        // Convert normalized value back to approximate pixel value for display
-        float pixel_value = images[sample_idx * 784 + i] * 0.3081f + 0.1307f; // Reverse normalization
-        int display_value = static_cast<int>(pixel_value * 255.0f);
-        std::cout << std::setw(4) << display_value;
-        if ((i + 1) % 28 == 0) std::cout << std::endl;
-      }
-    }
-  }
+  //     // Print the entire image data (784 pixels)
+  //     for (int i = 0; i < 784; ++i) {
+  //       // Convert normalized value back to approximate pixel value for display
+  //       float pixel_value = images[sample_idx * 784 + i] * 0.3081f + 0.1307f; // Reverse normalization
+  //       int display_value = static_cast<int>(pixel_value * 255.0f);
+  //       std::cout << std::setw(4) << display_value;
+  //       if ((i + 1) % 28 == 0) std::cout << std::endl;
+  //     }
+  //   }
+  // }
 
   // Create model with loss function
   auto model = ml::train::createModel(

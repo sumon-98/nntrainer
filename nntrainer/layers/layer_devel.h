@@ -375,12 +375,15 @@ public:
       for (unsigned int i = 0; i < run_context.getNumWeights(); ++i) {
         if (run_context.isGradientFirstAccess(i)) {
           auto &weight = run_context.getWeight(i);
-          std::cout << "Weight Name: " << weight.getName() << std::endl;
           if (dtype == TensorDim::DataType::NONE ||
-              weight.getDataType() == dtype) {
-                if(weight.getName().find("lora") != std::string::npos) {
-                  std::cout << "Saving weights..." << std::endl;
+            weight.getDataType() == dtype) {
+              if(weight.getName().find("lora") != std::string::npos) {
+                std::cout << "-------------------------------------------------------------------------" << std::endl;
+                std::cout << "Weight Name: " << weight.getName() << std::endl;
+                std::cout << "Saving weights..." << std::endl;
                   weight.save(file);
+                  weight.print(std::cout);
+                  std::cout << "-------------------------------------------------------------------------" << std::endl;
                 }
               }
           else {
@@ -441,6 +444,10 @@ public:
                     TensorDim::DataType defineWeightDataType, bool fsu,
                     size_t start_offset = 0, bool read_from_offset = false,
                     int file_fd = -1) {
+    auto lora_path = "/workspace/nntrainer_korea/nntrainer/Applications/LoRA/lora.bin";
+    auto lora_file =
+      checkedOpenStream<std::ifstream>(lora_path, std::ios::in | std::ios::binary);
+ 
     if (fsu) {
       for (unsigned int i = 0; i < run_context.getNumWeights(); ++i) {
         if (run_context.getWeight(i).getDataType() ==
@@ -463,8 +470,17 @@ public:
         for (unsigned int i = 0; i < run_context.getNumWeights(); ++i) {
           /// @note shared weights are only be read at the first acecss
           if (run_context.isGradientFirstAccess(i)) {
-            run_context.getWeight(i).read(file, start_offset, read_from_offset,
-                                          file_fd);
+            std::cout << "Weight Read: " << run_context.getWeight(i).getName() << std::endl;
+            if(run_context.getWeight(i).getName().find("lora") != std::string::npos) {
+              run_context.getWeight(i).read(lora_file, start_offset, read_from_offset,
+                                              file_fd);
+                run_context.getWeight(i).print(std::cout);
+            }
+            else {
+              run_context.getWeight(i).read(file, start_offset, read_from_offset,
+                                              file_fd);
+                run_context.getWeight(i).print(std::cout);
+            }
             if (run_context.isMixedPrecision(i) && trainable &&
                 !run_context.getWeightFP32(i).empty()) {
               run_context.getWeightFP32(i).copyData(run_context.getWeight(i));
@@ -490,7 +506,11 @@ public:
                     ml::train::ExecutionMode mode, bool trainable,
                     TensorDim::DataType defineWeightDataType, bool fsu,
                     size_t start_offset = 0, bool read_from_offset = false) {
-    if (fsu) {
+    auto lora_path = "/workspace/nntrainer_korea/nntrainer/Applications/LoRA/lora.bin";
+    auto lora_file =
+      checkedOpenStream<std::ifstream>(lora_path, std::ios::in | std::ios::binary);
+    
+      if (fsu) {
       for (unsigned int i = 0; i < run_context.getNumWeights(); ++i) {
         if (run_context.getWeight(i).getDataType() ==
             TensorDim::DataType::BCQ) {
@@ -512,8 +532,18 @@ public:
         for (unsigned int i = 0; i < run_context.getNumWeights(); ++i) {
           /// @note shared weights are only be read at the first acecss
           if (run_context.isGradientFirstAccess(i)) {
-            run_context.getWeight(i).read(src, start_offset, read_from_offset);
-            if (run_context.isMixedPrecision(i) && trainable &&
+             std::cout << "-------------------------------------------------------------------------" << std::endl;
+             std::cout << "Weight Read: " << run_context.getWeight(i).getName() << std::endl;
+              if(run_context.getWeight(i).getName().find("lora") != std::string::npos) {
+                run_context.getWeight(i).read(lora_file, start_offset, read_from_offset);
+                run_context.getWeight(i).print(std::cout);
+              }
+              else {
+                run_context.getWeight(i).read(src, start_offset, read_from_offset);
+                run_context.getWeight(i).print(std::cout);
+              }
+              std::cout << "-------------------------------------------------------------------------" << std::endl;
+              if (run_context.isMixedPrecision(i) && trainable &&
                 !run_context.getWeightFP32(i).empty()) {
               run_context.getWeightFP32(i).copyData(run_context.getWeight(i));
             }

@@ -63,6 +63,7 @@ void TensorBase::read(std::ifstream &file, size_t start_offset,
   if (start_offset == std::numeric_limits<size_t>::max()) {
     start_offset = file_offset;
   }
+  std::cout << "Start offset: " << (int)file_offset << std::endl;
   std::streamsize sz = static_cast<std::streamsize>(bytes());
 
   NNTR_THROW_IF(sz < 0, std::invalid_argument)
@@ -79,6 +80,7 @@ void TensorBase::read(ReadSource src, size_t start_offset,
   if (start_offset == std::numeric_limits<size_t>::max()) {
     start_offset = file_offset;
   }
+  std::cout << "Start offset: " << (int)file_offset << std::endl;
   std::streamsize sz = static_cast<std::streamsize>(bytes());
 
   NNTR_THROW_IF(sz < 0, std::invalid_argument)

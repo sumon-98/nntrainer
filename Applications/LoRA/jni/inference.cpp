@@ -106,7 +106,8 @@ float evaluateAccuracy(std::unique_ptr<ml::train::Model> &model,
   return static_cast<float>(correct_predictions) / static_cast<float>(eval_samples) * 100.0f;
 }
 
-std::vector<LayerHandle> createSimpleGraph() {
+std::vector<LayerHandle> createSimpleGraph(unsigned int lora_rank,
+                                           float lora_alpha) {
   using ml::train::createLayer;
 
   std::vector<LayerHandle> layers;
@@ -121,7 +122,10 @@ std::vector<LayerHandle> createSimpleGraph() {
     createLayer("fully_connected",
                 {nntrainer::withKey("unit", 256),
                  nntrainer::withKey("weight_initializer", "xavier_uniform"),
-                 nntrainer::withKey("activation", "relu")}));
+                 nntrainer::withKey("activation", "relu"),
+                 nntrainer::withKey("lora_rank", std::to_string(lora_rank)),
+                 nntrainer::withKey("lora_alpha", std::to_string(lora_alpha))
+                }));
 
   // Output layer with softmax activation for classification
   layers.push_back(
@@ -142,7 +146,8 @@ int main(int argc, char **argv) {
   std::string images_path = "train-images-idx3-ubyte";
   std::string labels_path = "train-labels-idx1-ubyte";
   std::string model_path = "mnist_model.bin";
-
+  unsigned int lora_rank = 16; // Default LoRA rank
+  float lora_alpha = 1.0f;     // Default LoRA alpha
   if (argc >= 3) {
     images_path = argv[1];
     labels_path = argv[2];
@@ -193,7 +198,7 @@ int main(int argc, char **argv) {
     ml::train::ModelType::NEURAL_NET, {nntrainer::withKey("loss", "cross")});
 
   // Add layers
-  auto layers = createSimpleGraph();
+  auto layers = createSimpleGraph(lora_rank, lora_alpha);
   for (auto &layer : layers) {
     model->addLayer(layer);
   }

@@ -643,8 +643,7 @@ void NeuralNetwork::save(
       auto it = layer_dtype_map.find(layer_node->getName());
       auto target_dtype = (it != layer_dtype_map.end()) ? it->second : dtype;
       std::cout << "Layer Name: " << layer_node->getType() << std::endl;
-      if(layer_node->getType() == "fully_connected")
-        layer_node->save(model_file, false, exec_mode, target_dtype);
+      layer_node->save(model_file, false, exec_mode, target_dtype);
     }
 
     if (opt && istrequal(opt->getType(), "adam")) {
@@ -652,12 +651,11 @@ void NeuralNetwork::save(
       model_file.write(adam.c_str(), 4);
       for (auto iter = model_graph.cbegin(); iter != model_graph.cend();
            iter++) {
-        if(0)
         (*iter)->save(model_file, true);
       }
     }
 
-    if (exec_mode == ml::train::ExecutionMode::TRAIN && 0) {
+    if (exec_mode == ml::train::ExecutionMode::TRAIN) {
       model_file.write((char *)&epoch_idx, sizeof(epoch_idx));
       model_file.write((char *)&iter, sizeof(iter));
     }
@@ -700,7 +698,7 @@ void NeuralNetwork::load(const std::string &file_path,
   const std::regex reg_("\\s*\\;\\s*");
   auto v = split(file_path, reg_);
 
-  size_t start_from = 0;
+  size_t start_from = 0, lora_start_from = 0;
   std::vector<std::pair<size_t, size_t>> file_offset;
   std::unordered_set<const Tensor *> visited_weights;
   for (auto iter = model_graph.cbegin(); iter != model_graph.cend(); iter++) {
@@ -717,7 +715,14 @@ void NeuralNetwork::load(const std::string &file_path,
       }
       size_t size = weight->getVariable().getMemoryBytes();
       auto tensor_data_type = weight->getDim().getDataType();
-      weight->getVariableRef().setFileOffset(start_from);
+      if (weight->getName().find("lora") != std::string::npos) {
+        std::cout << "Weight Name: " << weight->getName() << " lora_start_from: " << lora_start_from << " size: " << size << std::endl;
+        weight->getVariableRef().setFileOffset(lora_start_from);
+      }
+      else {
+        std::cout << "Weight Name: " << weight->getName() << " start_from: " << start_from << " size: " << size << std::endl;
+        weight->getVariableRef().setFileOffset(start_from);
+      }
       ///@todo instead of checking the data type,
       /// we may need to create a common parent class for
       /// quantized tensors, requiring qparam to be saved
@@ -730,8 +735,15 @@ void NeuralNetwork::load(const std::string &file_path,
         // for tensor with qparam
         size += sizeof(uint16_t);
       }
-      file_offset.emplace_back(std::make_pair(start_from, size));
-      start_from += size;
+      
+      if (weight->getName().find("lora") != std::string::npos) {
+        file_offset.emplace_back(std::make_pair(lora_start_from, size));
+        lora_start_from += size;
+      }
+      else {
+        file_offset.emplace_back(std::make_pair(start_from, size));
+        start_from += size;
+      }
     }
   }
 
@@ -747,6 +759,7 @@ void NeuralNetwork::load(const std::string &file_path,
       << " format: " << static_cast<unsigned>(format);
     auto f_path = (v.size() == 2) ? v[1] : v[0];
 
+    std::cout << "File path: " << f_path << std::endl;
     auto model_file =
       checkedOpenStream<std::ifstream>(f_path, std::ios::in | std::ios::binary);
 

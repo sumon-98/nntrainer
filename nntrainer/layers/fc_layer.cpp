@@ -223,6 +223,8 @@ void FullyConnectedLayer::forwarding(RunLayerContext &context, bool training) {
     Tensor &hidden_tmp_lora = context.getTensor(lora_idx[LORAParams::loraTmp]);
     Tensor &hidden_out_lora = context.getTensor(lora_idx[LORAParams::loraOut]);
 
+    // std::cout << weight << loraA << loraB << std::endl;
+
     input_.dot(loraA, hidden_tmp_lora, false, false);
     hidden_tmp_lora.dot(loraB, hidden_out_lora, false, false);
     hidden_out_lora.multiply_i(lora_scaling);
