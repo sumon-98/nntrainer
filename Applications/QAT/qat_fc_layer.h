@@ -1,105 +1,80 @@
+// SPDX-License-Identifier: Apache-2.0
+/**
+ * @file   qat_fc_layer.h
+ * @brief  QAT Fully Connected Layer - DIAGNOSTIC VERSION
+ *
+ * This is a MINIMAL version with NO fake quantization.
+ * It behaves identically to the built-in FullyConnectedLayer.
+ * Purpose: isolate whether the crash is in the layer logic or the setup.
+ */
+
 #ifndef __QAT_FC_LAYER_H__
 #define __QAT_FC_LAYER_H__
 
-#include <layer_context.h>
-// #include <layer_devel.h>
-#include <layer_impl.h>  // Changed from layer_devel.h
-#include <node_exporter.h>
-#include <utility>
-#include <array>
-#include <map>
-#include <mutex>
-#include <tensor_dim.h>
+#include <common_properties.h>
+#include <layer_impl.h>
 
 namespace nntrainer {
 
-class QATFullyConnectedLayer final : public Layer {
+class QATFullyConnectedLayer : public LayerImpl {
 public:
-  // Static registry to track QAT layers by name
-  static std::map<std::string, QATFullyConnectedLayer*>& getRegistry() {
-    static std::map<std::string, QATFullyConnectedLayer*> registry;
-    return registry;
-  }
-  
-  static std::mutex& getRegistryMutex() {
-    static std::mutex mtx;
-    return mtx;
-  }
-  
-  static QATFullyConnectedLayer* getLayerByName(const std::string& name) {
-    std::lock_guard<std::mutex> lock(getRegistryMutex());
-    auto it = getRegistry().find(name);
-    if (it != getRegistry().end()) {
-      return it->second;
-    }
-    return nullptr;
-  }
+  QATFullyConnectedLayer();
+  ~QATFullyConnectedLayer();
 
-  QATFullyConnectedLayer() : Layer(), running_min_val(0.0f), running_max_val(0.0f), initialized_stats(false), a_scale(0.0f), a_zp(0.0f), w_scale(0.0f), w_zp(0.0f), unit(0), disable_bias(false) {
-    weight_idx.fill(std::numeric_limits<unsigned>::max());
-  }
-  
-  
-  
-  ~QATFullyConnectedLayer() {
-    // Remove from registry on destruction
-    std::lock_guard<std::mutex> lock(getRegistryMutex());
-    for (auto it = getRegistry().begin(); it != getRegistry().end(); ++it) {
-      if (it->second == this) {
-        getRegistry().erase(it);
-        break;
-      }
-    }
-  }
+  QATFullyConnectedLayer(QATFullyConnectedLayer &&rhs) noexcept = default;
+  QATFullyConnectedLayer &operator=(QATFullyConnectedLayer &&rhs) = default;
 
   void finalize(InitLayerContext &context) override;
   void forwarding(RunLayerContext &context, bool training) override;
   void calcDerivative(RunLayerContext &context) override;
   void calcGradient(RunLayerContext &context) override;
-  bool supportBackwarding() const override { return true; }
-  void exportTo(Exporter &exporter, const ml::train::ExportMethods &method) const override {}
-  void setProperty(const std::vector<std::string> &values) override;
 
-  const std::string getType() const override { return type; }
+  bool supportBackwarding() const override { return true; }
+
+  void exportTo(Exporter &exporter,
+                const ml::train::ExportMethods &method) const override;
+
+  const std::string getType() const override {
+    return QATFullyConnectedLayer::type;
+  }
+
+  void setProperty(const std::vector<std::string> &values) override;
 
   inline static const std::string type = "qat_fully_connected";
 
-  // Helpers for printing scale/zp out
-  float getActScale() const { return a_scale; }
-  float getActZeroPoint() const { return a_zp; }
-  float getWeightScale() const { return w_scale; }
-  float getWeightZeroPoint() const { return w_zp; }
+  // Added to extract properties later
+  void printQATStats() const;
 
 private:
-  float running_min_val;
-  float running_max_val;
-  bool initialized_stats;
-
-  float a_scale, a_zp;
-  float w_scale, w_zp;
-
-  unsigned int unit;
-  bool disable_bias;
-  std::string layer_name;  // Store the name
-
+  std::tuple<props::Unit> qat_fc_props;
   std::array<unsigned int, 2> weight_idx;
-  enum FCParams { weight, bias };
+  enum FCParams { weight = 0, bias = 1 };
 
-  const float momentum = 0.1f;
-  const float q_min_a = 0.0f;
-  const float q_max_a = 255.0f;
-  const float q_min_w = -128.0f;
-  const float q_max_w = 127.0f;
+  // QAT specific properties
+  float q_min_act;
+  float q_max_act;
+  float q_min_weight;
+  float q_max_weight;
+  float momentum;
 
-  Tensor fakeQuantize(const Tensor &x, float &min_val, float &max_val, float q_min, float q_max, bool update_stats, float &out_scale, float &out_zp);
-  
-  void registerLayer(const std::string& name) {
-    std::lock_guard<std::mutex> lock(getRegistryMutex());
-    getRegistry()[name] = this;
-    layer_name = name;
-  }
+  // Flag to track if layer was properly initialized
+  bool initialized = false;
+
+  // QAT running stats
+  Tensor act_running_min;
+  Tensor act_running_max;
+  Tensor weight_running_min;
+  Tensor weight_running_max;
+
+  // QAT fake-quantized tensors for STE
+  Tensor x_fq;
+  Tensor w_fq;
+
+  // Helper method for Fake Quantization
+  Tensor fakeQuantize(Tensor &x, Tensor &running_min, Tensor &running_max, 
+                      float q_min, float q_max, bool training);
 };
 
 } // namespace nntrainer
 
-#endif
+#endif /* __QAT_FC_LAYER_H__ */
