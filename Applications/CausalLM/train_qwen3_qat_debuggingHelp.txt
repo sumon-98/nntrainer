@@ -1,0 +1,199 @@
+root@3ab51be2ad55:/nntrainerPranjal# meson configure build -Denable-transformer=true -Denable-debug=true --buildtype=debug
+root@3ab51be2ad55:/nntrainerPranjal# ninja -C build
+ninja: Entering directory `build'
+[0/1] Regenerating build files.
+The Meson build system
+Version: 0.61.2
+Source dir: /nntrainerPranjal
+Build dir: /nntrainerPranjal/build
+Build type: native build
+Project name: nntrainer
+Project version: 0.6.0
+C compiler for the host machine: cc (gcc 11.4.0 "cc (Ubuntu 11.4.0-1ubuntu1~22.04.3) 11.4.0")
+C linker for the host machine: cc ld.bfd 2.38
+C++ compiler for the host machine: c++ (gcc 11.4.0 "c++ (Ubuntu 11.4.0-1ubuntu1~22.04.3) 11.4.0")
+C++ linker for the host machine: c++ ld.bfd 2.38
+Host machine cpu family: x86_64
+Host machine cpu: x86_64
+Program powershell found: NO
+Program nproc found: YES (/usr/bin/nproc)
+Program cmd.exe found: NO
+Message: Build for X86 architecture
+Message: -march=native added for AVX hardware acceleration.
+Message: MMAP enabled
+Message: OpenCL kernel path set to: nntrainer_opencl_kernels
+Compiler for C supports arguments -Wredundant-decls: YES (cached)
+Compiler for C++ supports arguments -Wredundant-decls: YES (cached)
+Compiler for C supports arguments -Wwrite-strings: YES (cached)
+Compiler for C++ supports arguments -Wwrite-strings: YES (cached)
+Compiler for C supports arguments -Wformat: YES (cached)
+Compiler for C++ supports arguments -Wformat: YES (cached)
+Compiler for C supports arguments -Wformat-nonliteral: YES (cached)
+Compiler for C++ supports arguments -Wformat-nonliteral: YES (cached)
+Compiler for C supports arguments -Wformat-security: YES (cached)
+Compiler for C++ supports arguments -Wformat-security: YES (cached)
+Compiler for C supports arguments -Winit-self: YES (cached)
+Compiler for C++ supports arguments -Winit-self: YES (cached)
+Compiler for C supports arguments -Waddress: YES (cached)
+Compiler for C++ supports arguments -Waddress: YES (cached)
+Compiler for C supports arguments -Wvla: YES (cached)
+Compiler for C++ supports arguments -Wvla: YES (cached)
+Compiler for C supports arguments -Wpointer-arith: YES (cached)
+Compiler for C++ supports arguments -Wpointer-arith: YES (cached)
+Compiler for C supports arguments -Wno-error=varargs: YES (cached)
+Compiler for C++ supports arguments -Wno-error=varargs: YES (cached)
+Compiler for C supports arguments -Wno-error=ignored-attributes: YES (cached)
+Compiler for C++ supports arguments -Wno-error=ignored-attributes: YES (cached)
+Compiler for C supports arguments -Wno-error=sign-compare: YES (cached)
+Compiler for C++ supports arguments -Wno-error=sign-compare: YES (cached)
+Compiler for C supports arguments -Wdefaulted-function-deleted: NO (cached)
+Compiler for C++ supports arguments -Wdefaulted-function-deleted: NO (cached)
+Compiler for C supports arguments -ftree-vectorize: YES (cached)
+Compiler for C++ supports arguments -ftree-vectorize: YES (cached)
+Compiler for C supports arguments -Wno-unused-variable: YES (cached)
+Compiler for C++ supports arguments -Wno-unused-variable: YES (cached)
+Compiler for C supports arguments -Wno-comment: YES (cached)
+Compiler for C++ supports arguments -Wno-comment: YES (cached)
+Compiler for C supports arguments -Wno-ignored-attributes: YES (cached)
+Compiler for C++ supports arguments -Wno-ignored-attributes: YES (cached)
+Compiler for C supports arguments -Wno-sign-compare: YES (cached)
+Compiler for C++ supports arguments -Wno-sign-compare: YES (cached)
+Compiler for C supports arguments -Wno-maybe-uninitialized: YES (cached)
+Compiler for C++ supports arguments -Wno-maybe-uninitialized: YES (cached)
+Compiler for C supports arguments -Wmissing-declarations: YES (cached)
+Compiler for C supports arguments -Wmissing-include-dirs: YES (cached)
+Compiler for C supports arguments -Wmissing-prototypes: YES (cached)
+Compiler for C supports arguments -Wnested-externs: YES (cached)
+Compiler for C supports arguments -Waggregate-return: YES (cached)
+Compiler for C supports arguments -Wold-style-definition: YES (cached)
+Compiler for C supports arguments -Wdeclaration-after-statement: YES (cached)
+Compiler for C supports arguments -Wno-error=varargs: YES (cached)
+Dependency capi-ml-common found: YES 1.8.8 (cached)
+Dependency capi-ml-inference found: YES 1.8.8 (cached)
+Dependency openblas found: YES 0.3.20 (cached)
+Message: OpenBLAS dependency found in system
+Message: set nntrainer num threads=1
+Dependency openmp found: YES 4.5 (cached)
+Message: set nntrainer omp threads=6
+Dependency gmock found: YES unknown (cached)
+Dependency gtest found: YES 1.11.0 (cached)
+Dependency gtest found: YES 1.11.0 (cached)
+Library m found: YES
+Library dl found: YES
+Dependency threads found: YES unknown (cached)
+Dependency iniparser found: YES 3.2 (cached)
+Dependency tensorflow2-lite found: YES 2.15.0 (cached)
+Found pkg-config: /usr/bin/pkg-config (0.29.2)
+Found CMake: /usr/bin/cmake (3.22.1)
+Run-time dependency opencv found: NO (tried pkgconfig and cmake)
+Run-time dependency opencv4 found: NO (tried pkgconfig and cmake)
+Run-time dependency opencv3 found: NO (tried pkgconfig and cmake)
+Program flatc found: YES (/usr/bin/flatc)
+Configuring nntrainer.pc using configuration
+Configuring nntrainer.ini using configuration
+../meson.build:733: WARNING: The variable(s) 'FLASH_STORAGE_UTILIZATION_LOOKAHEAD' in the input file 'nntrainer.ini.in' are not present in the given configuration data.
+Message: NNTRAINER_CONF_PATH=/usr/local/etc/nntrainer.ini
+Message: extra defines are:-DMIN_CPP_VERSION=201703L -DMMAP_READ=1 -DKERNEL_CACHE=0 -DUSE_MMAP=1 -DOPENCL_KERNEL_PATH=nntrainer_opencl_kernels -DML_API_COMMON=1 -DNNSTREAMER_AVAILABLE=1 -DUSE_BLAS=1 -DHGEMM_EXPERIMENTAL_KERNEL=false -DNNTR_NUM_THREA
+DS=1 -DOMP_NUM_THREADS=6 -DDEBUG=1 -D__LOGGING__=1 -DENABLE_TEST=1 -DREDUCE_TOLERANCE=1 -DENABLE_TFLITE_BACKBONE=1 -DENABLE_TFLITE_INTERPRETER=1 -DNNTRAINER_CONF_PATH="/usr/local/etc/nntrainer.ini"
+Message: arm_arch_opt : none
+Configuring ccapi-ml-training.pc using configuration
+Configuring capi-ml-training.pc using configuration
+Run-time dependency nnstreamer-test-devel found: NO (tried pkgconfig and cmake)
+Dependency jsoncpp found: YES 1.9.5 (cached)
+Dependency libcurl found: YES 7.81.0 (cached)
+Dependency openmp found: YES 4.5 (cached)
+../meson.build:789: WARNING: android nnstreamer-filter and nnstreamer-trainer are not yet supported, building them is skipped
+Build targets in project: 106
+NOTICE: Future-deprecated features used:
+ * 0.56.0: {'meson.build_root', 'meson.source_root'}
+
+nntrainer 0.6.0
+
+  User defined options
+    backend           : ninja
+    buildtype         : debug
+    enable-debug      : true
+    enable-transformer: true
+
+Found ninja-1.10.1 at /usr/bin/ninja
+Cleaning... 0 files.
+[17/38] Compiling C++ object Applications/CausalLM/nntr_qwen3_qat.p/train_qwen3_qat.cpp.o
+FAILED: Applications/CausalLM/nntr_qwen3_qat.p/train_qwen3_qat.cpp.o
+c++ -IApplications/CausalLM/nntr_qwen3_qat.p -IApplications/CausalLM -I../Applications/CausalLM -IApplications/CausalLM/models -I../Applications/CausalLM/models -IApplications/CausalLM/models/gpt_oss -I../Applications/CausalLM/models/gpt_oss -IAppli
+cations/CausalLM/models/gpt_oss_cached_slim -I../Applications/CausalLM/models/gpt_oss_cached_slim -IApplications/CausalLM/models/qwen2 -I../Applications/CausalLM/models/qwen2 -IApplications/CausalLM/models/qwen3 -I../Applications/CausalLM/models/qwe
+n3 -IApplications/CausalLM/models/qwen3_moe -I../Applications/CausalLM/models/qwen3_moe -IApplications/CausalLM/models/qwen3_slim_moe -I../Applications/CausalLM/models/qwen3_slim_moe -IApplications/CausalLM/models/qwen3_cached_slim_moe -I../Applicat
+ions/CausalLM/models/qwen3_cached_slim_moe -IApplications/CausalLM/models/gemma3 -I../Applications/CausalLM/models/gemma3 -IApplications/QAT -I../Applications/QAT -Inntrainer -I../nntrainer -Iapi -I../api -I../api/ccapi/include -Inntrainer/compiler
+-I../nntrainer/compiler -Inntrainer/schema -I../nntrainer/schema -Inntrainer/dataset -I../nntrainer/dataset -Inntrainer/layers/loss -I../nntrainer/layers/loss -Inntrainer/layers -I../nntrainer/layers -Inntrainer/models -I../nntrainer/models -Inntrai
+ner/optimizers -I../nntrainer/optimizers -Inntrainer/tensor/cpu_backend/fallback -I../nntrainer/tensor/cpu_backend/fallback -Inntrainer/tensor/cpu_backend/ggml_interface/nntr_ggml_impl -I../nntrainer/tensor/cpu_backend/ggml_interface/nntr_ggml_impl
+-Inntrainer/tensor/cpu_backend/ggml_interface -I../nntrainer/tensor/cpu_backend/ggml_interface -Inntrainer/tensor/cpu_backend/cblas_interface -I../nntrainer/tensor/cpu_backend/cblas_interface -Inntrainer/tensor/cpu_backend/x86 -I../nntrainer/tensor/
+cpu_backend/x86 -Inntrainer/tensor/cpu_backend -I../nntrainer/tensor/cpu_backend -Inntrainer/tensor -I../nntrainer/tensor -Inntrainer/utils -I../nntrainer/utils -Inntrainer/graph -I../nntrainer/graph -IApplications/CausalLM/layers -I../Applications/
+CausalLM/layers -I/usr/include/x86_64-linux-gnu/openblas-pthread/ -I/usr/include/nnstreamer -I/usr/include/tensorflow2/ -fdiagnostics-color=always -D_FILE_OFFSET_BITS=64 -Wall -Winvalid-pch -Wnon-virtual-dtor -Werror -std=c++17 -g '-DVERSION="0.6.0"
+' -DVERSION_MAJOR=0 -DVERSION_MINOR=6 -DVERSION_MICRO=0 -DENABLE_TRANSFORMER=1 -march=native -mavx2 -mfma -Wredundant-decls -Wwrite-strings -Wformat -Wformat-nonliteral -Wformat-security -Winit-self -Waddress -Wvla -Wpointer-arith -Wno-error=varargs
+ -Wno-error=ignored-attributes -Wno-error=sign-compare -ftree-vectorize -Wno-unused-variable -Wno-comment -Wno-ignored-attributes -Wno-sign-compare -Wno-maybe-uninitialized -DMIN_CPP_VERSION=201703L -DMMAP_READ=1 -DKERNEL_CACHE=0 -DUSE_MMAP=1 -DOPEN
+CL_KERNEL_PATH=nntrainer_opencl_kernels -DML_API_COMMON=1 -DNNSTREAMER_AVAILABLE=1 -DUSE_BLAS=1 -DHGEMM_EXPERIMENTAL_KERNEL=false -DNNTR_NUM_THREADS=1 -DOMP_NUM_THREADS=6 -DDEBUG=1 -D__LOGGING__=1 -DENABLE_TEST=1 -DREDUCE_TOLERANCE=1 -DENABLE_TFLITE
+_BACKBONE=1 -DENABLE_TFLITE_INTERPRETER=1 '-DNNTRAINER_CONF_PATH="/usr/local/etc/nntrainer.ini"' -pthread -fopenmp -MD -MQ Applications/CausalLM/nntr_qwen3_qat.p/train_qwen3_qat.cpp.o -MF Applications/CausalLM/nntr_qwen3_qat.p/train_qwen3_qat.cpp.o.
+d -o Applications/CausalLM/nntr_qwen3_qat.p/train_qwen3_qat.cpp.o -c ../Applications/CausalLM/train_qwen3_qat.cpp
+../Applications/CausalLM/train_qwen3_qat.cpp: In constructor 'causallm::Qwen3QATTransformer::Qwen3QATTransformer(causallm::json&, causallm::json&, causallm::json&)':
+../Applications/CausalLM/train_qwen3_qat.cpp:61:7: error: type 'causallm::CausalLM' is not a direct or virtual base of 'causallm::Qwen3QATTransformer'
+   61 |       CausalLM(cfg, generation_cfg, nntr_cfg),
+      |       ^~~~~~~~
+../Applications/CausalLM/train_qwen3_qat.cpp:62:7: error: type 'causallm::Qwen3Transformer' is not a direct or virtual base of 'causallm::Qwen3QATTransformer'
+   62 |       Qwen3Transformer(cfg, generation_cfg, nntr_cfg),
+      |       ^~~~~~~~~~~~~~~~
+../Applications/CausalLM/train_qwen3_qat.cpp: In member function 'virtual std::vector<std::shared_ptr<ml::train::Layer> > causallm::Qwen3QATTransformer::createAttention(int, int, int, int, std::string, std::string, std::string)':
+../Applications/CausalLM/train_qwen3_qat.cpp:107:5: error: 'withKey' was not declared in this scope; did you mean 'nntrainer::withKey'?
+  107 |     withKey("name", Q),
+      |     ^~~~~~~
+      |     nntrainer::withKey
+In file included from ../nntrainer/utils/base_properties.h:25,
+                 from ../nntrainer/layers/layer_devel.h:30,
+                 from ../nntrainer/app_context.h:30,
+                 from ../Applications/CausalLM/train_qwen3_qat.cpp:39:
+../nntrainer/utils/util_func.h:254:20: note: 'nntrainer::withKey' declared here
+  254 | static std::string withKey(const std::string &key,
+      |                    ^~~~~~~
+../Applications/CausalLM/train_qwen3_qat.cpp:106:20: error: 'createLayer' was not declared in this scope
+  106 |   layers.push_back(createLayer("qat_fully_connected", {
+      |                    ^~~~~~~~~~~
+../Applications/CausalLM/train_qwen3_qat.cpp:106:20: note: suggested alternatives:
+In file included from ../nntrainer/app_context.h:30,
+                 from ../Applications/CausalLM/train_qwen3_qat.cpp:39:
+../nntrainer/layers/layer_devel.h:545:24: note:   'nntrainer::createLayer'
+  545 | std::unique_ptr<Layer> createLayer(const std::vector<std::string> &props = {}) {
+      |                        ^~~~~~~~~~~
+In file included from ../Applications/CausalLM/models/transformer.h:37,
+                 from ../Applications/CausalLM/models/causal_lm.h:42,
+                 from ../Applications/CausalLM/train_qwen3_qat.cpp:26:
+../api/ccapi/include/layer.h:313:24: note:   'ml::train::createLayer'
+  313 | std::unique_ptr<Layer> createLayer(const std::vector<std::string> &props = {}) {
+      |                        ^~~~~~~~~~~
+../Applications/CausalLM/train_qwen3_qat.cpp: In member function 'virtual std::vector<std::shared_ptr<ml::train::Layer> > causallm::Qwen3QATTransformer::createMlp(int, int, int, std::string)':
+../Applications/CausalLM/train_qwen3_qat.cpp:179:5: error: 'withKey' was not declared in this scope; did you mean 'nntrainer::withKey'?
+  179 |     withKey("name", "layer" + std::to_string(layer_id) + "_ffn_up"),
+      |     ^~~~~~~
+      |     nntrainer::withKey
+In file included from ../nntrainer/utils/base_properties.h:25,
+                 from ../nntrainer/layers/layer_devel.h:30,
+                 from ../nntrainer/app_context.h:30,
+                 from ../Applications/CausalLM/train_qwen3_qat.cpp:39:
+../nntrainer/utils/util_func.h:254:20: note: 'nntrainer::withKey' declared here
+  254 | static std::string withKey(const std::string &key,
+      |                    ^~~~~~~
+../Applications/CausalLM/train_qwen3_qat.cpp:178:20: error: 'createLayer' was not declared in this scope
+  178 |   layers.push_back(createLayer("qat_fully_connected", {
+      |                    ^~~~~~~~~~~
+../Applications/CausalLM/train_qwen3_qat.cpp:178:20: note: suggested alternatives:
+In file included from ../nntrainer/app_context.h:30,
+                 from ../Applications/CausalLM/train_qwen3_qat.cpp:39:
+../nntrainer/layers/layer_devel.h:545:24: note:   'nntrainer::createLayer'
+  545 | std::unique_ptr<Layer> createLayer(const std::vector<std::string> &props = {}) {
+      |                        ^~~~~~~~~~~
+In file included from ../Applications/CausalLM/models/transformer.h:37,
+                 from ../Applications/CausalLM/models/causal_lm.h:42,
+                 from ../Applications/CausalLM/train_qwen3_qat.cpp:26:
+../api/ccapi/include/layer.h:313:24: note:   'ml::train::createLayer'
+  313 | std::unique_ptr<Layer> createLayer(const std::vector<std::string> &props = {}) {
+      |                        ^~~~~~~~~~~
+[31/38] Compiling C++ object Applications/CausalLM/libcausallm.so.p/_nntrainerPranjal_Applications_CausalLM_models_sentence_transformer.cpp.o
+ninja: build stopped: subcommand failed.
+root@3ab51be2ad55:/nntrainerPranjal#
