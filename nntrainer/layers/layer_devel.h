@@ -372,12 +372,26 @@ public:
       // @note shared weights are only be saved at the first access
       std::cout << "Layer name inside: " << run_context.getName() << std::endl;
       std::cout << "FC layer weights: " << run_context.getNumWeights() << std::endl;
+      bool lora_enabled = false;
       for (unsigned int i = 0; i < run_context.getNumWeights(); ++i) {
         if (run_context.isGradientFirstAccess(i)) {
           auto &weight = run_context.getWeight(i);
           if (dtype == TensorDim::DataType::NONE ||
             weight.getDataType() == dtype) {
               if(weight.getName().find("lora") != std::string::npos) {
+                lora_enabled = true;
+                break;
+              }
+          }
+        }
+      }
+
+      for (unsigned int i = 0; i < run_context.getNumWeights(); ++i) {
+        if (run_context.isGradientFirstAccess(i)) {
+          auto &weight = run_context.getWeight(i);
+          if (dtype == TensorDim::DataType::NONE ||
+            weight.getDataType() == dtype) {
+              if(!lora_enabled || weight.getName().find("lora") != std::string::npos) {
                 std::cout << "-------------------------------------------------------------------------" << std::endl;
                 std::cout << "Weight Name: " << weight.getName() << std::endl;
                 std::cout << "Saving weights..." << std::endl;
@@ -443,10 +457,13 @@ public:
                     bool opt_var, ml::train::ExecutionMode mode, bool trainable,
                     TensorDim::DataType defineWeightDataType, bool fsu,
                     size_t start_offset = 0, bool read_from_offset = false,
-                    int file_fd = -1) {
-    auto lora_path = "/workspace/nntrainer_korea/nntrainer/Applications/LoRA/lora.bin";
-    auto lora_file =
-      checkedOpenStream<std::ifstream>(lora_path, std::ios::in | std::ios::binary);
+                    int file_fd = -1, const std::string &lora_path = "") {
+    std::ifstream lora_file;
+    bool lora_enabled = false;
+    if(lora_path != "") {
+      lora_enabled = true;
+      lora_file = checkedOpenStream<std::ifstream>(lora_path, std::ios::in | std::ios::binary);
+    }
  
     if (fsu) {
       for (unsigned int i = 0; i < run_context.getNumWeights(); ++i) {
@@ -472,9 +489,12 @@ public:
           if (run_context.isGradientFirstAccess(i)) {
             std::cout << "Weight Read: " << run_context.getWeight(i).getName() << std::endl;
             if(run_context.getWeight(i).getName().find("lora") != std::string::npos) {
-              run_context.getWeight(i).read(lora_file, start_offset, read_from_offset,
-                                              file_fd);
-                run_context.getWeight(i).print(std::cout);
+              if(lora_enabled) {
+                std::cout << "LoRA trainable: " << run_context.getTrainable() << std::endl;
+                run_context.getWeight(i).read(lora_file, start_offset, read_from_offset,
+                                                file_fd);
+                  run_context.getWeight(i).print(std::cout);
+              }
             }
             else {
               run_context.getWeight(i).read(file, start_offset, read_from_offset,
@@ -505,10 +525,13 @@ public:
   virtual void read(ReadSource src, RunLayerContext &run_context, bool opt_var,
                     ml::train::ExecutionMode mode, bool trainable,
                     TensorDim::DataType defineWeightDataType, bool fsu,
-                    size_t start_offset = 0, bool read_from_offset = false) {
-    auto lora_path = "/workspace/nntrainer_korea/nntrainer/Applications/LoRA/lora.bin";
-    auto lora_file =
-      checkedOpenStream<std::ifstream>(lora_path, std::ios::in | std::ios::binary);
+                    size_t start_offset = 0, bool read_from_offset = false, const std::string &lora_path = "") {
+    std::ifstream lora_file;
+    bool lora_enabled = false;
+    if(lora_path != "") {
+      lora_enabled = true;
+      lora_file = checkedOpenStream<std::ifstream>(lora_path, std::ios::in | std::ios::binary);
+    }
     
       if (fsu) {
       for (unsigned int i = 0; i < run_context.getNumWeights(); ++i) {
@@ -535,8 +558,11 @@ public:
              std::cout << "-------------------------------------------------------------------------" << std::endl;
              std::cout << "Weight Read: " << run_context.getWeight(i).getName() << std::endl;
               if(run_context.getWeight(i).getName().find("lora") != std::string::npos) {
-                run_context.getWeight(i).read(lora_file, start_offset, read_from_offset);
-                run_context.getWeight(i).print(std::cout);
+                if(lora_enabled) {
+                  std::cout << "LoRA trainable: " << run_context.getTrainable() << std::endl;
+                  run_context.getWeight(i).read(lora_file, start_offset, read_from_offset);
+                  run_context.getWeight(i).print(std::cout);
+                }
               }
               else {
                 run_context.getWeight(i).read(src, start_offset, read_from_offset);

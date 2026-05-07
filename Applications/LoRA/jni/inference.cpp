@@ -222,7 +222,7 @@ int main(int argc, char **argv) {
 
   // Load the trained model AFTER initialization
   try {
-    model->load(model_path);
+    model->load(model_path, ml::train::ModelFormat::MODEL_FORMAT_BIN, "/workspace/nntrainer_korea/nntrainer/Applications/LoRA/lora_1.bin");
     std::cout << "Model loaded from " << model_path << std::endl;
   } catch (const std::exception &e) {
     std::cerr << "Error loading model: " << e.what() << std::endl;

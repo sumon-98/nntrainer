@@ -143,7 +143,8 @@ std::vector<LayerHandle> createSimpleGraph(unsigned int lora_rank,
     createLayer("fully_connected",
                 {nntrainer::withKey("unit", 10),
                  nntrainer::withKey("weight_initializer", "xavier_uniform"),
-                 nntrainer::withKey("activation", "softmax")}));
+                 nntrainer::withKey("activation", "softmax"),
+                 nntrainer::withKey("trainable", "false")}));
 
   return layers;
 }
@@ -387,17 +388,17 @@ int main(int argc, char **argv) {
     return 1;
   }
 
-  // try {
-  //   model->load(pretrained_model_path,
-  //               ml::train::ModelFormat::MODEL_FORMAT_BIN);
-  //   std::cout << "Pre-trained model loaded successfully." << std::endl;
-  // } catch (const std::exception &e) {
-  //   std::cerr << "Error loading pre-trained model: " << e.what() << std::endl;
-  //   std::cerr << "Please make sure the pre-trained model exists and was "
-  //                "trained with compatible architecture."
-  //             << std::endl;
-  //   return 1;
-  // }
+  try {
+    model->load(pretrained_model_path,
+                ml::train::ModelFormat::MODEL_FORMAT_BIN);
+    std::cout << "Pre-trained model loaded successfully." << std::endl;
+  } catch (const std::exception &e) {
+    std::cerr << "Error loading pre-trained model: " << e.what() << std::endl;
+    std::cerr << "Please make sure the pre-trained model exists and was "
+                 "trained with compatible architecture."
+              << std::endl;
+    return 1;
+  }
   // Create DataInformation objects for training data (using only first
   // train_samples)
   auto train_user_data =
@@ -454,7 +455,7 @@ int main(int argc, char **argv) {
 
   // Save the trained model
   try {
-    model->save(model_path);
+    model->save(model_path, ml::train::ModelFormat::MODEL_FORMAT_LORA_BIN);
     std::cout << "LoRA fine-tuned model saved to " << model_path << std::endl;
   } catch (const std::exception &e) {
     std::cerr << "Error saving model: " << e.what() << std::endl;

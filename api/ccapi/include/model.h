@@ -94,7 +94,8 @@ for inference and training without any configurations*/
     ML_TRAIN_MODEL_FORMAT_FLATBUFFER,             /**< flatbuffer file */
   MODEL_FORMAT_ONNX = ML_TRAIN_MODEL_FORMAT_ONNX, /**< ONNX file */
 
-  MODEL_FORMAT_QNN = ML_TRAIN_MODEL_FORMAT_QNN /**< qnn binary file */
+  MODEL_FORMAT_QNN = ML_TRAIN_MODEL_FORMAT_QNN, /**< qnn binary file */
+  MODEL_FORMAT_LORA_BIN = ML_TRAIN_MODEL_FORMAT_LORA_BIN
 };
 
 /**
@@ -186,7 +187,7 @@ public:
    * @param format format to save parameters
    */
   virtual void load(const std::string &file_path,
-                    ModelFormat format = ModelFormat::MODEL_FORMAT_BIN) = 0;
+                    ModelFormat format = ModelFormat::MODEL_FORMAT_BIN, const std::string &lora_path = "") = 0;
 
   /**
    * @brief     Run Model training and validation

@@ -112,12 +112,12 @@ void FullyConnectedLayer::finalize(InitLayerContext &context) {
 
   weight_idx[FCParams::weight] = context.requestWeight(
     weight_dim, weight_initializer, weight_regularizer,
-    weight_regularizer_constant, weight_decay, "weight", true);
+    weight_regularizer_constant, weight_decay, "weight", (lora_rank == 0));
 
   if (disable_bias.empty() || disable_bias.get() == false) {
     weight_idx[FCParams::bias] =
       context.requestWeight(bias_dim, bias_initializer, WeightRegularizer::NONE,
-                            1.0f, bias_decay, "bias", true);
+                            1.0f, bias_decay, "bias", (lora_rank == 0));
   }
 
   /** create weights for LoRA */
@@ -211,9 +211,15 @@ void FullyConnectedLayer::forwarding(RunLayerContext &context, bool training) {
 
   ///@todo This dequantization action should be moved to tensor.dot()
   if (quantizer != nullptr) {
+    std::cout << "-----------------------------Forwarding FC layer------------------------------" << std::endl;
+    std::cout << weight << std::endl;
+    std::cout << "------------------------------------------------------------------------------" << std::endl;
     Tensor weight_ = quantizer->dequantize(weight, input_.getDataType());
     input_.dot(weight_, hidden_, false, false);
   } else {
+    std::cout << "-----------------------------Forwarding FC layer------------------------------" << std::endl;
+    std::cout << weight << std::endl;
+    std::cout << "------------------------------------------------------------------------------" << std::endl;
     input_.dot(weight, hidden_, false, false);
   }
 
@@ -223,7 +229,9 @@ void FullyConnectedLayer::forwarding(RunLayerContext &context, bool training) {
     Tensor &hidden_tmp_lora = context.getTensor(lora_idx[LORAParams::loraTmp]);
     Tensor &hidden_out_lora = context.getTensor(lora_idx[LORAParams::loraOut]);
 
-    // std::cout << weight << loraA << loraB << std::endl;
+    std::cout << "------------------------------Forwarding FC layer------------------------------" << std::endl;
+    std::cout << weight << loraA << loraB << std::endl;
+    std::cout << "-------------------------------------------------------------------------------" << std::endl;
 
     input_.dot(loraA, hidden_tmp_lora, false, false);
     hidden_tmp_lora.dot(loraB, hidden_out_lora, false, false);
