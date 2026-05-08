@@ -7,9 +7,8 @@
  * Adaptation) for Qwen3. The training approach is:
  *
  *   1. All base FC layers use qat_fully_connected (weight-only fake quant)
- *   2. LoRA adapters are injected on top via JSON config (same as LoRA master)
- *   3. Base weights are FROZEN (trainable=false) — only LoRA adapters train
- *   4. During forward pass, the frozen base weights are still fake-quantized
+ *   2. Base weights are FROZEN (trainable=false) — only LoRA adapters train
+ *   3. During forward pass, the frozen base weights are still fake-quantized
  *      so the network learns to compensate for quantization through LoRA
  *
  * Industry Standard Context:
@@ -29,9 +28,8 @@
  *           computed first, then LoRA training uses those frozen stats
  *
  * For now, this script implements Path B as a starting point:
- *   - Stage 1: Build with qat_fully_connected (for weight quantization stats)
- *   - Stage 2: The LoRA adapters are standard fully_connected LoRA layers
- *              applied after the QAT layers
+ *   - Build with qat_fully_connected (for weight quantization stats)
+ *   - Base weights are frozen (trainable=false)
  *
  * Usage:
  *   ./build/Applications/CausalLM/nntr_qwen3_qat_lora \
@@ -63,24 +61,21 @@
 #include <engine.h>
 #include <qat_fc_layer.h>
 
+// For withKey() and createLayer() used in model construction
+#include <llm_util.hpp>
+#include <layer.h>
+
 using json = nlohmann::json;
+using ml::train::createLayer;
 
 // =============================================================================
 // Qwen3 QAT+LoRA Transformer
 //
 // Strategy: The base FC weights are replaced with QAT FC (frozen, weight-only
-// fake quantized). LoRA adapters are NOT injected through qat_fc_layer but
-// through the standard LoRA mechanism (lora_rank/lora_alpha on the regular
-// FC layer). This means:
-//   - The base weights go through fake quantization during forward
-//   - The LoRA delta is added in FP32 on top
-//   - Only the LoRA delta is trainable
+// fake quantized).
 //
-// NOTE: This requires that NNTrainer's LoRA mechanism can work with a base
-// layer type of "qat_fully_connected". If it can't (because LoRA properties
-// are only parsed by the built-in FC layer), we fall back to using standard
-// fully_connected with LoRA and simply set trainable=false on the base weight.
-// In that fallback case, QAT is applied as a post-training step.
+// NOTE: LoRA adapter injection via qat_fc_layer properties is TODO.
+// Currently this builds the model with frozen QAT FC layers.
 // =============================================================================
 namespace causallm {
 
@@ -88,8 +83,6 @@ class Qwen3QATLoRATransformer : public Qwen3CausalLM {
 public:
   Qwen3QATLoRATransformer(json &cfg, json &generation_cfg, json &nntr_cfg)
     : Transformer(cfg, generation_cfg, nntr_cfg, ModelType::CAUSALLM),
-      CausalLM(cfg, generation_cfg, nntr_cfg),
-      Qwen3Transformer(cfg, generation_cfg, nntr_cfg),
       Qwen3CausalLM(cfg, generation_cfg, nntr_cfg) {}
 
   ~Qwen3QATLoRATransformer() = default;
@@ -104,25 +97,6 @@ public:
     std::string input_name) override;
 
   void registerCustomLayers() override;
-
-private:
-  /**
-   * @brief Create a QAT FC layer with frozen base weights.
-   *
-   * The QAT fake quantization still runs during forward (to simulate INT8
-   * weights), but the base weight is not updated by the optimizer.
-   */
-  LayerHandle createQATFCLayer(
-    const std::string &name, int unit,
-    const std::string &input_layers) {
-    return createLayer("qat_fully_connected", {
-      withKey("name", name),
-      withKey("unit", unit),
-      withKey("disable_bias", "true"),
-      withKey("input_layers", input_layers),
-      withKey("weight_initializer", "ones"),
-      withKey("trainable", "false")});  // Frozen for LoRA
-  }
 };
 
 std::vector<LayerHandle> Qwen3QATLoRATransformer::createAttention(
@@ -139,32 +113,57 @@ std::vector<LayerHandle> Qwen3QATLoRATransformer::createAttention(
   auto O = "layer" + std::to_string(layer_id) + "_attention_out";
 
   // Q — QAT FC (frozen base)
-  layers.push_back(createQATFCLayer(Q, head_dim * n_heads, query_name));
+  std::vector<std::string> q_params = {
+    withKey("name", Q),
+    withKey("unit", head_dim * n_heads),
+    withKey("disable_bias", "true"),
+    withKey("input_layers", query_name),
+    withKey("weight_initializer", "ones"),
+    withKey("trainable", "false")};
+  layers.push_back(createLayer("qat_fully_connected", q_params));
 
   // Q norm (unchanged)
-  layers.push_back(createLayer("reshaped_rms_norm", {
-    withKey("name", Q_norm), withKey("input_layers", Q),
-    withKey("packed", "false"), withKey("epsilon", std::to_string(NORM_EPS)),
+  std::vector<std::string> q_norm_params = {
+    withKey("name", Q_norm),
+    withKey("input_layers", Q),
+    withKey("packed", "false"),
+    withKey("epsilon", std::to_string(NORM_EPS)),
     withKey("feature_size", std::to_string(head_dim)),
-    withKey("trainable", "false")}));
+    withKey("trainable", "false")};
+  layers.push_back(createLayer("reshaped_rms_norm", q_norm_params));
 
   // K — QAT FC (frozen base)
-  layers.push_back(
-    createQATFCLayer(K, head_dim * n_heads / GQA_SIZE, key_name));
+  std::vector<std::string> k_params = {
+    withKey("name", K),
+    withKey("unit", head_dim * n_heads / GQA_SIZE),
+    withKey("disable_bias", "true"),
+    withKey("input_layers", key_name),
+    withKey("weight_initializer", "ones"),
+    withKey("trainable", "false")};
+  layers.push_back(createLayer("qat_fully_connected", k_params));
 
   // K norm (unchanged)
-  layers.push_back(createLayer("reshaped_rms_norm", {
-    withKey("name", K_norm), withKey("input_layers", K),
-    withKey("packed", "false"), withKey("epsilon", std::to_string(NORM_EPS)),
+  std::vector<std::string> k_norm_params = {
+    withKey("name", K_norm),
+    withKey("input_layers", K),
+    withKey("packed", "false"),
+    withKey("epsilon", std::to_string(NORM_EPS)),
     withKey("feature_size", std::to_string(head_dim)),
-    withKey("trainable", "false")}));
+    withKey("trainable", "false")};
+  layers.push_back(createLayer("reshaped_rms_norm", k_norm_params));
 
   // V — QAT FC (frozen base)
-  layers.push_back(
-    createQATFCLayer(V, head_dim * n_heads / GQA_SIZE, value_name));
+  std::vector<std::string> v_params = {
+    withKey("name", V),
+    withKey("unit", head_dim * n_heads / GQA_SIZE),
+    withKey("disable_bias", "true"),
+    withKey("input_layers", value_name),
+    withKey("weight_initializer", "ones"),
+    withKey("trainable", "false")};
+  layers.push_back(createLayer("qat_fully_connected", v_params));
 
   // Attention core (unchanged)
-  layers.push_back(createLayer("mha_core", {
+  std::vector<std::string> a_params = {
     withKey("name", A),
     withKey("num_heads", n_heads),
     withKey("num_heads_kv", n_heads / GQA_SIZE),
@@ -174,10 +173,18 @@ std::vector<LayerHandle> Qwen3QATLoRATransformer::createAttention(
     withKey("max_position_embeddings", MAX_POSITION_EMBEDDINGS),
     withKey("max_new_tokens", std::to_string(NUM_TO_GENERATE)),
     withKey("input_layers", {Q_norm, K_norm, V}),
-    withKey("trainable", "false")}));
+    withKey("trainable", "false")};
+  layers.push_back(createLayer("mha_core", a_params));
 
   // O — QAT FC (frozen base)
-  layers.push_back(createQATFCLayer(O, DIM, A));
+  std::vector<std::string> o_params = {
+    withKey("name", O),
+    withKey("unit", DIM),
+    withKey("disable_bias", "true"),
+    withKey("input_layers", A),
+    withKey("weight_initializer", "ones"),
+    withKey("trainable", "false")};
+  layers.push_back(createLayer("qat_fully_connected", o_params));
 
   return layers;
 }
@@ -188,25 +195,44 @@ std::vector<LayerHandle> Qwen3QATLoRATransformer::createMlp(
   std::vector<LayerHandle> layers;
 
   // ffn_up — QAT FC (frozen)
-  layers.push_back(createQATFCLayer(
-    "layer" + std::to_string(layer_id) + "_ffn_up", hidden_dim, input_name));
+  std::vector<std::string> up_params = {
+    withKey("name", "layer" + std::to_string(layer_id) + "_ffn_up"),
+    withKey("unit", hidden_dim),
+    withKey("disable_bias", "true"),
+    withKey("input_layers", input_name),
+    withKey("weight_initializer", "ones"),
+    withKey("trainable", "false")};
+  layers.push_back(createLayer("qat_fully_connected", up_params));
 
   // ffn_gate — QAT FC (frozen)
-  layers.push_back(createQATFCLayer(
-    "layer" + std::to_string(layer_id) + "_ffn_gate", hidden_dim, input_name));
+  std::vector<std::string> gate_params = {
+    withKey("name", "layer" + std::to_string(layer_id) + "_ffn_gate"),
+    withKey("unit", hidden_dim),
+    withKey("disable_bias", "true"),
+    withKey("input_layers", input_name),
+    withKey("weight_initializer", "ones"),
+    withKey("trainable", "false")};
+  layers.push_back(createLayer("qat_fully_connected", gate_params));
 
   // swiglu (unchanged)
-  layers.push_back(createLayer("swiglu", {
+  std::vector<std::string> swiglu_params = {
     withKey("name", "layer" + std::to_string(layer_id) + "_ffn_swiglu"),
     withKey("input_layers",
             "layer" + std::to_string(layer_id) + "_ffn_gate," +
             "layer" + std::to_string(layer_id) + "_ffn_up"),
-    withKey("trainable", "false")}));
+    withKey("trainable", "false")};
+  layers.push_back(createLayer("swiglu", swiglu_params));
 
   // ffn_down — QAT FC (frozen)
-  layers.push_back(createQATFCLayer(
-    "layer" + std::to_string(layer_id) + "_ffn_down", dim,
-    "layer" + std::to_string(layer_id) + "_ffn_swiglu"));
+  std::vector<std::string> down_params = {
+    withKey("name", "layer" + std::to_string(layer_id) + "_ffn_down"),
+    withKey("unit", dim),
+    withKey("disable_bias", "true"),
+    withKey("input_layers",
+            "layer" + std::to_string(layer_id) + "_ffn_swiglu"),
+    withKey("weight_initializer", "ones"),
+    withKey("trainable", "false")};
+  layers.push_back(createLayer("qat_fully_connected", down_params));
 
   return layers;
 }
