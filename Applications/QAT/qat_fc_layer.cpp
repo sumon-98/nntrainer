@@ -1,11 +1,20 @@
 // SPDX-License-Identifier: Apache-2.0
 /**
  * @file   qat_fc_layer.cpp
- * @brief  QAT Fully Connected Layer - DIAGNOSTIC VERSION
+ * @brief  QAT Fully Connected Layer — Weight-Only Fake Quantization
  *
- * This is a carbon copy of FullyConnectedLayer logic.
- * NO fake quantization, NO temp tensors.
- * Purpose: prove that a custom layer with weights can compile & train.
+ * Implements weight-only QAT using the Straight-Through Estimator (STE).
+ *
+ * Forward pass:
+ *   1. Fake-quantize weights to INT8 grid: w_fq = fakeQuantize(weight)
+ *   2. Compute output = input * w_fq + bias
+ *
+ * Backward pass (STE):
+ *   - calcDerivative: dL/dx = dL/dy * w_fq^T  (uses fake-quantized weights)
+ *   - calcGradient:   dL/dW = x^T * dL/dy     (uses original FP32 inputs)
+ *
+ * The optimizer updates the FP32 master weights normally. The fake quantization
+ * is only applied during the forward pass to simulate quantization effects.
  */
 
 #include "qat_fc_layer.h"
@@ -13,6 +22,7 @@
 #include <nntrainer_log.h>
 #include <node_exporter.h>
 #include <iostream>
+#include <functional>
 
 namespace nntrainer {
 
@@ -21,12 +31,10 @@ static constexpr size_t SINGLE_INOUT_IDX = 0;
 QATFullyConnectedLayer::QATFullyConnectedLayer() :
   LayerImpl(),
   qat_fc_props(props::Unit()),
-  q_min_act(0.0f),
-  q_max_act(255.0f),
   q_min_weight(-128.0f),
   q_max_weight(127.0f),
   momentum(0.1f),
-  initialized(false) {  // Add this
+  initialized(false) {
   weight_idx.fill(std::numeric_limits<unsigned>::max());
 }
 
@@ -36,11 +44,14 @@ QATFullyConnectedLayer::~QATFullyConnectedLayer() {
   }
 }
 
-Tensor QATFullyConnectedLayer::fakeQuantize(Tensor &x, Tensor &running_min, Tensor &running_max, float q_min, float q_max, bool training) {
+Tensor QATFullyConnectedLayer::fakeQuantize(
+  Tensor &x, Tensor &running_min, Tensor &running_max,
+  float q_min, float q_max, bool training) {
+
   if (training) {
     float current_min = x.minValue();
     float current_max = x.maxValue();
-    
+
     if (std::isinf(running_min.getValue<float>(0))) {
       running_min.setValue(current_min);
       running_max.setValue(current_max);
@@ -56,20 +67,16 @@ Tensor QATFullyConnectedLayer::fakeQuantize(Tensor &x, Tensor &running_min, Tens
   float max_val = running_max.getValue<float>(0);
 
   float range = max_val - min_val;
-  if (range < 1e-8f) range = 1e-8f;
-  
+  if (range < 1e-8f)
+    range = 1e-8f;
+
   float scale = range / (q_max - q_min);
   float zero_point = q_min - std::round(min_val / scale);
   zero_point = std::max(q_min, std::min(q_max, zero_point)); // clamp
 
-  // Tensor x_fq = x.clone();
-  // x_fq.apply([scale, zero_point, q_min, q_max](float v) -> float {
-  //   float q = std::round((v / scale) + zero_point);
-  //   q = std::max(q_min, std::min(q_max, q));
-  //   return (q - zero_point) * scale;
-  // }, x_fq);
   Tensor x_fq = x.clone();
-  std::function<float(float)> quantize_fn = [scale, zero_point, q_min, q_max](float v) -> float {
+  std::function<float(float)> quantize_fn =
+    [scale, zero_point, q_min, q_max](float v) -> float {
     float q = std::round((v / scale) + zero_point);
     q = std::max(q_min, std::min(q_max, q));
     return (q - zero_point) * scale;
@@ -80,24 +87,20 @@ Tensor QATFullyConnectedLayer::fakeQuantize(Tensor &x, Tensor &running_min, Tens
 }
 
 void QATFullyConnectedLayer::printQATStats() const {
-  // std::cerr << "--- " << getName() << " QAT Stats ---" << std::endl;
   std::cerr << "--- " << getType() << " QAT Stats ---" << std::endl;
 
-  
-  auto get_scale_zp = [](const Tensor& r_min, const Tensor& r_max, float q_min, float q_max) {
-    float min_val = r_min.getValue<float>(0);
-    float max_val = r_max.getValue<float>(0);
-    float range = std::max(max_val - min_val, 1e-8f);
-    float scale = range / (q_max - q_min);
-    float zero_point = std::max(q_min, std::min(q_max, q_min - std::round(min_val / scale)));
-    return std::make_pair(scale, zero_point);
-  };
+  float min_val = weight_running_min.getValue<float>(0);
+  float max_val = weight_running_max.getValue<float>(0);
+  float range = std::max(max_val - min_val, 1e-8f);
+  float scale = range / (q_max_weight - q_min_weight);
+  float zero_point = std::max(
+    q_min_weight,
+    std::min(q_max_weight, q_min_weight - std::round(min_val / scale)));
 
-  auto act_stats = get_scale_zp(act_running_min, act_running_max, q_min_act, q_max_act);
-  std::cerr << "Act Scale: " << act_stats.first << ", Act ZP: " << act_stats.second << std::endl;
-  
-  auto weight_stats = get_scale_zp(weight_running_min, weight_running_max, q_min_weight, q_max_weight);
-  std::cerr << "Weight Scale: " << weight_stats.first << ", Weight ZP: " << weight_stats.second << std::endl;
+  std::cerr << "Weight running min: " << min_val
+            << ", max: " << max_val << std::endl;
+  std::cerr << "Weight Scale: " << scale
+            << ", Weight ZP: " << zero_point << std::endl;
 }
 
 void QATFullyConnectedLayer::setProperty(
@@ -113,8 +116,6 @@ void QATFullyConnectedLayer::exportTo(
 }
 
 void QATFullyConnectedLayer::finalize(InitLayerContext &context) {
-  std::cerr << "[QAT_DIAG] finalize() ENTER for layer" << std::endl;
-
   auto &weight_regularizer =
     std::get<props::WeightRegularizer>(*layer_impl_props);
   auto &weight_regularizer_constant =
@@ -169,63 +170,45 @@ void QATFullyConnectedLayer::finalize(InitLayerContext &context) {
       "bias", true);
   }
 
-  // Initialize QAT running stats
-  act_running_min = Tensor({1});
-  act_running_max = Tensor({1});
+  // Initialize weight quantization running stats
   weight_running_min = Tensor({1});
   weight_running_max = Tensor({1});
-  
-  act_running_min.setValue(std::numeric_limits<float>::infinity());
-  act_running_max.setValue(-std::numeric_limits<float>::infinity());
   weight_running_min.setValue(std::numeric_limits<float>::infinity());
   weight_running_max.setValue(-std::numeric_limits<float>::infinity());
 
-  initialized = true;  // Add this at the end
-
-  std::cerr << "[QAT_DIAG] finalize() EXIT" << std::endl;
+  initialized = true;
 }
 
 void QATFullyConnectedLayer::forwarding(RunLayerContext &context,
                                          bool training) {
-  std::cerr << "[QAT_DIAG] forwarding() ENTER" << std::endl;
-
   Tensor &weight = context.getWeight(weight_idx[FCParams::weight]);
   Tensor &hidden_ = context.getOutput(SINGLE_INOUT_IDX);
   Tensor &input_ = context.getInput(SINGLE_INOUT_IDX);
 
-  // Fake Quantization Pass
-  x_fq = fakeQuantize(input_, act_running_min, act_running_max, q_min_act, q_max_act, training);
-  w_fq = fakeQuantize(weight, weight_running_min, weight_running_max, q_min_weight, q_max_weight, training);
+  // Weight-only fake quantization: quantize weights, pass activations as-is
+  w_fq = fakeQuantize(weight, weight_running_min, weight_running_max,
+                      q_min_weight, q_max_weight, training);
 
-  // Perform standard FC on the fake-quantized tensors
-  x_fq.dot(w_fq, hidden_, false, false);
+  // output = input (FP32) * w_fq (fake-quantized)
+  input_.dot(w_fq, hidden_, false, false);
 
   if (auto &disable_bias = std::get<props::DisableBias>(*layer_impl_props);
       disable_bias.empty() || disable_bias.get() == false) {
     Tensor &bias = context.getWeight(weight_idx[FCParams::bias]);
     hidden_.add_i(bias);
   }
-
-  std::cerr << "[QAT_DIAG] forwarding() EXIT" << std::endl;
 }
 
 void QATFullyConnectedLayer::calcDerivative(RunLayerContext &context) {
-  std::cerr << "[QAT_DIAG] calcDerivative() ENTER" << std::endl;
-
-  Tensor &weight = context.getWeight(weight_idx[FCParams::weight]);
   const Tensor &derivative_ =
     context.getIncomingDerivative(SINGLE_INOUT_IDX);
   Tensor &ret_ = context.getOutgoingDerivative(SINGLE_INOUT_IDX);
 
-  // STE: Use fake-quantized weights for backprop
+  // STE: Use fake-quantized weights for backprop through the layer
   ret_.dot_deriv_wrt_1(w_fq, derivative_, false, false);
-
-  std::cerr << "[QAT_DIAG] calcDerivative() EXIT" << std::endl;
 }
 
 void QATFullyConnectedLayer::calcGradient(RunLayerContext &context) {
-  std::cerr << "[QAT_DIAG] calcGradient() ENTER" << std::endl;
-
   Tensor &djdw = context.getWeightGrad(weight_idx[FCParams::weight]);
   djdw.setZero();
 
@@ -246,12 +229,11 @@ void QATFullyConnectedLayer::calcGradient(RunLayerContext &context) {
     }
   }
 
-  // STE: Use fake-quantized inputs for weight gradient
-  x_fq.dot_deriv_wrt_2(
+  // Weight gradient uses original FP32 input (weight-only QAT: no
+  // activation quantization, so input_ is used directly, not x_fq)
+  input_.dot_deriv_wrt_2(
     djdw, derivative_, false, false,
     !context.isGradientFirstAccess(weight_idx[FCParams::weight]));
-
-  std::cerr << "[QAT_DIAG] calcGradient() EXIT" << std::endl;
 }
 
 } // namespace nntrainer

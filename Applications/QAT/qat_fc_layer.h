@@ -1,11 +1,17 @@
 // SPDX-License-Identifier: Apache-2.0
 /**
  * @file   qat_fc_layer.h
- * @brief  QAT Fully Connected Layer - DIAGNOSTIC VERSION
+ * @brief  QAT Fully Connected Layer — Weight-Only Fake Quantization
  *
- * This is a MINIMAL version with NO fake quantization.
- * It behaves identically to the built-in FullyConnectedLayer.
- * Purpose: isolate whether the crash is in the layer logic or the setup.
+ * This layer implements weight-only Quantization Aware Training (QAT) using
+ * the Straight-Through Estimator (STE). During the forward pass, the weights
+ * are fake-quantized to simulate INT8 precision, while activations pass
+ * through in full FP32 precision. During backpropagation, gradients flow
+ * through the non-differentiable round/clamp operations via STE.
+ *
+ * This layer is a drop-in replacement for NNTrainer's built-in
+ * fully_connected layer. Register it as "qat_fully_connected" and use it
+ * anywhere you would use "fully_connected".
  */
 
 #ifndef __QAT_FC_LAYER_H__
@@ -42,7 +48,9 @@ public:
 
   inline static const std::string type = "qat_fully_connected";
 
-  // Added to extract properties later
+  /**
+   * @brief Print the learned quantization scale and zero-point
+   */
   void printQATStats() const;
 
 private:
@@ -50,9 +58,7 @@ private:
   std::array<unsigned int, 2> weight_idx;
   enum FCParams { weight = 0, bias = 1 };
 
-  // QAT specific properties
-  float q_min_act;
-  float q_max_act;
+  // Weight quantization parameters (INT8: [-128, 127])
   float q_min_weight;
   float q_max_weight;
   float momentum;
@@ -60,18 +66,25 @@ private:
   // Flag to track if layer was properly initialized
   bool initialized = false;
 
-  // QAT running stats
-  Tensor act_running_min;
-  Tensor act_running_max;
+  // Weight quantization running stats (EMA-tracked)
   Tensor weight_running_min;
   Tensor weight_running_max;
 
-  // QAT fake-quantized tensors for STE
-  Tensor x_fq;
+  // Cached fake-quantized weight tensor (used by STE in backward pass)
   Tensor w_fq;
 
-  // Helper method for Fake Quantization
-  Tensor fakeQuantize(Tensor &x, Tensor &running_min, Tensor &running_max, 
+  /**
+   * @brief Apply fake quantization to a tensor using running min/max EMA
+   *
+   * @param x         The tensor to fake-quantize
+   * @param running_min  EMA-tracked minimum value (scalar tensor)
+   * @param running_max  EMA-tracked maximum value (scalar tensor)
+   * @param q_min     Minimum of the quantized integer range
+   * @param q_max     Maximum of the quantized integer range
+   * @param training  If true, update running stats with current batch
+   * @return Tensor   The fake-quantized tensor (same shape as x)
+   */
+  Tensor fakeQuantize(Tensor &x, Tensor &running_min, Tensor &running_max,
                       float q_min, float q_max, bool training);
 };
 

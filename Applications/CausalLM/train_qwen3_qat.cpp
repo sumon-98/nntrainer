@@ -40,7 +40,12 @@
 #include <engine.h>
 #include <qat_fc_layer.h>
 
+// For withKey() and createLayer() used in model construction
+#include <llm_util.hpp>
+#include <layer.h>
+
 using json = nlohmann::json;
+using ml::train::createLayer;
 
 // =============================================================================
 // Qwen3 QAT Transformer — Overrides FC layers to use QAT FC
@@ -53,13 +58,16 @@ namespace causallm {
  *
  * This follows the same override pattern as Qwen3Transformer, which itself
  * overrides Transformer::createAttention() to add Q/K norm layers.
+ *
+ * C++ inheritance note: Since Qwen3QATTransformer directly inherits from
+ * Qwen3CausalLM only, we can only initialize Qwen3CausalLM in our
+ * constructor. The intermediate bases (Transformer, CausalLM,
+ * Qwen3Transformer) are initialized by Qwen3CausalLM's constructor.
  */
 class Qwen3QATTransformer : public Qwen3CausalLM {
 public:
   Qwen3QATTransformer(json &cfg, json &generation_cfg, json &nntr_cfg)
     : Transformer(cfg, generation_cfg, nntr_cfg, ModelType::CAUSALLM),
-      CausalLM(cfg, generation_cfg, nntr_cfg),
-      Qwen3Transformer(cfg, generation_cfg, nntr_cfg),
       Qwen3CausalLM(cfg, generation_cfg, nntr_cfg) {}
 
   ~Qwen3QATTransformer() = default;
@@ -103,47 +111,52 @@ std::vector<LayerHandle> Qwen3QATTransformer::createAttention(
   auto O = "layer" + std::to_string(layer_id) + "_attention_out";
 
   // Q layer — QAT FC
-  layers.push_back(createLayer("qat_fully_connected", {
+  std::vector<std::string> q_params = {
     withKey("name", Q),
     withKey("unit", head_dim * n_heads),
     withKey("disable_bias", "true"),
     withKey("input_layers", query_name),
-    withKey("weight_initializer", "ones")}));
+    withKey("weight_initializer", "ones")};
+  layers.push_back(createLayer("qat_fully_connected", q_params));
 
   // Q-reshaped-norm layer (unchanged — no learnable matmul weights)
-  layers.push_back(createLayer("reshaped_rms_norm", {
+  std::vector<std::string> q_norm_params = {
     withKey("name", Q_norm),
     withKey("input_layers", Q),
     withKey("packed", "false"),
     withKey("epsilon", std::to_string(NORM_EPS)),
-    withKey("feature_size", std::to_string(head_dim))}));
+    withKey("feature_size", std::to_string(head_dim))};
+  layers.push_back(createLayer("reshaped_rms_norm", q_norm_params));
 
   // K layer — QAT FC
-  layers.push_back(createLayer("qat_fully_connected", {
+  std::vector<std::string> k_params = {
     withKey("name", K),
     withKey("unit", head_dim * n_heads / GQA_SIZE),
     withKey("disable_bias", "true"),
     withKey("input_layers", key_name),
-    withKey("weight_initializer", "ones")}));
+    withKey("weight_initializer", "ones")};
+  layers.push_back(createLayer("qat_fully_connected", k_params));
 
   // K-reshaped-norm layer (unchanged)
-  layers.push_back(createLayer("reshaped_rms_norm", {
+  std::vector<std::string> k_norm_params = {
     withKey("name", K_norm),
     withKey("input_layers", K),
     withKey("packed", "false"),
     withKey("epsilon", std::to_string(NORM_EPS)),
-    withKey("feature_size", std::to_string(head_dim))}));
+    withKey("feature_size", std::to_string(head_dim))};
+  layers.push_back(createLayer("reshaped_rms_norm", k_norm_params));
 
   // V layer — QAT FC
-  layers.push_back(createLayer("qat_fully_connected", {
+  std::vector<std::string> v_params = {
     withKey("name", V),
     withKey("unit", head_dim * n_heads / GQA_SIZE),
     withKey("disable_bias", "true"),
     withKey("input_layers", value_name),
-    withKey("weight_initializer", "ones")}));
+    withKey("weight_initializer", "ones")};
+  layers.push_back(createLayer("qat_fully_connected", v_params));
 
   // Attention core layer (unchanged — no learnable weights)
-  layers.push_back(createLayer("mha_core", {
+  std::vector<std::string> a_params = {
     withKey("name", A),
     withKey("num_heads", n_heads),
     withKey("num_heads_kv", n_heads / GQA_SIZE),
@@ -152,15 +165,17 @@ std::vector<LayerHandle> Qwen3QATTransformer::createAttention(
     withKey("rope_theta", ROPE_THETA),
     withKey("max_position_embeddings", MAX_POSITION_EMBEDDINGS),
     withKey("max_new_tokens", std::to_string(NUM_TO_GENERATE)),
-    withKey("input_layers", {Q_norm, K_norm, V})}));
+    withKey("input_layers", {Q_norm, K_norm, V})};
+  layers.push_back(createLayer("mha_core", a_params));
 
   // O layer — QAT FC
-  layers.push_back(createLayer("qat_fully_connected", {
+  std::vector<std::string> o_params = {
     withKey("name", O),
     withKey("unit", DIM),
     withKey("disable_bias", "true"),
     withKey("input_layers", A),
-    withKey("weight_initializer", "ones")}));
+    withKey("weight_initializer", "ones")};
+  layers.push_back(createLayer("qat_fully_connected", o_params));
 
   return layers;
 }
@@ -175,36 +190,40 @@ std::vector<LayerHandle> Qwen3QATTransformer::createMlp(
   std::vector<LayerHandle> layers;
 
   // ffn_up — QAT FC
-  layers.push_back(createLayer("qat_fully_connected", {
+  std::vector<std::string> up_params = {
     withKey("name", "layer" + std::to_string(layer_id) + "_ffn_up"),
     withKey("unit", hidden_dim),
     withKey("disable_bias", "true"),
     withKey("input_layers", input_name),
-    withKey("weight_initializer", "ones")}));
+    withKey("weight_initializer", "ones")};
+  layers.push_back(createLayer("qat_fully_connected", up_params));
 
   // ffn_gate — QAT FC
-  layers.push_back(createLayer("qat_fully_connected", {
+  std::vector<std::string> gate_params = {
     withKey("name", "layer" + std::to_string(layer_id) + "_ffn_gate"),
     withKey("unit", hidden_dim),
     withKey("disable_bias", "true"),
     withKey("input_layers", input_name),
-    withKey("weight_initializer", "ones")}));
+    withKey("weight_initializer", "ones")};
+  layers.push_back(createLayer("qat_fully_connected", gate_params));
 
   // swiglu (unchanged — stateless activation)
-  layers.push_back(createLayer("swiglu", {
+  std::vector<std::string> swiglu_params = {
     withKey("name", "layer" + std::to_string(layer_id) + "_ffn_swiglu"),
     withKey("input_layers",
             "layer" + std::to_string(layer_id) + "_ffn_gate," +
-            "layer" + std::to_string(layer_id) + "_ffn_up")}));
+            "layer" + std::to_string(layer_id) + "_ffn_up")};
+  layers.push_back(createLayer("swiglu", swiglu_params));
 
   // ffn_down — QAT FC
-  layers.push_back(createLayer("qat_fully_connected", {
+  std::vector<std::string> down_params = {
     withKey("name", "layer" + std::to_string(layer_id) + "_ffn_down"),
     withKey("unit", dim),
     withKey("disable_bias", "true"),
     withKey("input_layers",
             "layer" + std::to_string(layer_id) + "_ffn_swiglu"),
-    withKey("weight_initializer", "ones")}));
+    withKey("weight_initializer", "ones")};
+  layers.push_back(createLayer("qat_fully_connected", down_params));
 
   return layers;
 }
@@ -358,21 +377,6 @@ int main(int argc, char *argv[]) {
     std::cout << "\n=== Starting Qwen3 QAT full model training ===" << std::endl;
     auto train_start = std::chrono::steady_clock::now();
 
-    // // Callbacks
-    // auto iter_cb = [](void *user_data) -> bool {
-    //   auto m = static_cast<causallm::Qwen3QATTransformer *>(user_data);
-    //   std::cout << "  [Step] Training Loss: " << m->getTrainingLoss()
-    //             << std::endl;
-    //   return false;
-    // };
-
-    // auto epoch_cb = [](void *user_data) {
-    //   auto m = static_cast<causallm::Qwen3QATTransformer *>(user_data);
-    //   std::cout << "[Epoch Done] Training Loss: " << m->getTrainingLoss()
-    //             << std::endl;
-    // };
-
-    // model->train({}, iter_cb, model.get(), epoch_cb, model.get());
     model->train();
 
     auto train_end = std::chrono::steady_clock::now();
