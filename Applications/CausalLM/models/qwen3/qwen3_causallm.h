@@ -16,6 +16,10 @@
 
 #include <causal_lm.h>
 
+// LoRA Debugging includes
+#include <fstream>
+#include <iomanip>
+
 namespace causallm {
 
 /**
@@ -55,6 +59,7 @@ public:
   virtual ~Qwen3CausalLM() = default;
 
   void registerCustomLayers() override;
+  // void exportWeightsToFile(const std::string& filename) const; // LoRA Debugging
 
 private:
 };
