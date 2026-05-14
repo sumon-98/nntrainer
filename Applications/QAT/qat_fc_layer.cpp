@@ -1,20 +1,29 @@
 // SPDX-License-Identifier: Apache-2.0
 /**
  * @file   qat_fc_layer.cpp
- * @brief  QAT Fully Connected Layer — Weight-Only Fake Quantization
+ * @brief  QAT Fully Connected Layer — supports both full QAT and LoRA QAT
  *
- * Implements weight-only QAT using the Straight-Through Estimator (STE).
+ * Two modes using the same layer code:
  *
- * Forward pass:
- *   1. Fake-quantize weights to INT8 grid: w_fq = fakeQuantize(weight)
- *   2. Compute output = input * w_fq + bias
+ * MODE 1 — Full Model QAT (lora_rank not set):
+ *   Forward:  w_fq = fakeQuantize(W)
+ *             output = input * w_fq + bias
+ *   Backward: STE on base weight gradients
+ *   Use case: train_qwen3_qat.cpp (all weights trainable with QAT)
  *
- * Backward pass (STE):
- *   - calcDerivative: dL/dx = dL/dy * w_fq^T  (uses fake-quantized weights)
- *   - calcGradient:   dL/dW = x^T * dL/dy     (uses original FP32 inputs)
+ * MODE 2 — LoRA QAT (lora_rank > 0):
+ *   Forward:  a_fq = fakeQuantize(loraA)
+ *             b_fq = fakeQuantize(loraB)
+ *             output = input * W_frozen
+ *                    + input * a_fq * b_fq * scaling
+ *                    + bias
+ *   Backward: STE on LoRA weight gradients only (base W is frozen)
+ *   Use case: train_qwen3_qat_lora.cpp (base frozen, LoRA adapters
+ *             trained with QAT for INT8 deployment of adapters)
  *
- * The optimizer updates the FP32 master weights normally. The fake quantization
- * is only applied during the forward pass to simulate quantization effects.
+ * Key difference from previous version:
+ *   OLD: QAT was on the BASE weight, LoRA was added in FP32 on top
+ *   NEW: Base weight is vanilla FP32 (frozen), QAT is on the LORA weights
  */
 
 #include "qat_fc_layer.h"
@@ -30,12 +39,14 @@ static constexpr size_t SINGLE_INOUT_IDX = 0;
 
 QATFullyConnectedLayer::QATFullyConnectedLayer() :
   LayerImpl(),
-  qat_fc_props(props::Unit()),
-  q_min_weight(-128.0f),
-  q_max_weight(127.0f),
+  lora_scaling(1.0f),
+  qat_fc_props(props::Unit(), props::LoraRank(), props::LoraAlpha()),
+  q_min(-128.0f),
+  q_max(127.0f),
   momentum(0.1f),
   initialized(false) {
   weight_idx.fill(std::numeric_limits<unsigned>::max());
+  lora_idx.fill(std::numeric_limits<unsigned>::max());
 }
 
 QATFullyConnectedLayer::~QATFullyConnectedLayer() {
@@ -46,7 +57,7 @@ QATFullyConnectedLayer::~QATFullyConnectedLayer() {
 
 Tensor QATFullyConnectedLayer::fakeQuantize(
   Tensor &x, Tensor &running_min, Tensor &running_max,
-  float q_min, float q_max, bool training) {
+  float q_min_val, float q_max_val, bool training) {
 
   if (training) {
     float current_min = x.minValue();
@@ -70,15 +81,15 @@ Tensor QATFullyConnectedLayer::fakeQuantize(
   if (range < 1e-8f)
     range = 1e-8f;
 
-  float scale = range / (q_max - q_min);
-  float zero_point = q_min - std::round(min_val / scale);
-  zero_point = std::max(q_min, std::min(q_max, zero_point)); // clamp
+  float scale = range / (q_max_val - q_min_val);
+  float zero_point = q_min_val - std::round(min_val / scale);
+  zero_point = std::max(q_min_val, std::min(q_max_val, zero_point));
 
   Tensor x_fq = x.clone();
   std::function<float(float)> quantize_fn =
-    [scale, zero_point, q_min, q_max](float v) -> float {
+    [scale, zero_point, q_min_val, q_max_val](float v) -> float {
     float q = std::round((v / scale) + zero_point);
-    q = std::max(q_min, std::min(q_max, q));
+    q = std::max(q_min_val, std::min(q_max_val, q));
     return (q - zero_point) * scale;
   };
   x_fq.apply(quantize_fn, x_fq);
@@ -87,20 +98,45 @@ Tensor QATFullyConnectedLayer::fakeQuantize(
 }
 
 void QATFullyConnectedLayer::printQATStats() const {
-  std::cerr << "--- " << getType() << " QAT Stats ---" << std::endl;
+  const auto &lora_rank = std::get<props::LoraRank>(qat_fc_props);
 
-  float min_val = weight_running_min.getValue<float>(0);
-  float max_val = weight_running_max.getValue<float>(0);
-  float range = std::max(max_val - min_val, 1e-8f);
-  float scale = range / (q_max_weight - q_min_weight);
-  float zero_point = std::max(
-    q_min_weight,
-    std::min(q_max_weight, q_min_weight - std::round(min_val / scale)));
+  if (lora_rank.empty()) {
+    // Mode 1: print base weight quantization stats
+    std::cerr << "--- " << getType() << " QAT Stats (Base Weight) ---"
+              << std::endl;
 
-  std::cerr << "Weight running min: " << min_val
-            << ", max: " << max_val << std::endl;
-  std::cerr << "Weight Scale: " << scale
-            << ", Weight ZP: " << zero_point << std::endl;
+    float min_val = weight_running_min.getValue<float>(0);
+    float max_val = weight_running_max.getValue<float>(0);
+    float range = std::max(max_val - min_val, 1e-8f);
+    float scale = range / (q_max - q_min);
+    float zero_point = std::max(
+      q_min, std::min(q_max, q_min - std::round(min_val / scale)));
+
+    std::cerr << "Weight running min: " << min_val
+              << ", max: " << max_val << std::endl;
+    std::cerr << "Weight Scale: " << scale
+              << ", Weight ZP: " << zero_point << std::endl;
+  } else {
+    // Mode 2: print LoRA weight quantization stats
+    std::cerr << "--- " << getType() << " QAT Stats (LoRA Weights) ---"
+              << std::endl;
+    std::cerr << "LoRA rank: " << lora_rank.get()
+              << ", scaling: " << lora_scaling << std::endl;
+
+    float a_min = lora_a_running_min.getValue<float>(0);
+    float a_max = lora_a_running_max.getValue<float>(0);
+    float a_range = std::max(a_max - a_min, 1e-8f);
+    float a_scale = a_range / (q_max - q_min);
+    std::cerr << "LoraA running min: " << a_min << ", max: " << a_max
+              << ", scale: " << a_scale << std::endl;
+
+    float b_min = lora_b_running_min.getValue<float>(0);
+    float b_max = lora_b_running_max.getValue<float>(0);
+    float b_range = std::max(b_max - b_min, 1e-8f);
+    float b_scale = b_range / (q_max - q_min);
+    std::cerr << "LoraB running min: " << b_min << ", max: " << b_max
+              << ", scale: " << b_scale << std::endl;
+  }
 }
 
 void QATFullyConnectedLayer::setProperty(
@@ -113,6 +149,14 @@ void QATFullyConnectedLayer::exportTo(
   Exporter &exporter, const ml::train::ExportMethods &method) const {
   LayerImpl::exportTo(exporter, method);
   exporter.saveResult(qat_fc_props, method, this);
+}
+
+void QATFullyConnectedLayer::setBatch(nntrainer::RunLayerContext &context,
+                                       unsigned int batch) {
+  if (!std::get<props::LoraRank>(qat_fc_props).empty()) {
+    context.updateTensor(lora_idx[LORAParams::loraTmp], batch);
+    context.updateTensor(lora_idx[LORAParams::loraOut], batch);
+  }
 }
 
 void QATFullyConnectedLayer::finalize(InitLayerContext &context) {
@@ -128,6 +172,15 @@ void QATFullyConnectedLayer::finalize(InitLayerContext &context) {
   auto &disable_bias = std::get<props::DisableBias>(*layer_impl_props);
 
   const auto &unit = std::get<props::Unit>(qat_fc_props).get();
+
+  // LoRA setup
+  const auto &lora_rank = (std::get<props::LoraRank>(qat_fc_props).empty())
+                            ? 0
+                            : std::get<props::LoraRank>(qat_fc_props).get();
+  lora_scaling =
+    (lora_rank && !std::get<props::LoraAlpha>(qat_fc_props).empty())
+      ? (float)std::get<props::LoraAlpha>(qat_fc_props) / lora_rank
+      : 1;
 
   NNTR_THROW_IF(context.getNumInputs() != 1, std::invalid_argument)
     << "QATFullyConnectedLayer takes only one input";
@@ -148,15 +201,17 @@ void QATFullyConnectedLayer::finalize(InitLayerContext &context) {
 
   context.setOutputDimensions(output_dims);
 
+  // Weight dimension
   TensorDim weight_dim(
     1, is_nchw ? 1 : unit, is_nchw ? in_dim.width() : 1,
     is_nchw ? unit : in_dim.channel(),
     TensorDim::TensorType(context.getFormat(), context.getWeightDataType()),
     is_nchw ? 0b0011 : 0b0101);
 
+  // When LoRA is active, base weight is NOT trainable (lora_rank == 0 → true)
   weight_idx[FCParams::weight] = context.requestWeight(
     weight_dim, weight_initializer, weight_regularizer,
-    weight_regularizer_constant, weight_decay, "weight", true);
+    weight_regularizer_constant, weight_decay, "weight", (lora_rank == 0));
 
   if (disable_bias.empty() || disable_bias.get() == false) {
     TensorDim bias_dim(
@@ -167,10 +222,66 @@ void QATFullyConnectedLayer::finalize(InitLayerContext &context) {
 
     weight_idx[FCParams::bias] = context.requestWeight(
       bias_dim, bias_initializer, WeightRegularizer::NONE, 1.0f, bias_decay,
-      "bias", true);
+      "bias", (lora_rank == 0));
   }
 
-  // Initialize weight quantization running stats
+  // Create LoRA weights if lora_rank is specified
+  if (lora_rank) {
+    TensorDim loraA_dim(
+      1, is_nchw ? 1 : lora_rank, is_nchw ? in_dim.width() : 1,
+      is_nchw ? lora_rank : in_dim.channel(),
+      TensorDim::TensorType(context.getFormat(), context.getWeightDataType()),
+      is_nchw ? 0b0011 : 0b0101);
+
+    TensorDim loraB_dim(
+      1, is_nchw ? 1 : unit, is_nchw ? lora_rank : 1,
+      is_nchw ? unit : lora_rank,
+      TensorDim::TensorType(context.getFormat(), context.getWeightDataType()),
+      is_nchw ? 0b0011 : 0b0101);
+
+    TensorDim loraTmp_dim(
+      in_dim.batch(), is_nchw ? 1 : lora_rank, is_nchw ? in_dim.height() : 1,
+      is_nchw ? lora_rank : in_dim.width(),
+      TensorDim::TensorType(context.getFormat(),
+                            context.getActivationDataType()),
+      is_nchw ? 0b1011 : 0b1101);
+
+    TensorDim loraOut_dim(
+      in_dim.batch(), is_nchw ? 1 : unit, is_nchw ? in_dim.height() : 1,
+      is_nchw ? unit : in_dim.width(),
+      TensorDim::TensorType(context.getFormat(),
+                            context.getActivationDataType()),
+      is_nchw ? 0b1011 : 0b1101);
+
+    lora_idx[LORAParams::loraA] = context.requestWeight(
+      loraA_dim, Initializer::ZEROS, weight_regularizer,
+      weight_regularizer_constant, weight_decay, "loraA", true);
+
+    lora_idx[LORAParams::loraB] = context.requestWeight(
+      loraB_dim, Initializer::LECUN_NORMAL, weight_regularizer,
+      weight_regularizer_constant, weight_decay, "loraB", true);
+
+    lora_idx[LORAParams::loraTmp] =
+      context.requestTensor(loraTmp_dim, "hidden_tmp_lora", Initializer::NONE,
+                            true, TensorLifespan::FORWARD_GRAD_LIFESPAN);
+
+    lora_idx[LORAParams::loraOut] =
+      context.requestTensor(loraOut_dim, "hidden_lora", Initializer::NONE, true,
+                            TensorLifespan::FORWARD_FUNC_LIFESPAN);
+
+    // Initialize running stats for LoRA weight quantization
+    lora_a_running_min = Tensor({1});
+    lora_a_running_max = Tensor({1});
+    lora_a_running_min.setValue(std::numeric_limits<float>::infinity());
+    lora_a_running_max.setValue(-std::numeric_limits<float>::infinity());
+
+    lora_b_running_min = Tensor({1});
+    lora_b_running_max = Tensor({1});
+    lora_b_running_min.setValue(std::numeric_limits<float>::infinity());
+    lora_b_running_max.setValue(-std::numeric_limits<float>::infinity());
+  }
+
+  // Initialize base weight quantization running stats (used in Mode 1 only)
   weight_running_min = Tensor({1});
   weight_running_max = Tensor({1});
   weight_running_min.setValue(std::numeric_limits<float>::infinity());
@@ -179,18 +290,44 @@ void QATFullyConnectedLayer::finalize(InitLayerContext &context) {
   initialized = true;
 }
 
+// =============================================================================
+// FORWARDING
+// =============================================================================
 void QATFullyConnectedLayer::forwarding(RunLayerContext &context,
                                          bool training) {
   Tensor &weight = context.getWeight(weight_idx[FCParams::weight]);
   Tensor &hidden_ = context.getOutput(SINGLE_INOUT_IDX);
   Tensor &input_ = context.getInput(SINGLE_INOUT_IDX);
 
-  // Weight-only fake quantization: quantize weights, pass activations as-is
-  w_fq = fakeQuantize(weight, weight_running_min, weight_running_max,
-                      q_min_weight, q_max_weight, training);
+  if (std::get<props::LoraRank>(qat_fc_props).empty()) {
+    // ===== MODE 1: Full QAT — fake-quantize base weight =====
+    // w_fq = fakeQuantize(W); output = input * w_fq
+    w_fq = fakeQuantize(weight, weight_running_min, weight_running_max,
+                        q_min, q_max, training);
+    input_.dot(w_fq, hidden_, false, false);
+  } else {
+    // ===== MODE 2: LoRA QAT — base weight vanilla, QAT on LoRA =====
+    // Base path: output = input * W_frozen (no fake-quant on W)
+    input_.dot(weight, hidden_, false, false);
 
-  // output = input (FP32) * w_fq (fake-quantized)
-  input_.dot(w_fq, hidden_, false, false);
+    // LoRA path: fake-quantize A and B, then compute LoRA contribution
+    Tensor &loraA = context.getWeight(lora_idx[LORAParams::loraA]);
+    Tensor &loraB = context.getWeight(lora_idx[LORAParams::loraB]);
+    Tensor &hidden_tmp_lora = context.getTensor(lora_idx[LORAParams::loraTmp]);
+    Tensor &hidden_out_lora = context.getTensor(lora_idx[LORAParams::loraOut]);
+
+    // Fake-quantize LoRA weights (simulate INT8 deployment of adapters)
+    a_fq = fakeQuantize(loraA, lora_a_running_min, lora_a_running_max,
+                        q_min, q_max, training);
+    b_fq = fakeQuantize(loraB, lora_b_running_min, lora_b_running_max,
+                        q_min, q_max, training);
+
+    // LoRA contribution: input * fakeQuant(A) * fakeQuant(B) * scaling
+    input_.dot(a_fq, hidden_tmp_lora, false, false);
+    hidden_tmp_lora.dot(b_fq, hidden_out_lora, false, false);
+    hidden_out_lora.multiply_i(lora_scaling);
+    hidden_.add_i(hidden_out_lora);
+  }
 
   if (auto &disable_bias = std::get<props::DisableBias>(*layer_impl_props);
       disable_bias.empty() || disable_bias.get() == false) {
@@ -199,41 +336,91 @@ void QATFullyConnectedLayer::forwarding(RunLayerContext &context,
   }
 }
 
+// =============================================================================
+// CALC DERIVATIVE (dL/dx — gradient flowing to previous layer)
+// =============================================================================
 void QATFullyConnectedLayer::calcDerivative(RunLayerContext &context) {
   const Tensor &derivative_ =
     context.getIncomingDerivative(SINGLE_INOUT_IDX);
   Tensor &ret_ = context.getOutgoingDerivative(SINGLE_INOUT_IDX);
 
-  // STE: Use fake-quantized weights for backprop through the layer
-  ret_.dot_deriv_wrt_1(w_fq, derivative_, false, false);
+  if (std::get<props::LoraRank>(qat_fc_props).empty()) {
+    // MODE 1: dL/dx = dL/dy * w_fq^T (STE on base weight)
+    ret_.dot_deriv_wrt_1(w_fq, derivative_, false, false);
+  } else {
+    // MODE 2: effective weight = W_frozen + fakeQuant(A) * fakeQuant(B) * scaling
+    // dL/dx = dL/dy * [W + a_fq * b_fq * scaling]^T
+    Tensor &weight = context.getWeight(weight_idx[FCParams::weight]);
+    ret_.dot_deriv_wrt_1(
+      weight.add(a_fq.dot(b_fq).multiply(lora_scaling)),
+      derivative_, false, false);
+  }
 }
 
+// =============================================================================
+// CALC GRADIENT (dL/dW or dL/dA, dL/dB)
+// =============================================================================
 void QATFullyConnectedLayer::calcGradient(RunLayerContext &context) {
-  Tensor &djdw = context.getWeightGrad(weight_idx[FCParams::weight]);
-  djdw.setZero();
-
   const Tensor &derivative_ =
     context.getIncomingDerivative(SINGLE_INOUT_IDX);
   Tensor &input_ = context.getInput(SINGLE_INOUT_IDX);
 
-  if (auto &disable_bias = std::get<props::DisableBias>(*layer_impl_props);
-      disable_bias.empty() || disable_bias.get() == false) {
-    Tensor &djdb = context.getWeightGrad(weight_idx[FCParams::bias]);
-    djdb.setZero();
+  if (std::get<props::LoraRank>(qat_fc_props).empty()) {
+    // ===== MODE 1: Full QAT — gradients for base weight via STE =====
+    Tensor &djdw = context.getWeightGrad(weight_idx[FCParams::weight]);
+    djdw.setZero();
 
-    if (context.isGradientFirstAccess(weight_idx[FCParams::bias])) {
-      derivative_.sum({0, 1, 2}, djdb);
-    } else {
-      Tensor t = derivative_.sum({0, 1, 2});
-      djdb.add_i(t);
+    if (auto &disable_bias = std::get<props::DisableBias>(*layer_impl_props);
+        disable_bias.empty() || disable_bias.get() == false) {
+      Tensor &djdb = context.getWeightGrad(weight_idx[FCParams::bias]);
+      djdb.setZero();
+
+      if (context.isGradientFirstAccess(weight_idx[FCParams::bias])) {
+        derivative_.sum({0, 1, 2}, djdb);
+      } else {
+        Tensor t = derivative_.sum({0, 1, 2});
+        djdb.add_i(t);
+      }
     }
-  }
 
-  // Weight gradient uses original FP32 input (weight-only QAT: no
-  // activation quantization, so input_ is used directly, not x_fq)
-  input_.dot_deriv_wrt_2(
-    djdw, derivative_, false, false,
-    !context.isGradientFirstAccess(weight_idx[FCParams::weight]));
+    // STE: gradient flows through fakeQuantize as identity
+    input_.dot_deriv_wrt_2(
+      djdw, derivative_, false, false,
+      !context.isGradientFirstAccess(weight_idx[FCParams::weight]));
+  } else {
+    // ===== MODE 2: LoRA QAT — gradients for LoRA params only =====
+    // Base weight is frozen → no djdw computed
+    //
+    // Forward was: loraTmp = input * a_fq;  loraOut = loraTmp * b_fq * scaling
+    // STE: treat fakeQuant(A), fakeQuant(B) as identity for gradient purposes
+    //
+    // Chain rule:
+    //   dL/dB = loraTmp^T * (dL/dy * scaling)     [STE on B]
+    //   dL/d(loraTmp) = (dL/dy * scaling) * b_fq^T [use b_fq from forward]
+    //   dL/dA = input^T * dL/d(loraTmp)            [STE on A]
+
+    Tensor &djdla = context.getWeightGrad(lora_idx[LORAParams::loraA]);
+    Tensor &djdlb = context.getWeightGrad(lora_idx[LORAParams::loraB]);
+    Tensor &djdtmp = context.getTensorGrad(lora_idx[LORAParams::loraTmp]);
+
+    Tensor &loraTmp = context.getTensor(lora_idx[LORAParams::loraTmp]);
+    const auto &lora_derivative_ = derivative_.multiply(lora_scaling);
+
+    // dL/dB: loraTmp already contains (input * a_fq) from forward pass
+    loraTmp.dot_deriv_wrt_2(
+      djdlb, lora_derivative_, false, false,
+      !context.isGradientFirstAccess(lora_idx[LORAParams::loraB]));
+
+    // dL/d(loraTmp): use b_fq (the fake-quantized B from forward)
+    djdtmp.dot_deriv_wrt_1(
+      b_fq, lora_derivative_, false, false,
+      !context.isGradientFirstAccess(lora_idx[LORAParams::loraTmp]));
+
+    // dL/dA: STE — gradient flows through fakeQuant(A) as identity
+    input_.dot_deriv_wrt_2(
+      djdla, djdtmp, false, false,
+      !context.isGradientFirstAccess(lora_idx[LORAParams::loraA]));
+  }
 }
 
 } // namespace nntrainer

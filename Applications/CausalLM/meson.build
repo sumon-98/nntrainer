@@ -92,6 +92,18 @@ e_qwen3_lora_master = executable('nntr_qwen3_lora_master',
     dependencies: [nntrainer_dep, nntrainer_ccapi_dep, causallm_layer_dependencies, causallm_dep],
 )
 
+e_qwen3_qat = executable('nntr_qwen3_qat',
+    ['train_qwen3_qat.cpp', 'lora_train.cpp'],
+    include_directories: [causallm_inc, qat_inc],
+    dependencies: [nntrainer_dep, nntrainer_ccapi_dep, causallm_layer_dependencies, causallm_dep, qat_layer_dep],
+)
+
+e_qwen3_qat_lora = executable('nntr_qwen3_qat_lora',
+    ['train_qwen3_qat_lora.cpp', 'lora_train.cpp'],
+    include_directories: [causallm_inc, qat_inc],
+    dependencies: [nntrainer_dep, nntrainer_ccapi_dep, causallm_layer_dependencies, causallm_dep, qat_layer_dep],
+)
+
 test_api_src = [
     meson.current_source_dir() / 'api' / 'test_api.cpp',
 ]

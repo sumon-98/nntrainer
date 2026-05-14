@@ -1,41 +1,27 @@
 // SPDX-License-Identifier: Apache-2.0
 /**
  * @file   train_qwen3_qat_lora.cpp
- * @brief  Qwen3 QAT + LoRA Training — Weight-Only Quantization with LoRA
+ * @brief  Qwen3 LoRA QAT Training — QAT on LoRA adapters for INT8 deployment
  *
- * This script combines QAT (Quantization Aware Training) with LoRA (Low-Rank
- * Adaptation) for Qwen3. The training approach is:
+ * This script trains Qwen3 with LoRA adapters that are fake-quantized (QAT).
+ * The key architecture:
  *
- *   1. All base FC layers use qat_fully_connected (weight-only fake quant)
- *   2. Base weights are FROZEN (trainable=false) — only LoRA adapters train
- *   3. During forward pass, the frozen base weights are still fake-quantized
- *      so the network learns to compensate for quantization through LoRA
+ *   1. Base FC weights are FROZEN and used as vanilla FP32 (no quantization)
+ *   2. LoRA adapters (A, B) are TRAINABLE and FAKE-QUANTIZED to INT8
+ *   3. The LoRA adapters learn to work under INT8 quantization noise
+ *   4. At deployment: base weights stay FP32, LoRA adapters go to INT8
  *
- * Industry Standard Context:
- *   This is known as "QAT-aware LoRA" or "Quantization-aware Fine-tuning".
- *   The idea is that after deploying the model, both the quantized base
- *   weights AND the LoRA adapters are used at inference time. The LoRA
- *   adapters specifically learn to correct for quantization error.
- *
- * IMPORTANT NOTE: This is a STARTER script. The key challenge is that
- * NNTrainer's built-in LoRA support is tied to the fully_connected layer
- * (via lora_rank/lora_alpha properties). Our qat_fully_connected layer
- * does NOT currently support LoRA properties. There are two paths forward:
- *
- *   Path A: Add lora_rank/lora_alpha support to qat_fc_layer (recommended
- *           but requires significant layer changes)
- *   Path B: Use a two-stage approach where QAT quantization stats are
- *           computed first, then LoRA training uses those frozen stats
- *
- * For now, this script implements Path B as a starting point:
- *   - Build with qat_fully_connected (for weight quantization stats)
- *   - Base weights are frozen (trainable=false)
+ * The math per layer:
+ *   output = input * W_frozen
+ *          + input * fakeQuant(A) * fakeQuant(B) * (alpha/rank)
+ *          + bias
  *
  * Usage:
  *   ./build/Applications/CausalLM/nntr_qwen3_qat_lora \
  *       <model_dir> <train_data.txt> \
  *       [--lr <float>] [--epochs <int>] [--output <path>] \
- *       [--max_samples <int>] [--skip_weights]
+ *       [--max_samples <int>] [--skip_weights] \
+ *       [--lora_rank <int>] [--lora_alpha <int>]
  */
 
 #include <cstdlib>
@@ -61,7 +47,7 @@
 #include <engine.h>
 #include <qat_fc_layer.h>
 
-// For withKey() and createLayer() used in model construction
+// For withKey() and createLayer()
 #include <llm_util.hpp>
 #include <layer.h>
 
@@ -70,20 +56,17 @@ using ml::train::createLayer;
 
 // =============================================================================
 // Qwen3 QAT+LoRA Transformer
-//
-// Strategy: The base FC weights are replaced with QAT FC (frozen, weight-only
-// fake quantized).
-//
-// NOTE: LoRA adapter injection via qat_fc_layer properties is TODO.
-// Currently this builds the model with frozen QAT FC layers.
 // =============================================================================
 namespace causallm {
 
 class Qwen3QATLoRATransformer : public Qwen3CausalLM {
 public:
-  Qwen3QATLoRATransformer(json &cfg, json &generation_cfg, json &nntr_cfg)
+  Qwen3QATLoRATransformer(json &cfg, json &generation_cfg, json &nntr_cfg,
+                           int lora_rank, int lora_alpha)
     : Transformer(cfg, generation_cfg, nntr_cfg, ModelType::CAUSALLM),
-      Qwen3CausalLM(cfg, generation_cfg, nntr_cfg) {}
+      Qwen3CausalLM(cfg, generation_cfg, nntr_cfg),
+      lora_rank_(lora_rank),
+      lora_alpha_(lora_alpha) {}
 
   ~Qwen3QATLoRATransformer() = default;
 
@@ -97,6 +80,28 @@ public:
     std::string input_name) override;
 
   void registerCustomLayers() override;
+
+private:
+  int lora_rank_;
+  int lora_alpha_;
+
+  /**
+   * @brief Create a QAT FC layer with LoRA enabled.
+   * Base weight is frozen; only LoRA adapters are trainable.
+   */
+  LayerHandle createQATLoRAFCLayer(
+    const std::string &name, int unit,
+    const std::string &input_layers) {
+    std::vector<std::string> params = {
+      withKey("name", name),
+      withKey("unit", unit),
+      withKey("disable_bias", "true"),
+      withKey("input_layers", input_layers),
+      withKey("weight_initializer", "ones"),
+      withKey("lora_rank", lora_rank_),
+      withKey("lora_alpha", lora_alpha_)};
+    return createLayer("qat_fully_connected", params);
+  }
 };
 
 std::vector<LayerHandle> Qwen3QATLoRATransformer::createAttention(
@@ -112,17 +117,10 @@ std::vector<LayerHandle> Qwen3QATLoRATransformer::createAttention(
   auto A = "layer" + std::to_string(layer_id) + "_attention";
   auto O = "layer" + std::to_string(layer_id) + "_attention_out";
 
-  // Q — QAT FC (frozen base)
-  std::vector<std::string> q_params = {
-    withKey("name", Q),
-    withKey("unit", head_dim * n_heads),
-    withKey("disable_bias", "true"),
-    withKey("input_layers", query_name),
-    withKey("weight_initializer", "ones"),
-    withKey("trainable", "false")};
-  layers.push_back(createLayer("qat_fully_connected", q_params));
+  // Q — QAT FC + LoRA
+  layers.push_back(createQATLoRAFCLayer(Q, head_dim * n_heads, query_name));
 
-  // Q norm (unchanged)
+  // Q norm (frozen, no matmul weights)
   std::vector<std::string> q_norm_params = {
     withKey("name", Q_norm),
     withKey("input_layers", Q),
@@ -132,17 +130,11 @@ std::vector<LayerHandle> Qwen3QATLoRATransformer::createAttention(
     withKey("trainable", "false")};
   layers.push_back(createLayer("reshaped_rms_norm", q_norm_params));
 
-  // K — QAT FC (frozen base)
-  std::vector<std::string> k_params = {
-    withKey("name", K),
-    withKey("unit", head_dim * n_heads / GQA_SIZE),
-    withKey("disable_bias", "true"),
-    withKey("input_layers", key_name),
-    withKey("weight_initializer", "ones"),
-    withKey("trainable", "false")};
-  layers.push_back(createLayer("qat_fully_connected", k_params));
+  // K — QAT FC + LoRA
+  layers.push_back(
+    createQATLoRAFCLayer(K, head_dim * n_heads / GQA_SIZE, key_name));
 
-  // K norm (unchanged)
+  // K norm (frozen)
   std::vector<std::string> k_norm_params = {
     withKey("name", K_norm),
     withKey("input_layers", K),
@@ -152,17 +144,11 @@ std::vector<LayerHandle> Qwen3QATLoRATransformer::createAttention(
     withKey("trainable", "false")};
   layers.push_back(createLayer("reshaped_rms_norm", k_norm_params));
 
-  // V — QAT FC (frozen base)
-  std::vector<std::string> v_params = {
-    withKey("name", V),
-    withKey("unit", head_dim * n_heads / GQA_SIZE),
-    withKey("disable_bias", "true"),
-    withKey("input_layers", value_name),
-    withKey("weight_initializer", "ones"),
-    withKey("trainable", "false")};
-  layers.push_back(createLayer("qat_fully_connected", v_params));
+  // V — QAT FC + LoRA
+  layers.push_back(
+    createQATLoRAFCLayer(V, head_dim * n_heads / GQA_SIZE, value_name));
 
-  // Attention core (unchanged)
+  // Attention core (frozen)
   std::vector<std::string> a_params = {
     withKey("name", A),
     withKey("num_heads", n_heads),
@@ -176,15 +162,8 @@ std::vector<LayerHandle> Qwen3QATLoRATransformer::createAttention(
     withKey("trainable", "false")};
   layers.push_back(createLayer("mha_core", a_params));
 
-  // O — QAT FC (frozen base)
-  std::vector<std::string> o_params = {
-    withKey("name", O),
-    withKey("unit", DIM),
-    withKey("disable_bias", "true"),
-    withKey("input_layers", A),
-    withKey("weight_initializer", "ones"),
-    withKey("trainable", "false")};
-  layers.push_back(createLayer("qat_fully_connected", o_params));
+  // O — QAT FC + LoRA
+  layers.push_back(createQATLoRAFCLayer(O, DIM, A));
 
   return layers;
 }
@@ -194,27 +173,15 @@ std::vector<LayerHandle> Qwen3QATLoRATransformer::createMlp(
 
   std::vector<LayerHandle> layers;
 
-  // ffn_up — QAT FC (frozen)
-  std::vector<std::string> up_params = {
-    withKey("name", "layer" + std::to_string(layer_id) + "_ffn_up"),
-    withKey("unit", hidden_dim),
-    withKey("disable_bias", "true"),
-    withKey("input_layers", input_name),
-    withKey("weight_initializer", "ones"),
-    withKey("trainable", "false")};
-  layers.push_back(createLayer("qat_fully_connected", up_params));
+  // ffn_up — QAT FC + LoRA
+  layers.push_back(createQATLoRAFCLayer(
+    "layer" + std::to_string(layer_id) + "_ffn_up", hidden_dim, input_name));
 
-  // ffn_gate — QAT FC (frozen)
-  std::vector<std::string> gate_params = {
-    withKey("name", "layer" + std::to_string(layer_id) + "_ffn_gate"),
-    withKey("unit", hidden_dim),
-    withKey("disable_bias", "true"),
-    withKey("input_layers", input_name),
-    withKey("weight_initializer", "ones"),
-    withKey("trainable", "false")};
-  layers.push_back(createLayer("qat_fully_connected", gate_params));
+  // ffn_gate — QAT FC + LoRA
+  layers.push_back(createQATLoRAFCLayer(
+    "layer" + std::to_string(layer_id) + "_ffn_gate", hidden_dim, input_name));
 
-  // swiglu (unchanged)
+  // swiglu (frozen, stateless)
   std::vector<std::string> swiglu_params = {
     withKey("name", "layer" + std::to_string(layer_id) + "_ffn_swiglu"),
     withKey("input_layers",
@@ -223,16 +190,10 @@ std::vector<LayerHandle> Qwen3QATLoRATransformer::createMlp(
     withKey("trainable", "false")};
   layers.push_back(createLayer("swiglu", swiglu_params));
 
-  // ffn_down — QAT FC (frozen)
-  std::vector<std::string> down_params = {
-    withKey("name", "layer" + std::to_string(layer_id) + "_ffn_down"),
-    withKey("unit", dim),
-    withKey("disable_bias", "true"),
-    withKey("input_layers",
-            "layer" + std::to_string(layer_id) + "_ffn_swiglu"),
-    withKey("weight_initializer", "ones"),
-    withKey("trainable", "false")};
-  layers.push_back(createLayer("qat_fully_connected", down_params));
+  // ffn_down — QAT FC + LoRA
+  layers.push_back(createQATLoRAFCLayer(
+    "layer" + std::to_string(layer_id) + "_ffn_down", dim,
+    "layer" + std::to_string(layer_id) + "_ffn_swiglu"));
 
   return layers;
 }
@@ -267,10 +228,8 @@ int main(int argc, char *argv[]) {
       << " <model_dir> <train_data.txt>"
          " [--lr <float>] [--epochs <int>]"
          " [--output <path>] [--max_samples <int>] [--skip_weights]"
+         " [--lora_rank <int>] [--lora_alpha <int>]"
       << std::endl;
-    std::cerr << "\nNOTE: This is a STARTER script for QAT+LoRA. "
-              << "LoRA adapters are not yet injected. "
-              << "See comments in source for the roadmap." << std::endl;
     return 1;
   }
 
@@ -281,6 +240,8 @@ int main(int argc, char *argv[]) {
   std::string output_path = "qat_lora_weights.bin";
   int max_samples = -1;
   bool skip_weights = false;
+  int lora_rank = 8;      // Default LoRA rank
+  int lora_alpha = 16;    // Default LoRA alpha
 
   for (int i = 3; i < argc; i++) {
     std::string arg = argv[i];
@@ -294,6 +255,10 @@ int main(int argc, char *argv[]) {
       max_samples = std::atoi(argv[++i]);
     } else if (arg == "--skip_weights") {
       skip_weights = true;
+    } else if (arg == "--lora_rank" && i + 1 < argc) {
+      lora_rank = std::atoi(argv[++i]);
+    } else if (arg == "--lora_alpha" && i + 1 < argc) {
+      lora_alpha = std::atoi(argv[++i]);
     }
   }
 
@@ -310,19 +275,49 @@ int main(int argc, char *argv[]) {
     auto gen_cfg = causallm::LoadJsonFile(gen_config_path);
     auto nntr_cfg = causallm::LoadJsonFile(nntr_config_path);
 
-    std::cout << "=== Qwen3 QAT+LoRA Training (Starter) ===" << std::endl;
+    std::cout << "=== Qwen3 QAT + LoRA Training ===" << std::endl;
     std::cout << "Model dir:    " << model_dir << std::endl;
     std::cout << "Train data:   " << train_data_path << std::endl;
     std::cout << "Learning rate: " << lr << std::endl;
     std::cout << "Epochs:       " << epochs << std::endl;
-    std::cout << "NOTE: Base FC weights are QAT-quantized and FROZEN."
+    std::cout << "LoRA rank:    " << lora_rank << std::endl;
+    std::cout << "LoRA alpha:   " << lora_alpha << std::endl;
+    std::cout << "LoRA scaling: " << (float)lora_alpha / lora_rank << std::endl;
+    std::cout << "Output:       " << output_path << std::endl;
+    std::cout << "Max samples:  "
+              << (max_samples > 0 ? std::to_string(max_samples) : "all")
               << std::endl;
-    std::cout << "NOTE: LoRA adapter injection is TODO — "
-              << "currently trains with frozen QAT weights only."
+    std::cout << "Skip weights: " << (skip_weights ? "yes" : "no")
+              << std::endl;
+    std::cout << "\nBase FC weights: FROZEN, vanilla FP32 (no quantization)"
+              << std::endl;
+    std::cout << "LoRA adapters:   TRAINABLE + FAKE-QUANTIZED (INT8 simulation)"
               << std::endl;
 
+    // =========================================================================
+    // CRITICAL: Inject lora_rank/lora_alpha into nntr_cfg BEFORE constructing
+    // the model. The base Transformer::setupParameters() reads these from JSON
+    // to set LORA_RANK > 0, which triggers freezing of ALL non-FC layers:
+    //   - embedding0          (Transformer::constructModel)
+    //   - output_norm         (Transformer::constructModel)
+    //   - lm_head             (Transformer::constructModel)
+    //   - attention_norm      (Transformer::createTransformerDecoderBlock)
+    //   - decoder_add         (Transformer::createTransformerDecoderBlock)
+    //   - ffn_norm            (Transformer::createTransformerDecoderBlock)
+    //   - decoder_output      (Transformer::createTransformerDecoderBlock)
+    //
+    // Without this, LORA_RANK == 0 and those layers remain trainable!
+    // This follows the same pattern as train_qwen3_lora_master.cpp.
+    // =========================================================================
+    nntr_cfg["lora_rank"] = lora_rank;
+    nntr_cfg["lora_alpha"] = lora_alpha;
+    // We don't set lora_target here because our QAT+LoRA subclass overrides
+    // createAttention/createMlp directly — the base class isLoRATarget() is
+    // not used for layer type selection in our overrides. But LORA_RANK > 0
+    // is still needed to trigger the freezing guards.
+
     auto model = std::make_unique<causallm::Qwen3QATLoRATransformer>(
-      cfg, gen_cfg, nntr_cfg);
+      cfg, gen_cfg, nntr_cfg, lora_rank, lora_alpha);
     if (!model) {
       std::cerr << "Failed to allocate Qwen3QATLoRATransformer" << std::endl;
       return 1;
@@ -362,8 +357,13 @@ int main(int argc, char *argv[]) {
 
     if (max_samples > 0 &&
         (unsigned int)max_samples < data_gen.getNumSamples()) {
+      std::cout << "Limiting training samples from "
+                << data_gen.getNumSamples() << " to " << max_samples
+                << std::endl;
       data_gen.limitSamples(max_samples);
     }
+
+    std::cout << "Training samples: " << data_gen.getNumSamples() << std::endl;
 
     if (data_gen.getNumSamples() == 0) {
       std::cerr << "Error: Not enough training data" << std::endl;
@@ -389,7 +389,9 @@ int main(int argc, char *argv[]) {
     std::cout << "\nQAT+LoRA Training completed in " << elapsed_sec
               << " seconds." << std::endl;
 
+    std::cout << "\n=== NNTrainer Memory Profile (QAT+LoRA) ===" << std::endl;
     PROFILE_END(profiler_listener);
+    std::cout << "=============================================\n" << std::endl;
 
     try {
       model->save_weight(output_path);
