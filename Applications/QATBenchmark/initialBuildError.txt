@@ -1,0 +1,643 @@
+root@e4788b7c5ad3:/nntrainer# ninja -C build
+ninja: Entering directory `build'
+[1/14] Compiling C++ object Applications/QATBenchmark/nntrainer_qat_benchmark_forced_scale.p/qat_benchmark_forced_scale.cpp.o
+FAILED: Applications/QATBenchmark/nntrainer_qat_benchmark_forced_scale.p/qat_benchmark_forced_scale.cpp.o 
+c++ -IApplications/QATBenchmark/nntrainer_qat_benchmark_forced_scale.p -IApplications/QATBenchmark -I../Applications/QATBenchmark -Inntrainer -I../nntrainer -Iapi -I../api -I../api/ccapi/include -Inntrainer/compiler -I../nntrainer/compiler -Inntrainer/schema -I../nntrainer/schema -Inntrainer/dataset -I../nntrainer/dataset -Inntrainer/layers/loss -I../nntrainer/layers/loss -Inntrainer/layers -I../nntrainer/layers -Inntrainer/models -I../nntrainer/models -Inntrainer/optimizers -I../nntrainer/optimizers -Inntrainer/tensor/cpu_backend/fallback -I../nntrainer/tensor/cpu_backend/fallback -Inntrainer/tensor/cpu_backend/ggml_interface/nntr_ggml_impl -I../nntrainer/tensor/cpu_backend/ggml_interface/nntr_ggml_impl -Inntrainer/tensor/cpu_backend/ggml_interface -I../nntrainer/tensor/cpu_backend/ggml_interface -Inntrainer/tensor/cpu_backend/cblas_interface -I../nntrainer/tensor/cpu_backend/cblas_interface -Inntrainer/tensor/cpu_backend/x86 -I../nntrainer/tensor/cpu_backend/x86 -Inntrainer/tensor/cpu_backend -I../nntrainer/tensor/cpu_backend -Inntrainer/tensor -I../nntrainer/tensor -Inntrainer/utils -I../nntrainer/utils -Inntrainer/graph -I../nntrainer/graph -I/usr/include/x86_64-linux-gnu/openblas-pthread/ -I/usr/include/nnstreamer -I/usr/include/tensorflow2/ -fdiagnostics-color=always -D_FILE_OFFSET_BITS=64 -Wall -Winvalid-pch -Wnon-virtual-dtor -Werror -std=c++17 -g '-DVERSION="0.6.0"' -DVERSION_MAJOR=0 -DVERSION_MINOR=6 -DVERSION_MICRO=0 -DENABLE_TRANSFORMER=1 -march=native -mavx2 -mfma -Wredundant-decls -Wwrite-strings -Wformat -Wformat-nonliteral -Wformat-security -Winit-self -Waddress -Wvla -Wpointer-arith -Wno-error=varargs -Wno-error=ignored-attributes -Wno-error=sign-compare -ftree-vectorize -Wno-unused-variable -Wno-comment -Wno-ignored-attributes -Wno-sign-compare -Wno-maybe-uninitialized -DMIN_CPP_VERSION=201703L -DMMAP_READ=1 -DKERNEL_CACHE=0 -DUSE_MMAP=1 -DOPENCL_KERNEL_PATH=nntrainer_opencl_kernels -DML_API_COMMON=1 -DNNSTREAMER_AVAILABLE=1 -DUSE_BLAS=1 -DHGEMM_EXPERIMENTAL_KERNEL=false -DNNTR_NUM_THREADS=1 -DOMP_NUM_THREADS=6 -DDEBUG=1 -D__LOGGING__=1 -DENABLE_TEST=1 -DREDUCE_TOLERANCE=1 -DENABLE_TFLITE_BACKBONE=1 -DENABLE_TFLITE_INTERPRETER=1 '-DNNTRAINER_CONF_PATH="/usr/local/etc/nntrainer.ini"' -pthread -fopenmp -MD -MQ Applications/QATBenchmark/nntrainer_qat_benchmark_forced_scale.p/qat_benchmark_forced_scale.cpp.o -MF Applications/QATBenchmark/nntrainer_qat_benchmark_forced_scale.p/qat_benchmark_forced_scale.cpp.o.d -o Applications/QATBenchmark/nntrainer_qat_benchmark_forced_scale.p/qat_benchmark_forced_scale.cpp.o -c ../Applications/QATBenchmark/qat_benchmark_forced_scale.cpp
+../Applications/QATBenchmark/qat_benchmark_forced_scale.cpp: In function 'nntrainer::Tensor buildForcedQ6K(const nntrainer::Tensor&)':
+../Applications/QATBenchmark/qat_benchmark_forced_scale.cpp:133:31: error: 'createQuantizer' is not a member of 'nntrainer::Quantizer'
+  133 |   auto quantizer = Quantizer::createQuantizer(QScheme::Q6_K);
+      |                               ^~~~~~~~~~~~~~~
+../Applications/QATBenchmark/qat_benchmark_forced_scale.cpp: In function 'int main()':
+../Applications/QATBenchmark/qat_benchmark_forced_scale.cpp:193:42: error: call of overloaded 'Tensor(<brace-enclosed initializer list>)' is ambiguous
+  193 |   Tensor W1({1, 1, INPUT_DIM, HIDDEN_DIM});
+      |                                          ^
+In file included from ../Applications/QATBenchmark/qat_benchmark_forced_scale.cpp:24:
+../nntrainer/tensor/tensor.h:466:3: note: candidate: 'nntrainer::Tensor::Tensor(nntrainer::Tensor&&)'
+  466 |   Tensor(Tensor &&rhs) noexcept = default;
+      |   ^~~~~~
+../nntrainer/tensor/tensor.h:460:3: note: candidate: 'nntrainer::Tensor::Tensor(const nntrainer::Tensor&)'
+  460 |   Tensor(const Tensor &rhs);
+      |   ^~~~~~
+../nntrainer/tensor/tensor.h:81:3: note: candidate: 'nntrainer::Tensor::Tensor(const TensorDim&, const void*, nntrainer::QScheme)'
+   81 |   Tensor(const TensorDim &d, const void *buf = nullptr,
+      |   ^~~~~~
+../nntrainer/tensor/tensor.h:57:3: note: candidate: 'nntrainer::Tensor::Tensor(std::string, nntrainer::Tformat, nntrainer::Tdatatype)'
+   57 |   Tensor(std::string name_ = "", Tformat fm = Tformat::NCHW,
+      |   ^~~~~~
+../Applications/QATBenchmark/qat_benchmark_forced_scale.cpp:194:40: error: call of overloaded 'Tensor(<brace-enclosed initializer list>)' is ambiguous
+  194 |   Tensor input({BATCH, 1, 1, INPUT_DIM});
+      |                                        ^
+In file included from ../Applications/QATBenchmark/qat_benchmark_forced_scale.cpp:24:
+../nntrainer/tensor/tensor.h:466:3: note: candidate: 'nntrainer::Tensor::Tensor(nntrainer::Tensor&&)'
+  466 |   Tensor(Tensor &&rhs) noexcept = default;
+      |   ^~~~~~
+../nntrainer/tensor/tensor.h:460:3: note: candidate: 'nntrainer::Tensor::Tensor(const nntrainer::Tensor&)'
+  460 |   Tensor(const Tensor &rhs);
+      |   ^~~~~~
+../nntrainer/tensor/tensor.h:81:3: note: candidate: 'nntrainer::Tensor::Tensor(const TensorDim&, const void*, nntrainer::QScheme)'
+   81 |   Tensor(const TensorDim &d, const void *buf = nullptr,
+      |   ^~~~~~
+../nntrainer/tensor/tensor.h:57:3: note: candidate: 'nntrainer::Tensor::Tensor(std::string, nntrainer::Tformat, nntrainer::Tdatatype)'
+   57 |   Tensor(std::string name_ = "", Tformat fm = Tformat::NCHW,
+      |   ^~~~~~
+../Applications/QATBenchmark/qat_benchmark_forced_scale.cpp:200:31: error: 'createQuantizer' is not a member of 'nntrainer::Quantizer'
+  200 |   auto quantizer = Quantizer::createQuantizer(QScheme::Q6_K);
+      |                               ^~~~~~~~~~~~~~~
+../Applications/QATBenchmark/qat_benchmark_forced_scale.cpp:211:44: error: call of overloaded 'Tensor(<brace-enclosed initializer list>)' is ambiguous
+  211 |   Tensor out_fp32({BATCH, 1, 1, HIDDEN_DIM});
+      |                                            ^
+In file included from ../Applications/QATBenchmark/qat_benchmark_forced_scale.cpp:24:
+../nntrainer/tensor/tensor.h:466:3: note: candidate: 'nntrainer::Tensor::Tensor(nntrainer::Tensor&&)'
+  466 |   Tensor(Tensor &&rhs) noexcept = default;
+      |   ^~~~~~
+../nntrainer/tensor/tensor.h:460:3: note: candidate: 'nntrainer::Tensor::Tensor(const nntrainer::Tensor&)'
+  460 |   Tensor(const Tensor &rhs);
+      |   ^~~~~~
+../nntrainer/tensor/tensor.h:81:3: note: candidate: 'nntrainer::Tensor::Tensor(const TensorDim&, const void*, nntrainer::QScheme)'
+   81 |   Tensor(const TensorDim &d, const void *buf = nullptr,
+      |   ^~~~~~
+../nntrainer/tensor/tensor.h:57:3: note: candidate: 'nntrainer::Tensor::Tensor(std::string, nntrainer::Tformat, nntrainer::Tdatatype)'
+   57 |   Tensor(std::string name_ = "", Tformat fm = Tformat::NCHW,
+      |   ^~~~~~
+../Applications/QATBenchmark/qat_benchmark_forced_scale.cpp:215:46: error: call of overloaded 'Tensor(<brace-enclosed initializer list>)' is ambiguous
+  215 |   Tensor out_normal({BATCH, 1, 1, HIDDEN_DIM});
+      |                                              ^
+In file included from ../Applications/QATBenchmark/qat_benchmark_forced_scale.cpp:24:
+../nntrainer/tensor/tensor.h:466:3: note: candidate: 'nntrainer::Tensor::Tensor(nntrainer::Tensor&&)'
+  466 |   Tensor(Tensor &&rhs) noexcept = default;
+      |   ^~~~~~
+../nntrainer/tensor/tensor.h:460:3: note: candidate: 'nntrainer::Tensor::Tensor(const nntrainer::Tensor&)'
+  460 |   Tensor(const Tensor &rhs);
+      |   ^~~~~~
+../nntrainer/tensor/tensor.h:81:3: note: candidate: 'nntrainer::Tensor::Tensor(const TensorDim&, const void*, nntrainer::QScheme)'
+   81 |   Tensor(const TensorDim &d, const void *buf = nullptr,
+      |   ^~~~~~
+../nntrainer/tensor/tensor.h:57:3: note: candidate: 'nntrainer::Tensor::Tensor(std::string, nntrainer::Tformat, nntrainer::Tdatatype)'
+   57 |   Tensor(std::string name_ = "", Tformat fm = Tformat::NCHW,
+      |   ^~~~~~
+../Applications/QATBenchmark/qat_benchmark_forced_scale.cpp:219:46: error: call of overloaded 'Tensor(<brace-enclosed initializer list>)' is ambiguous
+  219 |   Tensor out_forced({BATCH, 1, 1, HIDDEN_DIM});
+      |                                              ^
+In file included from ../Applications/QATBenchmark/qat_benchmark_forced_scale.cpp:24:
+../nntrainer/tensor/tensor.h:466:3: note: candidate: 'nntrainer::Tensor::Tensor(nntrainer::Tensor&&)'
+  466 |   Tensor(Tensor &&rhs) noexcept = default;
+      |   ^~~~~~
+../nntrainer/tensor/tensor.h:460:3: note: candidate: 'nntrainer::Tensor::Tensor(const nntrainer::Tensor&)'
+  460 |   Tensor(const Tensor &rhs);
+      |   ^~~~~~
+../nntrainer/tensor/tensor.h:81:3: note: candidate: 'nntrainer::Tensor::Tensor(const TensorDim&, const void*, nntrainer::QScheme)'
+   81 |   Tensor(const TensorDim &d, const void *buf = nullptr,
+      |   ^~~~~~
+../nntrainer/tensor/tensor.h:57:3: note: candidate: 'nntrainer::Tensor::Tensor(std::string, nntrainer::Tformat, nntrainer::Tdatatype)'
+   57 |   Tensor(std::string name_ = "", Tformat fm = Tformat::NCHW,
+      |   ^~~~~~
+../Applications/QATBenchmark/qat_benchmark_forced_scale.cpp:234:43: error: call of overloaded 'Tensor(<brace-enclosed initializer list>)' is ambiguous
+  234 |       Tensor tmp({BATCH, 1, 1, HIDDEN_DIM});
+      |                                           ^
+In file included from ../Applications/QATBenchmark/qat_benchmark_forced_scale.cpp:24:
+../nntrainer/tensor/tensor.h:466:3: note: candidate: 'nntrainer::Tensor::Tensor(nntrainer::Tensor&&)'
+  466 |   Tensor(Tensor &&rhs) noexcept = default;
+      |   ^~~~~~
+../nntrainer/tensor/tensor.h:460:3: note: candidate: 'nntrainer::Tensor::Tensor(const nntrainer::Tensor&)'
+  460 |   Tensor(const Tensor &rhs);
+      |   ^~~~~~
+../nntrainer/tensor/tensor.h:81:3: note: candidate: 'nntrainer::Tensor::Tensor(const TensorDim&, const void*, nntrainer::QScheme)'
+   81 |   Tensor(const TensorDim &d, const void *buf = nullptr,
+      |   ^~~~~~
+../nntrainer/tensor/tensor.h:57:3: note: candidate: 'nntrainer::Tensor::Tensor(std::string, nntrainer::Tformat, nntrainer::Tdatatype)'
+   57 |   Tensor(std::string name_ = "", Tformat fm = Tformat::NCHW,
+      |   ^~~~~~
+../Applications/QATBenchmark/qat_benchmark_forced_scale.cpp:244:43: error: call of overloaded 'Tensor(<brace-enclosed initializer list>)' is ambiguous
+  244 |       Tensor tmp({BATCH, 1, 1, HIDDEN_DIM});
+      |                                           ^
+In file included from ../Applications/QATBenchmark/qat_benchmark_forced_scale.cpp:24:
+../nntrainer/tensor/tensor.h:466:3: note: candidate: 'nntrainer::Tensor::Tensor(nntrainer::Tensor&&)'
+  466 |   Tensor(Tensor &&rhs) noexcept = default;
+      |   ^~~~~~
+../nntrainer/tensor/tensor.h:460:3: note: candidate: 'nntrainer::Tensor::Tensor(const nntrainer::Tensor&)'
+  460 |   Tensor(const Tensor &rhs);
+      |   ^~~~~~
+../nntrainer/tensor/tensor.h:81:3: note: candidate: 'nntrainer::Tensor::Tensor(const TensorDim&, const void*, nntrainer::QScheme)'
+   81 |   Tensor(const TensorDim &d, const void *buf = nullptr,
+      |   ^~~~~~
+../nntrainer/tensor/tensor.h:57:3: note: candidate: 'nntrainer::Tensor::Tensor(std::string, nntrainer::Tformat, nntrainer::Tdatatype)'
+   57 |   Tensor(std::string name_ = "", Tformat fm = Tformat::NCHW,
+      |   ^~~~~~
+../Applications/QATBenchmark/qat_benchmark_forced_scale.cpp:254:43: error: call of overloaded 'Tensor(<brace-enclosed initializer list>)' is ambiguous
+  254 |       Tensor tmp({BATCH, 1, 1, HIDDEN_DIM});
+      |                                           ^
+In file included from ../Applications/QATBenchmark/qat_benchmark_forced_scale.cpp:24:
+../nntrainer/tensor/tensor.h:466:3: note: candidate: 'nntrainer::Tensor::Tensor(nntrainer::Tensor&&)'
+  466 |   Tensor(Tensor &&rhs) noexcept = default;
+      |   ^~~~~~
+../nntrainer/tensor/tensor.h:460:3: note: candidate: 'nntrainer::Tensor::Tensor(const nntrainer::Tensor&)'
+  460 |   Tensor(const Tensor &rhs);
+      |   ^~~~~~
+../nntrainer/tensor/tensor.h:81:3: note: candidate: 'nntrainer::Tensor::Tensor(const TensorDim&, const void*, nntrainer::QScheme)'
+   81 |   Tensor(const TensorDim &d, const void *buf = nullptr,
+      |   ^~~~~~
+../nntrainer/tensor/tensor.h:57:3: note: candidate: 'nntrainer::Tensor::Tensor(std::string, nntrainer::Tformat, nntrainer::Tdatatype)'
+   57 |   Tensor(std::string name_ = "", Tformat fm = Tformat::NCHW,
+      |   ^~~~~~
+[2/14] Compiling C++ object Applications/QATBenchmark/nntrainer_qat_benchmark.p/qat_benchmark.cpp.o
+FAILED: Applications/QATBenchmark/nntrainer_qat_benchmark.p/qat_benchmark.cpp.o 
+c++ -IApplications/QATBenchmark/nntrainer_qat_benchmark.p -IApplications/QATBenchmark -I../Applications/QATBenchmark -Inntrainer -I../nntrainer -Iapi -I../api -I../api/ccapi/include -Inntrainer/compiler -I../nntrainer/compiler -Inntrainer/schema -I../nntrainer/schema -Inntrainer/dataset -I../nntrainer/dataset -Inntrainer/layers/loss -I../nntrainer/layers/loss -Inntrainer/layers -I../nntrainer/layers -Inntrainer/models -I../nntrainer/models -Inntrainer/optimizers -I../nntrainer/optimizers -Inntrainer/tensor/cpu_backend/fallback -I../nntrainer/tensor/cpu_backend/fallback -Inntrainer/tensor/cpu_backend/ggml_interface/nntr_ggml_impl -I../nntrainer/tensor/cpu_backend/ggml_interface/nntr_ggml_impl -Inntrainer/tensor/cpu_backend/ggml_interface -I../nntrainer/tensor/cpu_backend/ggml_interface -Inntrainer/tensor/cpu_backend/cblas_interface -I../nntrainer/tensor/cpu_backend/cblas_interface -Inntrainer/tensor/cpu_backend/x86 -I../nntrainer/tensor/cpu_backend/x86 -Inntrainer/tensor/cpu_backend -I../nntrainer/tensor/cpu_backend -Inntrainer/tensor -I../nntrainer/tensor -Inntrainer/utils -I../nntrainer/utils -Inntrainer/graph -I../nntrainer/graph -I/usr/include/x86_64-linux-gnu/openblas-pthread/ -I/usr/include/nnstreamer -I/usr/include/tensorflow2/ -fdiagnostics-color=always -D_FILE_OFFSET_BITS=64 -Wall -Winvalid-pch -Wnon-virtual-dtor -Werror -std=c++17 -g '-DVERSION="0.6.0"' -DVERSION_MAJOR=0 -DVERSION_MINOR=6 -DVERSION_MICRO=0 -DENABLE_TRANSFORMER=1 -march=native -mavx2 -mfma -Wredundant-decls -Wwrite-strings -Wformat -Wformat-nonliteral -Wformat-security -Winit-self -Waddress -Wvla -Wpointer-arith -Wno-error=varargs -Wno-error=ignored-attributes -Wno-error=sign-compare -ftree-vectorize -Wno-unused-variable -Wno-comment -Wno-ignored-attributes -Wno-sign-compare -Wno-maybe-uninitialized -DMIN_CPP_VERSION=201703L -DMMAP_READ=1 -DKERNEL_CACHE=0 -DUSE_MMAP=1 -DOPENCL_KERNEL_PATH=nntrainer_opencl_kernels -DML_API_COMMON=1 -DNNSTREAMER_AVAILABLE=1 -DUSE_BLAS=1 -DHGEMM_EXPERIMENTAL_KERNEL=false -DNNTR_NUM_THREADS=1 -DOMP_NUM_THREADS=6 -DDEBUG=1 -D__LOGGING__=1 -DENABLE_TEST=1 -DREDUCE_TOLERANCE=1 -DENABLE_TFLITE_BACKBONE=1 -DENABLE_TFLITE_INTERPRETER=1 '-DNNTRAINER_CONF_PATH="/usr/local/etc/nntrainer.ini"' -pthread -fopenmp -MD -MQ Applications/QATBenchmark/nntrainer_qat_benchmark.p/qat_benchmark.cpp.o -MF Applications/QATBenchmark/nntrainer_qat_benchmark.p/qat_benchmark.cpp.o.d -o Applications/QATBenchmark/nntrainer_qat_benchmark.p/qat_benchmark.cpp.o -c ../Applications/QATBenchmark/qat_benchmark.cpp
+../Applications/QATBenchmark/qat_benchmark.cpp: In function 'void modeA_fp32(const nntrainer::Tensor&, const nntrainer::Tensor&, const nntrainer::Tensor&, const nntrainer::Tensor&, const nntrainer::Tensor&, nntrainer::Tensor&)':
+../Applications/QATBenchmark/qat_benchmark.cpp:95:42: error: call of overloaded 'Tensor(<brace-enclosed initializer list>)' is ambiguous
+   95 |   Tensor hidden({BATCH, 1, 1, HIDDEN_DIM});
+      |                                          ^
+In file included from ../Applications/QATBenchmark/qat_benchmark.cpp:24:
+../nntrainer/tensor/tensor.h:466:3: note: candidate: 'nntrainer::Tensor::Tensor(nntrainer::Tensor&&)'
+  466 |   Tensor(Tensor &&rhs) noexcept = default;
+      |   ^~~~~~
+../nntrainer/tensor/tensor.h:460:3: note: candidate: 'nntrainer::Tensor::Tensor(const nntrainer::Tensor&)'
+  460 |   Tensor(const Tensor &rhs);
+      |   ^~~~~~
+../nntrainer/tensor/tensor.h:81:3: note: candidate: 'nntrainer::Tensor::Tensor(const TensorDim&, const void*, nntrainer::QScheme)'
+   81 |   Tensor(const TensorDim &d, const void *buf = nullptr,
+      |   ^~~~~~
+../nntrainer/tensor/tensor.h:57:3: note: candidate: 'nntrainer::Tensor::Tensor(std::string, nntrainer::Tformat, nntrainer::Tdatatype)'
+   57 |   Tensor(std::string name_ = "", Tformat fm = Tformat::NCHW,
+      |   ^~~~~~
+../Applications/QATBenchmark/qat_benchmark.cpp: In function 'void modeB_dequant_fp32(const nntrainer::Tensor&, const std::vector<signed char>&, QuantParams, const nntrainer::Tensor&, const std::vector<signed char>&, QuantParams, const nntrainer::Tensor&, nntrainer::Tensor&)':
+../Applications/QATBenchmark/qat_benchmark.cpp:112:46: error: call of overloaded 'Tensor(<brace-enclosed initializer list>)' is ambiguous
+  112 |   Tensor W1_deq({1, 1, INPUT_DIM, HIDDEN_DIM});
+      |                                              ^
+In file included from ../Applications/QATBenchmark/qat_benchmark.cpp:24:
+../nntrainer/tensor/tensor.h:466:3: note: candidate: 'nntrainer::Tensor::Tensor(nntrainer::Tensor&&)'
+  466 |   Tensor(Tensor &&rhs) noexcept = default;
+      |   ^~~~~~
+../nntrainer/tensor/tensor.h:460:3: note: candidate: 'nntrainer::Tensor::Tensor(const nntrainer::Tensor&)'
+  460 |   Tensor(const Tensor &rhs);
+      |   ^~~~~~
+../nntrainer/tensor/tensor.h:81:3: note: candidate: 'nntrainer::Tensor::Tensor(const TensorDim&, const void*, nntrainer::QScheme)'
+   81 |   Tensor(const TensorDim &d, const void *buf = nullptr,
+      |   ^~~~~~
+../nntrainer/tensor/tensor.h:57:3: note: candidate: 'nntrainer::Tensor::Tensor(std::string, nntrainer::Tformat, nntrainer::Tdatatype)'
+   57 |   Tensor(std::string name_ = "", Tformat fm = Tformat::NCHW,
+      |   ^~~~~~
+../Applications/QATBenchmark/qat_benchmark.cpp:118:42: error: call of overloaded 'Tensor(<brace-enclosed initializer list>)' is ambiguous
+  118 |   Tensor hidden({BATCH, 1, 1, HIDDEN_DIM});
+      |                                          ^
+In file included from ../Applications/QATBenchmark/qat_benchmark.cpp:24:
+../nntrainer/tensor/tensor.h:466:3: note: candidate: 'nntrainer::Tensor::Tensor(nntrainer::Tensor&&)'
+  466 |   Tensor(Tensor &&rhs) noexcept = default;
+      |   ^~~~~~
+../nntrainer/tensor/tensor.h:460:3: note: candidate: 'nntrainer::Tensor::Tensor(const nntrainer::Tensor&)'
+  460 |   Tensor(const Tensor &rhs);
+      |   ^~~~~~
+../nntrainer/tensor/tensor.h:81:3: note: candidate: 'nntrainer::Tensor::Tensor(const TensorDim&, const void*, nntrainer::QScheme)'
+   81 |   Tensor(const TensorDim &d, const void *buf = nullptr,
+      |   ^~~~~~
+../nntrainer/tensor/tensor.h:57:3: note: candidate: 'nntrainer::Tensor::Tensor(std::string, nntrainer::Tformat, nntrainer::Tdatatype)'
+   57 |   Tensor(std::string name_ = "", Tformat fm = Tformat::NCHW,
+      |   ^~~~~~
+../Applications/QATBenchmark/qat_benchmark.cpp:124:47: error: call of overloaded 'Tensor(<brace-enclosed initializer list>)' is ambiguous
+  124 |   Tensor W2_deq({1, 1, HIDDEN_DIM, OUTPUT_DIM});
+      |                                               ^
+In file included from ../Applications/QATBenchmark/qat_benchmark.cpp:24:
+../nntrainer/tensor/tensor.h:466:3: note: candidate: 'nntrainer::Tensor::Tensor(nntrainer::Tensor&&)'
+  466 |   Tensor(Tensor &&rhs) noexcept = default;
+      |   ^~~~~~
+../nntrainer/tensor/tensor.h:460:3: note: candidate: 'nntrainer::Tensor::Tensor(const nntrainer::Tensor&)'
+  460 |   Tensor(const Tensor &rhs);
+      |   ^~~~~~
+../nntrainer/tensor/tensor.h:81:3: note: candidate: 'nntrainer::Tensor::Tensor(const TensorDim&, const void*, nntrainer::QScheme)'
+   81 |   Tensor(const TensorDim &d, const void *buf = nullptr,
+      |   ^~~~~~
+../nntrainer/tensor/tensor.h:57:3: note: candidate: 'nntrainer::Tensor::Tensor(std::string, nntrainer::Tformat, nntrainer::Tdatatype)'
+   57 |   Tensor(std::string name_ = "", Tformat fm = Tformat::NCHW,
+      |   ^~~~~~
+../Applications/QATBenchmark/qat_benchmark.cpp: In function 'void modeC_int8(const nntrainer::Tensor&, QuantParams, const std::vector<signed char>&, QuantParams, const nntrainer::Tensor&, QuantParams, const std::vector<signed char>&, QuantParams, const nntrainer::Tensor&, nntrainer::Tensor&)':
+../Applications/QATBenchmark/qat_benchmark.cpp:172:42: error: call of overloaded 'Tensor(<brace-enclosed initializer list>)' is ambiguous
+  172 |   Tensor hidden({BATCH, 1, 1, HIDDEN_DIM});
+      |                                          ^
+In file included from ../Applications/QATBenchmark/qat_benchmark.cpp:24:
+../nntrainer/tensor/tensor.h:466:3: note: candidate: 'nntrainer::Tensor::Tensor(nntrainer::Tensor&&)'
+  466 |   Tensor(Tensor &&rhs) noexcept = default;
+      |   ^~~~~~
+../nntrainer/tensor/tensor.h:460:3: note: candidate: 'nntrainer::Tensor::Tensor(const nntrainer::Tensor&)'
+  460 |   Tensor(const Tensor &rhs);
+      |   ^~~~~~
+../nntrainer/tensor/tensor.h:81:3: note: candidate: 'nntrainer::Tensor::Tensor(const TensorDim&, const void*, nntrainer::QScheme)'
+   81 |   Tensor(const TensorDim &d, const void *buf = nullptr,
+      |   ^~~~~~
+../nntrainer/tensor/tensor.h:57:3: note: candidate: 'nntrainer::Tensor::Tensor(std::string, nntrainer::Tformat, nntrainer::Tdatatype)'
+   57 |   Tensor(std::string name_ = "", Tformat fm = Tformat::NCHW,
+      |   ^~~~~~
+../Applications/QATBenchmark/qat_benchmark.cpp: In function 'int main()':
+../Applications/QATBenchmark/qat_benchmark.cpp:233:42: error: call of overloaded 'Tensor(<brace-enclosed initializer list>)' is ambiguous
+  233 |   Tensor W1({1, 1, INPUT_DIM, HIDDEN_DIM});
+      |                                          ^
+In file included from ../Applications/QATBenchmark/qat_benchmark.cpp:24:
+../nntrainer/tensor/tensor.h:466:3: note: candidate: 'nntrainer::Tensor::Tensor(nntrainer::Tensor&&)'
+  466 |   Tensor(Tensor &&rhs) noexcept = default;
+      |   ^~~~~~
+../nntrainer/tensor/tensor.h:460:3: note: candidate: 'nntrainer::Tensor::Tensor(const nntrainer::Tensor&)'
+  460 |   Tensor(const Tensor &rhs);
+      |   ^~~~~~
+../nntrainer/tensor/tensor.h:81:3: note: candidate: 'nntrainer::Tensor::Tensor(const TensorDim&, const void*, nntrainer::QScheme)'
+   81 |   Tensor(const TensorDim &d, const void *buf = nullptr,
+      |   ^~~~~~
+../nntrainer/tensor/tensor.h:57:3: note: candidate: 'nntrainer::Tensor::Tensor(std::string, nntrainer::Tformat, nntrainer::Tdatatype)'
+   57 |   Tensor(std::string name_ = "", Tformat fm = Tformat::NCHW,
+      |   ^~~~~~
+../Applications/QATBenchmark/qat_benchmark.cpp:234:43: error: call of overloaded 'Tensor(<brace-enclosed initializer list>)' is ambiguous
+  234 |   Tensor W2({1, 1, HIDDEN_DIM, OUTPUT_DIM});
+      |                                           ^
+In file included from ../Applications/QATBenchmark/qat_benchmark.cpp:24:
+../nntrainer/tensor/tensor.h:466:3: note: candidate: 'nntrainer::Tensor::Tensor(nntrainer::Tensor&&)'
+  466 |   Tensor(Tensor &&rhs) noexcept = default;
+      |   ^~~~~~
+../nntrainer/tensor/tensor.h:460:3: note: candidate: 'nntrainer::Tensor::Tensor(const nntrainer::Tensor&)'
+  460 |   Tensor(const Tensor &rhs);
+      |   ^~~~~~
+../nntrainer/tensor/tensor.h:81:3: note: candidate: 'nntrainer::Tensor::Tensor(const TensorDim&, const void*, nntrainer::QScheme)'
+   81 |   Tensor(const TensorDim &d, const void *buf = nullptr,
+      |   ^~~~~~
+../nntrainer/tensor/tensor.h:57:3: note: candidate: 'nntrainer::Tensor::Tensor(std::string, nntrainer::Tformat, nntrainer::Tdatatype)'
+   57 |   Tensor(std::string name_ = "", Tformat fm = Tformat::NCHW,
+      |   ^~~~~~
+../Applications/QATBenchmark/qat_benchmark.cpp:235:34: error: call of overloaded 'Tensor(<brace-enclosed initializer list>)' is ambiguous
+  235 |   Tensor b1({1, 1, 1, HIDDEN_DIM});
+      |                                  ^
+In file included from ../Applications/QATBenchmark/qat_benchmark.cpp:24:
+../nntrainer/tensor/tensor.h:466:3: note: candidate: 'nntrainer::Tensor::Tensor(nntrainer::Tensor&&)'
+  466 |   Tensor(Tensor &&rhs) noexcept = default;
+      |   ^~~~~~
+../nntrainer/tensor/tensor.h:460:3: note: candidate: 'nntrainer::Tensor::Tensor(const nntrainer::Tensor&)'
+  460 |   Tensor(const Tensor &rhs);
+      |   ^~~~~~
+../nntrainer/tensor/tensor.h:81:3: note: candidate: 'nntrainer::Tensor::Tensor(const TensorDim&, const void*, nntrainer::QScheme)'
+   81 |   Tensor(const TensorDim &d, const void *buf = nullptr,
+      |   ^~~~~~
+../nntrainer/tensor/tensor.h:57:3: note: candidate: 'nntrainer::Tensor::Tensor(std::string, nntrainer::Tformat, nntrainer::Tdatatype)'
+   57 |   Tensor(std::string name_ = "", Tformat fm = Tformat::NCHW,
+      |   ^~~~~~
+../Applications/QATBenchmark/qat_benchmark.cpp:236:34: error: call of overloaded 'Tensor(<brace-enclosed initializer list>)' is ambiguous
+  236 |   Tensor b2({1, 1, 1, OUTPUT_DIM});
+      |                                  ^
+In file included from ../Applications/QATBenchmark/qat_benchmark.cpp:24:
+../nntrainer/tensor/tensor.h:466:3: note: candidate: 'nntrainer::Tensor::Tensor(nntrainer::Tensor&&)'
+  466 |   Tensor(Tensor &&rhs) noexcept = default;
+      |   ^~~~~~
+../nntrainer/tensor/tensor.h:460:3: note: candidate: 'nntrainer::Tensor::Tensor(const nntrainer::Tensor&)'
+  460 |   Tensor(const Tensor &rhs);
+      |   ^~~~~~
+../nntrainer/tensor/tensor.h:81:3: note: candidate: 'nntrainer::Tensor::Tensor(const TensorDim&, const void*, nntrainer::QScheme)'
+   81 |   Tensor(const TensorDim &d, const void *buf = nullptr,
+      |   ^~~~~~
+../nntrainer/tensor/tensor.h:57:3: note: candidate: 'nntrainer::Tensor::Tensor(std::string, nntrainer::Tformat, nntrainer::Tdatatype)'
+   57 |   Tensor(std::string name_ = "", Tformat fm = Tformat::NCHW,
+      |   ^~~~~~
+../Applications/QATBenchmark/qat_benchmark.cpp:237:40: error: call of overloaded 'Tensor(<brace-enclosed initializer list>)' is ambiguous
+  237 |   Tensor input({BATCH, 1, 1, INPUT_DIM});
+      |                                        ^
+In file included from ../Applications/QATBenchmark/qat_benchmark.cpp:24:
+../nntrainer/tensor/tensor.h:466:3: note: candidate: 'nntrainer::Tensor::Tensor(nntrainer::Tensor&&)'
+  466 |   Tensor(Tensor &&rhs) noexcept = default;
+      |   ^~~~~~
+../nntrainer/tensor/tensor.h:460:3: note: candidate: 'nntrainer::Tensor::Tensor(const nntrainer::Tensor&)'
+  460 |   Tensor(const Tensor &rhs);
+      |   ^~~~~~
+../nntrainer/tensor/tensor.h:81:3: note: candidate: 'nntrainer::Tensor::Tensor(const TensorDim&, const void*, nntrainer::QScheme)'
+   81 |   Tensor(const TensorDim &d, const void *buf = nullptr,
+      |   ^~~~~~
+../nntrainer/tensor/tensor.h:57:3: note: candidate: 'nntrainer::Tensor::Tensor(std::string, nntrainer::Tformat, nntrainer::Tdatatype)'
+   57 |   Tensor(std::string name_ = "", Tformat fm = Tformat::NCHW,
+      |   ^~~~~~
+../Applications/QATBenchmark/qat_benchmark.cpp:290:41: error: call of overloaded 'Tensor(<brace-enclosed initializer list>)' is ambiguous
+  290 |   Tensor out_A({BATCH, 1, 1, OUTPUT_DIM});
+      |                                         ^
+In file included from ../Applications/QATBenchmark/qat_benchmark.cpp:24:
+../nntrainer/tensor/tensor.h:466:3: note: candidate: 'nntrainer::Tensor::Tensor(nntrainer::Tensor&&)'
+  466 |   Tensor(Tensor &&rhs) noexcept = default;
+      |   ^~~~~~
+../nntrainer/tensor/tensor.h:460:3: note: candidate: 'nntrainer::Tensor::Tensor(const nntrainer::Tensor&)'
+  460 |   Tensor(const Tensor &rhs);
+      |   ^~~~~~
+../nntrainer/tensor/tensor.h:81:3: note: candidate: 'nntrainer::Tensor::Tensor(const TensorDim&, const void*, nntrainer::QScheme)'
+   81 |   Tensor(const TensorDim &d, const void *buf = nullptr,
+      |   ^~~~~~
+../nntrainer/tensor/tensor.h:57:3: note: candidate: 'nntrainer::Tensor::Tensor(std::string, nntrainer::Tformat, nntrainer::Tdatatype)'
+   57 |   Tensor(std::string name_ = "", Tformat fm = Tformat::NCHW,
+      |   ^~~~~~
+../Applications/QATBenchmark/qat_benchmark.cpp:291:41: error: call of overloaded 'Tensor(<brace-enclosed initializer list>)' is ambiguous
+  291 |   Tensor out_B({BATCH, 1, 1, OUTPUT_DIM});
+      |                                         ^
+In file included from ../Applications/QATBenchmark/qat_benchmark.cpp:24:
+../nntrainer/tensor/tensor.h:466:3: note: candidate: 'nntrainer::Tensor::Tensor(nntrainer::Tensor&&)'
+  466 |   Tensor(Tensor &&rhs) noexcept = default;
+      |   ^~~~~~
+../nntrainer/tensor/tensor.h:460:3: note: candidate: 'nntrainer::Tensor::Tensor(const nntrainer::Tensor&)'
+  460 |   Tensor(const Tensor &rhs);
+      |   ^~~~~~
+../nntrainer/tensor/tensor.h:81:3: note: candidate: 'nntrainer::Tensor::Tensor(const TensorDim&, const void*, nntrainer::QScheme)'
+   81 |   Tensor(const TensorDim &d, const void *buf = nullptr,
+      |   ^~~~~~
+../nntrainer/tensor/tensor.h:57:3: note: candidate: 'nntrainer::Tensor::Tensor(std::string, nntrainer::Tformat, nntrainer::Tdatatype)'
+   57 |   Tensor(std::string name_ = "", Tformat fm = Tformat::NCHW,
+      |   ^~~~~~
+../Applications/QATBenchmark/qat_benchmark.cpp:292:41: error: call of overloaded 'Tensor(<brace-enclosed initializer list>)' is ambiguous
+  292 |   Tensor out_C({BATCH, 1, 1, OUTPUT_DIM});
+      |                                         ^
+In file included from ../Applications/QATBenchmark/qat_benchmark.cpp:24:
+../nntrainer/tensor/tensor.h:466:3: note: candidate: 'nntrainer::Tensor::Tensor(nntrainer::Tensor&&)'
+  466 |   Tensor(Tensor &&rhs) noexcept = default;
+      |   ^~~~~~
+../nntrainer/tensor/tensor.h:460:3: note: candidate: 'nntrainer::Tensor::Tensor(const nntrainer::Tensor&)'
+  460 |   Tensor(const Tensor &rhs);
+      |   ^~~~~~
+../nntrainer/tensor/tensor.h:81:3: note: candidate: 'nntrainer::Tensor::Tensor(const TensorDim&, const void*, nntrainer::QScheme)'
+   81 |   Tensor(const TensorDim &d, const void *buf = nullptr,
+      |   ^~~~~~
+../nntrainer/tensor/tensor.h:57:3: note: candidate: 'nntrainer::Tensor::Tensor(std::string, nntrainer::Tformat, nntrainer::Tdatatype)'
+   57 |   Tensor(std::string name_ = "", Tformat fm = Tformat::NCHW,
+      |   ^~~~~~
+../Applications/QATBenchmark/qat_benchmark.cpp:301:43: error: call of overloaded 'Tensor(<brace-enclosed initializer list>)' is ambiguous
+  301 |       Tensor tmp({BATCH, 1, 1, OUTPUT_DIM});
+      |                                           ^
+In file included from ../Applications/QATBenchmark/qat_benchmark.cpp:24:
+../nntrainer/tensor/tensor.h:466:3: note: candidate: 'nntrainer::Tensor::Tensor(nntrainer::Tensor&&)'
+  466 |   Tensor(Tensor &&rhs) noexcept = default;
+      |   ^~~~~~
+../nntrainer/tensor/tensor.h:460:3: note: candidate: 'nntrainer::Tensor::Tensor(const nntrainer::Tensor&)'
+  460 |   Tensor(const Tensor &rhs);
+      |   ^~~~~~
+../nntrainer/tensor/tensor.h:81:3: note: candidate: 'nntrainer::Tensor::Tensor(const TensorDim&, const void*, nntrainer::QScheme)'
+   81 |   Tensor(const TensorDim &d, const void *buf = nullptr,
+      |   ^~~~~~
+../nntrainer/tensor/tensor.h:57:3: note: candidate: 'nntrainer::Tensor::Tensor(std::string, nntrainer::Tformat, nntrainer::Tdatatype)'
+   57 |   Tensor(std::string name_ = "", Tformat fm = Tformat::NCHW,
+      |   ^~~~~~
+../Applications/QATBenchmark/qat_benchmark.cpp:315:43: error: call of overloaded 'Tensor(<brace-enclosed initializer list>)' is ambiguous
+  315 |       Tensor tmp({BATCH, 1, 1, OUTPUT_DIM});
+      |                                           ^
+In file included from ../Applications/QATBenchmark/qat_benchmark.cpp:24:
+../nntrainer/tensor/tensor.h:466:3: note: candidate: 'nntrainer::Tensor::Tensor(nntrainer::Tensor&&)'
+  466 |   Tensor(Tensor &&rhs) noexcept = default;
+      |   ^~~~~~
+../nntrainer/tensor/tensor.h:460:3: note: candidate: 'nntrainer::Tensor::Tensor(const nntrainer::Tensor&)'
+  460 |   Tensor(const Tensor &rhs);
+      |   ^~~~~~
+../nntrainer/tensor/tensor.h:81:3: note: candidate: 'nntrainer::Tensor::Tensor(const TensorDim&, const void*, nntrainer::QScheme)'
+   81 |   Tensor(const TensorDim &d, const void *buf = nullptr,
+      |   ^~~~~~
+../nntrainer/tensor/tensor.h:57:3: note: candidate: 'nntrainer::Tensor::Tensor(std::string, nntrainer::Tformat, nntrainer::Tdatatype)'
+   57 |   Tensor(std::string name_ = "", Tformat fm = Tformat::NCHW,
+      |   ^~~~~~
+../Applications/QATBenchmark/qat_benchmark.cpp:330:43: error: call of overloaded 'Tensor(<brace-enclosed initializer list>)' is ambiguous
+  330 |       Tensor tmp({BATCH, 1, 1, OUTPUT_DIM});
+      |                                           ^
+In file included from ../Applications/QATBenchmark/qat_benchmark.cpp:24:
+../nntrainer/tensor/tensor.h:466:3: note: candidate: 'nntrainer::Tensor::Tensor(nntrainer::Tensor&&)'
+  466 |   Tensor(Tensor &&rhs) noexcept = default;
+      |   ^~~~~~
+../nntrainer/tensor/tensor.h:460:3: note: candidate: 'nntrainer::Tensor::Tensor(const nntrainer::Tensor&)'
+  460 |   Tensor(const Tensor &rhs);
+      |   ^~~~~~
+../nntrainer/tensor/tensor.h:81:3: note: candidate: 'nntrainer::Tensor::Tensor(const TensorDim&, const void*, nntrainer::QScheme)'
+   81 |   Tensor(const TensorDim &d, const void *buf = nullptr,
+      |   ^~~~~~
+../nntrainer/tensor/tensor.h:57:3: note: candidate: 'nntrainer::Tensor::Tensor(std::string, nntrainer::Tformat, nntrainer::Tdatatype)'
+   57 |   Tensor(std::string name_ = "", Tformat fm = Tformat::NCHW,
+      |   ^~~~~~
+[3/14] Compiling C++ object Applications/QATBenchmark/nntrainer_qat_benchmark_ggml.p/qat_benchmark_ggml.cpp.o
+FAILED: Applications/QATBenchmark/nntrainer_qat_benchmark_ggml.p/qat_benchmark_ggml.cpp.o 
+c++ -IApplications/QATBenchmark/nntrainer_qat_benchmark_ggml.p -IApplications/QATBenchmark -I../Applications/QATBenchmark -Inntrainer -I../nntrainer -Iapi -I../api -I../api/ccapi/include -Inntrainer/compiler -I../nntrainer/compiler -Inntrainer/schema -I../nntrainer/schema -Inntrainer/dataset -I../nntrainer/dataset -Inntrainer/layers/loss -I../nntrainer/layers/loss -Inntrainer/layers -I../nntrainer/layers -Inntrainer/models -I../nntrainer/models -Inntrainer/optimizers -I../nntrainer/optimizers -Inntrainer/tensor/cpu_backend/fallback -I../nntrainer/tensor/cpu_backend/fallback -Inntrainer/tensor/cpu_backend/ggml_interface/nntr_ggml_impl -I../nntrainer/tensor/cpu_backend/ggml_interface/nntr_ggml_impl -Inntrainer/tensor/cpu_backend/ggml_interface -I../nntrainer/tensor/cpu_backend/ggml_interface -Inntrainer/tensor/cpu_backend/cblas_interface -I../nntrainer/tensor/cpu_backend/cblas_interface -Inntrainer/tensor/cpu_backend/x86 -I../nntrainer/tensor/cpu_backend/x86 -Inntrainer/tensor/cpu_backend -I../nntrainer/tensor/cpu_backend -Inntrainer/tensor -I../nntrainer/tensor -Inntrainer/utils -I../nntrainer/utils -Inntrainer/graph -I../nntrainer/graph -I/usr/include/x86_64-linux-gnu/openblas-pthread/ -I/usr/include/nnstreamer -I/usr/include/tensorflow2/ -fdiagnostics-color=always -D_FILE_OFFSET_BITS=64 -Wall -Winvalid-pch -Wnon-virtual-dtor -Werror -std=c++17 -g '-DVERSION="0.6.0"' -DVERSION_MAJOR=0 -DVERSION_MINOR=6 -DVERSION_MICRO=0 -DENABLE_TRANSFORMER=1 -march=native -mavx2 -mfma -Wredundant-decls -Wwrite-strings -Wformat -Wformat-nonliteral -Wformat-security -Winit-self -Waddress -Wvla -Wpointer-arith -Wno-error=varargs -Wno-error=ignored-attributes -Wno-error=sign-compare -ftree-vectorize -Wno-unused-variable -Wno-comment -Wno-ignored-attributes -Wno-sign-compare -Wno-maybe-uninitialized -DMIN_CPP_VERSION=201703L -DMMAP_READ=1 -DKERNEL_CACHE=0 -DUSE_MMAP=1 -DOPENCL_KERNEL_PATH=nntrainer_opencl_kernels -DML_API_COMMON=1 -DNNSTREAMER_AVAILABLE=1 -DUSE_BLAS=1 -DHGEMM_EXPERIMENTAL_KERNEL=false -DNNTR_NUM_THREADS=1 -DOMP_NUM_THREADS=6 -DDEBUG=1 -D__LOGGING__=1 -DENABLE_TEST=1 -DREDUCE_TOLERANCE=1 -DENABLE_TFLITE_BACKBONE=1 -DENABLE_TFLITE_INTERPRETER=1 '-DNNTRAINER_CONF_PATH="/usr/local/etc/nntrainer.ini"' -pthread -fopenmp -MD -MQ Applications/QATBenchmark/nntrainer_qat_benchmark_ggml.p/qat_benchmark_ggml.cpp.o -MF Applications/QATBenchmark/nntrainer_qat_benchmark_ggml.p/qat_benchmark_ggml.cpp.o.d -o Applications/QATBenchmark/nntrainer_qat_benchmark_ggml.p/qat_benchmark_ggml.cpp.o -c ../Applications/QATBenchmark/qat_benchmark_ggml.cpp
+../Applications/QATBenchmark/qat_benchmark_ggml.cpp: In function 'void modeA_fp32(const nntrainer::Tensor&, const nntrainer::Tensor&, const nntrainer::Tensor&, const nntrainer::Tensor&, const nntrainer::Tensor&, nntrainer::Tensor&)':
+../Applications/QATBenchmark/qat_benchmark_ggml.cpp:51:42: error: call of overloaded 'Tensor(<brace-enclosed initializer list>)' is ambiguous
+   51 |   Tensor hidden({BATCH, 1, 1, HIDDEN_DIM});
+      |                                          ^
+In file included from ../Applications/QATBenchmark/qat_benchmark_ggml.cpp:25:
+../nntrainer/tensor/tensor.h:466:3: note: candidate: 'nntrainer::Tensor::Tensor(nntrainer::Tensor&&)'
+  466 |   Tensor(Tensor &&rhs) noexcept = default;
+      |   ^~~~~~
+../nntrainer/tensor/tensor.h:460:3: note: candidate: 'nntrainer::Tensor::Tensor(const nntrainer::Tensor&)'
+  460 |   Tensor(const Tensor &rhs);
+      |   ^~~~~~
+../nntrainer/tensor/tensor.h:81:3: note: candidate: 'nntrainer::Tensor::Tensor(const TensorDim&, const void*, nntrainer::QScheme)'
+   81 |   Tensor(const TensorDim &d, const void *buf = nullptr,
+      |   ^~~~~~
+../nntrainer/tensor/tensor.h:57:3: note: candidate: 'nntrainer::Tensor::Tensor(std::string, nntrainer::Tformat, nntrainer::Tdatatype)'
+   57 |   Tensor(std::string name_ = "", Tformat fm = Tformat::NCHW,
+      |   ^~~~~~
+../Applications/QATBenchmark/qat_benchmark_ggml.cpp: In function 'void modeD_ggml_q6k(const nntrainer::Tensor&, const nntrainer::Tensor&, const nntrainer::Tensor&, const nntrainer::Tensor&, const nntrainer::Tensor&, nntrainer::Tensor&)':
+../Applications/QATBenchmark/qat_benchmark_ggml.cpp:67:42: error: call of overloaded 'Tensor(<brace-enclosed initializer list>)' is ambiguous
+   67 |   Tensor hidden({BATCH, 1, 1, HIDDEN_DIM});
+      |                                          ^
+In file included from ../Applications/QATBenchmark/qat_benchmark_ggml.cpp:25:
+../nntrainer/tensor/tensor.h:466:3: note: candidate: 'nntrainer::Tensor::Tensor(nntrainer::Tensor&&)'
+  466 |   Tensor(Tensor &&rhs) noexcept = default;
+      |   ^~~~~~
+../nntrainer/tensor/tensor.h:460:3: note: candidate: 'nntrainer::Tensor::Tensor(const nntrainer::Tensor&)'
+  460 |   Tensor(const Tensor &rhs);
+      |   ^~~~~~
+../nntrainer/tensor/tensor.h:81:3: note: candidate: 'nntrainer::Tensor::Tensor(const TensorDim&, const void*, nntrainer::QScheme)'
+   81 |   Tensor(const TensorDim &d, const void *buf = nullptr,
+      |   ^~~~~~
+../nntrainer/tensor/tensor.h:57:3: note: candidate: 'nntrainer::Tensor::Tensor(std::string, nntrainer::Tformat, nntrainer::Tdatatype)'
+   57 |   Tensor(std::string name_ = "", Tformat fm = Tformat::NCHW,
+      |   ^~~~~~
+../Applications/QATBenchmark/qat_benchmark_ggml.cpp: In function 'void modeE_ggml_q4_0(const nntrainer::Tensor&, const nntrainer::Tensor&, const nntrainer::Tensor&, const nntrainer::Tensor&, const nntrainer::Tensor&, nntrainer::Tensor&)':
+../Applications/QATBenchmark/qat_benchmark_ggml.cpp:83:42: error: call of overloaded 'Tensor(<brace-enclosed initializer list>)' is ambiguous
+   83 |   Tensor hidden({BATCH, 1, 1, HIDDEN_DIM});
+      |                                          ^
+In file included from ../Applications/QATBenchmark/qat_benchmark_ggml.cpp:25:
+../nntrainer/tensor/tensor.h:466:3: note: candidate: 'nntrainer::Tensor::Tensor(nntrainer::Tensor&&)'
+  466 |   Tensor(Tensor &&rhs) noexcept = default;
+      |   ^~~~~~
+../nntrainer/tensor/tensor.h:460:3: note: candidate: 'nntrainer::Tensor::Tensor(const nntrainer::Tensor&)'
+  460 |   Tensor(const Tensor &rhs);
+      |   ^~~~~~
+../nntrainer/tensor/tensor.h:81:3: note: candidate: 'nntrainer::Tensor::Tensor(const TensorDim&, const void*, nntrainer::QScheme)'
+   81 |   Tensor(const TensorDim &d, const void *buf = nullptr,
+      |   ^~~~~~
+../nntrainer/tensor/tensor.h:57:3: note: candidate: 'nntrainer::Tensor::Tensor(std::string, nntrainer::Tformat, nntrainer::Tdatatype)'
+   57 |   Tensor(std::string name_ = "", Tformat fm = Tformat::NCHW,
+      |   ^~~~~~
+../Applications/QATBenchmark/qat_benchmark_ggml.cpp: In function 'int main()':
+../Applications/QATBenchmark/qat_benchmark_ggml.cpp:120:42: error: call of overloaded 'Tensor(<brace-enclosed initializer list>)' is ambiguous
+  120 |   Tensor W1({1, 1, INPUT_DIM, HIDDEN_DIM});
+      |                                          ^
+In file included from ../Applications/QATBenchmark/qat_benchmark_ggml.cpp:25:
+../nntrainer/tensor/tensor.h:466:3: note: candidate: 'nntrainer::Tensor::Tensor(nntrainer::Tensor&&)'
+  466 |   Tensor(Tensor &&rhs) noexcept = default;
+      |   ^~~~~~
+../nntrainer/tensor/tensor.h:460:3: note: candidate: 'nntrainer::Tensor::Tensor(const nntrainer::Tensor&)'
+  460 |   Tensor(const Tensor &rhs);
+      |   ^~~~~~
+../nntrainer/tensor/tensor.h:81:3: note: candidate: 'nntrainer::Tensor::Tensor(const TensorDim&, const void*, nntrainer::QScheme)'
+   81 |   Tensor(const TensorDim &d, const void *buf = nullptr,
+      |   ^~~~~~
+../nntrainer/tensor/tensor.h:57:3: note: candidate: 'nntrainer::Tensor::Tensor(std::string, nntrainer::Tformat, nntrainer::Tdatatype)'
+   57 |   Tensor(std::string name_ = "", Tformat fm = Tformat::NCHW,
+      |   ^~~~~~
+../Applications/QATBenchmark/qat_benchmark_ggml.cpp:121:43: error: call of overloaded 'Tensor(<brace-enclosed initializer list>)' is ambiguous
+  121 |   Tensor W2({1, 1, HIDDEN_DIM, OUTPUT_DIM});
+      |                                           ^
+In file included from ../Applications/QATBenchmark/qat_benchmark_ggml.cpp:25:
+../nntrainer/tensor/tensor.h:466:3: note: candidate: 'nntrainer::Tensor::Tensor(nntrainer::Tensor&&)'
+  466 |   Tensor(Tensor &&rhs) noexcept = default;
+      |   ^~~~~~
+../nntrainer/tensor/tensor.h:460:3: note: candidate: 'nntrainer::Tensor::Tensor(const nntrainer::Tensor&)'
+  460 |   Tensor(const Tensor &rhs);
+      |   ^~~~~~
+../nntrainer/tensor/tensor.h:81:3: note: candidate: 'nntrainer::Tensor::Tensor(const TensorDim&, const void*, nntrainer::QScheme)'
+   81 |   Tensor(const TensorDim &d, const void *buf = nullptr,
+      |   ^~~~~~
+../nntrainer/tensor/tensor.h:57:3: note: candidate: 'nntrainer::Tensor::Tensor(std::string, nntrainer::Tformat, nntrainer::Tdatatype)'
+   57 |   Tensor(std::string name_ = "", Tformat fm = Tformat::NCHW,
+      |   ^~~~~~
+../Applications/QATBenchmark/qat_benchmark_ggml.cpp:122:34: error: call of overloaded 'Tensor(<brace-enclosed initializer list>)' is ambiguous
+  122 |   Tensor b1({1, 1, 1, HIDDEN_DIM});
+      |                                  ^
+In file included from ../Applications/QATBenchmark/qat_benchmark_ggml.cpp:25:
+../nntrainer/tensor/tensor.h:466:3: note: candidate: 'nntrainer::Tensor::Tensor(nntrainer::Tensor&&)'
+  466 |   Tensor(Tensor &&rhs) noexcept = default;
+      |   ^~~~~~
+../nntrainer/tensor/tensor.h:460:3: note: candidate: 'nntrainer::Tensor::Tensor(const nntrainer::Tensor&)'
+  460 |   Tensor(const Tensor &rhs);
+      |   ^~~~~~
+../nntrainer/tensor/tensor.h:81:3: note: candidate: 'nntrainer::Tensor::Tensor(const TensorDim&, const void*, nntrainer::QScheme)'
+   81 |   Tensor(const TensorDim &d, const void *buf = nullptr,
+      |   ^~~~~~
+../nntrainer/tensor/tensor.h:57:3: note: candidate: 'nntrainer::Tensor::Tensor(std::string, nntrainer::Tformat, nntrainer::Tdatatype)'
+   57 |   Tensor(std::string name_ = "", Tformat fm = Tformat::NCHW,
+      |   ^~~~~~
+../Applications/QATBenchmark/qat_benchmark_ggml.cpp:123:34: error: call of overloaded 'Tensor(<brace-enclosed initializer list>)' is ambiguous
+  123 |   Tensor b2({1, 1, 1, OUTPUT_DIM});
+      |                                  ^
+In file included from ../Applications/QATBenchmark/qat_benchmark_ggml.cpp:25:
+../nntrainer/tensor/tensor.h:466:3: note: candidate: 'nntrainer::Tensor::Tensor(nntrainer::Tensor&&)'
+  466 |   Tensor(Tensor &&rhs) noexcept = default;
+      |   ^~~~~~
+../nntrainer/tensor/tensor.h:460:3: note: candidate: 'nntrainer::Tensor::Tensor(const nntrainer::Tensor&)'
+  460 |   Tensor(const Tensor &rhs);
+      |   ^~~~~~
+../nntrainer/tensor/tensor.h:81:3: note: candidate: 'nntrainer::Tensor::Tensor(const TensorDim&, const void*, nntrainer::QScheme)'
+   81 |   Tensor(const TensorDim &d, const void *buf = nullptr,
+      |   ^~~~~~
+../nntrainer/tensor/tensor.h:57:3: note: candidate: 'nntrainer::Tensor::Tensor(std::string, nntrainer::Tformat, nntrainer::Tdatatype)'
+   57 |   Tensor(std::string name_ = "", Tformat fm = Tformat::NCHW,
+      |   ^~~~~~
+../Applications/QATBenchmark/qat_benchmark_ggml.cpp:124:40: error: call of overloaded 'Tensor(<brace-enclosed initializer list>)' is ambiguous
+  124 |   Tensor input({BATCH, 1, 1, INPUT_DIM});
+      |                                        ^
+In file included from ../Applications/QATBenchmark/qat_benchmark_ggml.cpp:25:
+../nntrainer/tensor/tensor.h:466:3: note: candidate: 'nntrainer::Tensor::Tensor(nntrainer::Tensor&&)'
+  466 |   Tensor(Tensor &&rhs) noexcept = default;
+      |   ^~~~~~
+../nntrainer/tensor/tensor.h:460:3: note: candidate: 'nntrainer::Tensor::Tensor(const nntrainer::Tensor&)'
+  460 |   Tensor(const Tensor &rhs);
+      |   ^~~~~~
+../nntrainer/tensor/tensor.h:81:3: note: candidate: 'nntrainer::Tensor::Tensor(const TensorDim&, const void*, nntrainer::QScheme)'
+   81 |   Tensor(const TensorDim &d, const void *buf = nullptr,
+      |   ^~~~~~
+../nntrainer/tensor/tensor.h:57:3: note: candidate: 'nntrainer::Tensor::Tensor(std::string, nntrainer::Tformat, nntrainer::Tdatatype)'
+   57 |   Tensor(std::string name_ = "", Tformat fm = Tformat::NCHW,
+      |   ^~~~~~
+../Applications/QATBenchmark/qat_benchmark_ggml.cpp:136:35: error: 'createQuantizer' is not a member of 'nntrainer::Quantizer'
+  136 |   auto q6k_quantizer = Quantizer::createQuantizer(QScheme::Q6_K);
+      |                                   ^~~~~~~~~~~~~~~
+../Applications/QATBenchmark/qat_benchmark_ggml.cpp:144:36: error: 'createQuantizer' is not a member of 'nntrainer::Quantizer'
+  144 |   auto q4_0_quantizer = Quantizer::createQuantizer(QScheme::Q4_0);
+      |                                    ^~~~~~~~~~~~~~~
+../Applications/QATBenchmark/qat_benchmark_ggml.cpp:172:41: error: call of overloaded 'Tensor(<brace-enclosed initializer list>)' is ambiguous
+  172 |   Tensor out_A({BATCH, 1, 1, OUTPUT_DIM});
+      |                                         ^
+In file included from ../Applications/QATBenchmark/qat_benchmark_ggml.cpp:25:
+../nntrainer/tensor/tensor.h:466:3: note: candidate: 'nntrainer::Tensor::Tensor(nntrainer::Tensor&&)'
+  466 |   Tensor(Tensor &&rhs) noexcept = default;
+      |   ^~~~~~
+../nntrainer/tensor/tensor.h:460:3: note: candidate: 'nntrainer::Tensor::Tensor(const nntrainer::Tensor&)'
+  460 |   Tensor(const Tensor &rhs);
+      |   ^~~~~~
+../nntrainer/tensor/tensor.h:81:3: note: candidate: 'nntrainer::Tensor::Tensor(const TensorDim&, const void*, nntrainer::QScheme)'
+   81 |   Tensor(const TensorDim &d, const void *buf = nullptr,
+      |   ^~~~~~
+../nntrainer/tensor/tensor.h:57:3: note: candidate: 'nntrainer::Tensor::Tensor(std::string, nntrainer::Tformat, nntrainer::Tdatatype)'
+   57 |   Tensor(std::string name_ = "", Tformat fm = Tformat::NCHW,
+      |   ^~~~~~
+../Applications/QATBenchmark/qat_benchmark_ggml.cpp:173:41: error: call of overloaded 'Tensor(<brace-enclosed initializer list>)' is ambiguous
+  173 |   Tensor out_D({BATCH, 1, 1, OUTPUT_DIM});
+      |                                         ^
+In file included from ../Applications/QATBenchmark/qat_benchmark_ggml.cpp:25:
+../nntrainer/tensor/tensor.h:466:3: note: candidate: 'nntrainer::Tensor::Tensor(nntrainer::Tensor&&)'
+  466 |   Tensor(Tensor &&rhs) noexcept = default;
+      |   ^~~~~~
+../nntrainer/tensor/tensor.h:460:3: note: candidate: 'nntrainer::Tensor::Tensor(const nntrainer::Tensor&)'
+  460 |   Tensor(const Tensor &rhs);
+      |   ^~~~~~
+../nntrainer/tensor/tensor.h:81:3: note: candidate: 'nntrainer::Tensor::Tensor(const TensorDim&, const void*, nntrainer::QScheme)'
+   81 |   Tensor(const TensorDim &d, const void *buf = nullptr,
+      |   ^~~~~~
+../nntrainer/tensor/tensor.h:57:3: note: candidate: 'nntrainer::Tensor::Tensor(std::string, nntrainer::Tformat, nntrainer::Tdatatype)'
+   57 |   Tensor(std::string name_ = "", Tformat fm = Tformat::NCHW,
+      |   ^~~~~~
+../Applications/QATBenchmark/qat_benchmark_ggml.cpp:174:41: error: call of overloaded 'Tensor(<brace-enclosed initializer list>)' is ambiguous
+  174 |   Tensor out_E({BATCH, 1, 1, OUTPUT_DIM});
+      |                                         ^
+In file included from ../Applications/QATBenchmark/qat_benchmark_ggml.cpp:25:
+../nntrainer/tensor/tensor.h:466:3: note: candidate: 'nntrainer::Tensor::Tensor(nntrainer::Tensor&&)'
+  466 |   Tensor(Tensor &&rhs) noexcept = default;
+      |   ^~~~~~
+../nntrainer/tensor/tensor.h:460:3: note: candidate: 'nntrainer::Tensor::Tensor(const nntrainer::Tensor&)'
+  460 |   Tensor(const Tensor &rhs);
+      |   ^~~~~~
+../nntrainer/tensor/tensor.h:81:3: note: candidate: 'nntrainer::Tensor::Tensor(const TensorDim&, const void*, nntrainer::QScheme)'
+   81 |   Tensor(const TensorDim &d, const void *buf = nullptr,
+      |   ^~~~~~
+../nntrainer/tensor/tensor.h:57:3: note: candidate: 'nntrainer::Tensor::Tensor(std::string, nntrainer::Tformat, nntrainer::Tdatatype)'
+   57 |   Tensor(std::string name_ = "", Tformat fm = Tformat::NCHW,
+      |   ^~~~~~
+../Applications/QATBenchmark/qat_benchmark_ggml.cpp:183:43: error: call of overloaded 'Tensor(<brace-enclosed initializer list>)' is ambiguous
+  183 |       Tensor tmp({BATCH, 1, 1, OUTPUT_DIM});
+      |                                           ^
+In file included from ../Applications/QATBenchmark/qat_benchmark_ggml.cpp:25:
+../nntrainer/tensor/tensor.h:466:3: note: candidate: 'nntrainer::Tensor::Tensor(nntrainer::Tensor&&)'
+  466 |   Tensor(Tensor &&rhs) noexcept = default;
+      |   ^~~~~~
+../nntrainer/tensor/tensor.h:460:3: note: candidate: 'nntrainer::Tensor::Tensor(const nntrainer::Tensor&)'
+  460 |   Tensor(const Tensor &rhs);
+      |   ^~~~~~
+../nntrainer/tensor/tensor.h:81:3: note: candidate: 'nntrainer::Tensor::Tensor(const TensorDim&, const void*, nntrainer::QScheme)'
+   81 |   Tensor(const TensorDim &d, const void *buf = nullptr,
+      |   ^~~~~~
+../nntrainer/tensor/tensor.h:57:3: note: candidate: 'nntrainer::Tensor::Tensor(std::string, nntrainer::Tformat, nntrainer::Tdatatype)'
+   57 |   Tensor(std::string name_ = "", Tformat fm = Tformat::NCHW,
+      |   ^~~~~~
+../Applications/QATBenchmark/qat_benchmark_ggml.cpp:197:43: error: call of overloaded 'Tensor(<brace-enclosed initializer list>)' is ambiguous
+  197 |       Tensor tmp({BATCH, 1, 1, OUTPUT_DIM});
+      |                                           ^
+In file included from ../Applications/QATBenchmark/qat_benchmark_ggml.cpp:25:
+../nntrainer/tensor/tensor.h:466:3: note: candidate: 'nntrainer::Tensor::Tensor(nntrainer::Tensor&&)'
+  466 |   Tensor(Tensor &&rhs) noexcept = default;
+      |   ^~~~~~
+../nntrainer/tensor/tensor.h:460:3: note: candidate: 'nntrainer::Tensor::Tensor(const nntrainer::Tensor&)'
+  460 |   Tensor(const Tensor &rhs);
+      |   ^~~~~~
+../nntrainer/tensor/tensor.h:81:3: note: candidate: 'nntrainer::Tensor::Tensor(const TensorDim&, const void*, nntrainer::QScheme)'
+   81 |   Tensor(const TensorDim &d, const void *buf = nullptr,
+      |   ^~~~~~
+../nntrainer/tensor/tensor.h:57:3: note: candidate: 'nntrainer::Tensor::Tensor(std::string, nntrainer::Tformat, nntrainer::Tdatatype)'
+   57 |   Tensor(std::string name_ = "", Tformat fm = Tformat::NCHW,
+      |   ^~~~~~
+../Applications/QATBenchmark/qat_benchmark_ggml.cpp:212:43: error: call of overloaded 'Tensor(<brace-enclosed initializer list>)' is ambiguous
+  212 |       Tensor tmp({BATCH, 1, 1, OUTPUT_DIM});
+      |                                           ^
+In file included from ../Applications/QATBenchmark/qat_benchmark_ggml.cpp:25:
+../nntrainer/tensor/tensor.h:466:3: note: candidate: 'nntrainer::Tensor::Tensor(nntrainer::Tensor&&)'
+  466 |   Tensor(Tensor &&rhs) noexcept = default;
+      |   ^~~~~~
+../nntrainer/tensor/tensor.h:460:3: note: candidate: 'nntrainer::Tensor::Tensor(const nntrainer::Tensor&)'
+  460 |   Tensor(const Tensor &rhs);
+      |   ^~~~~~
+../nntrainer/tensor/tensor.h:81:3: note: candidate: 'nntrainer::Tensor::Tensor(const TensorDim&, const void*, nntrainer::QScheme)'
+   81 |   Tensor(const TensorDim &d, const void *buf = nullptr,
+      |   ^~~~~~
+../nntrainer/tensor/tensor.h:57:3: note: candidate: 'nntrainer::Tensor::Tensor(std::string, nntrainer::Tformat, nntrainer::Tdatatype)'
+   57 |   Tensor(std::string name_ = "", Tformat fm = Tformat::NCHW,
+      |   ^~~~~~
+[4/14] Linking target Applications/CausalLM/libcausallm.so
+ninja: build stopped: subcommand failed.
