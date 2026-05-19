@@ -28,8 +28,8 @@ using namespace nntrainer;
 using Clock = std::chrono::high_resolution_clock;
 
 // ─── Configuration ──────────────────────────────────────────────────────────
-static constexpr unsigned int INPUT_DIM = 768;   // multiple of 256 for GGML
-static constexpr unsigned int HIDDEN_DIM = 128;  // multiple of 32
+static constexpr unsigned int INPUT_DIM = 768;
+static constexpr unsigned int HIDDEN_DIM = 128;
 static constexpr unsigned int OUTPUT_DIM = 10;
 static constexpr unsigned int BATCH = 64;
 static constexpr int NUM_ITERS = 1000;
@@ -43,7 +43,6 @@ struct QuantParams {
   float q_max;
 };
 
-/// Compute per-tensor-affine quantization parameters from min/max
 static QuantParams computeQuantParams(float min_val, float max_val) {
   QuantParams p;
   p.q_min = -128.0f;
@@ -56,19 +55,17 @@ static QuantParams computeQuantParams(float min_val, float max_val) {
   return p;
 }
 
-/// Quantize a float value to int8 using given params
 static inline int8_t quantize_val(float v, const QuantParams &p) {
   float q = std::round(v / p.scale + p.zero_point);
   q = std::max(p.q_min, std::min(p.q_max, q));
   return static_cast<int8_t>(q);
 }
 
-/// Dequantize an int8 value back to float
 static inline float dequantize_val(int8_t q, const QuantParams &p) {
   return p.scale * (static_cast<float>(q) - p.zero_point);
 }
 
-// ─── Utility: fill tensor with random normal values ─────────────────────────
+// ─── Utility ────────────────────────────────────────────────────────────────
 static void fillRandom(Tensor &t, float mean, float stddev, unsigned seed) {
   std::mt19937 gen(seed);
   std::normal_distribution<float> dist(mean, stddev);
@@ -77,7 +74,6 @@ static void fillRandom(Tensor &t, float mean, float stddev, unsigned seed) {
     data[i] = dist(gen);
 }
 
-// ─── Utility: compute statistics ────────────────────────────────────────────
 static void getMinMax(const Tensor &t, float &out_min, float &out_max) {
   const float *d = t.getData<float>();
   out_min = d[0];
@@ -91,13 +87,10 @@ static void getMinMax(const Tensor &t, float &out_min, float &out_max) {
 // ─── Mode A: FP32 × FP32 (baseline) ────────────────────────────────────────
 static void modeA_fp32(const Tensor &input, const Tensor &W1, const Tensor &b1,
                        const Tensor &W2, const Tensor &b2, Tensor &output) {
-  // Layer 1: hidden = input * W1 + b1, then ReLU
-  Tensor hidden({BATCH, 1, 1, HIDDEN_DIM});
+  Tensor hidden(TensorDim(BATCH, 1, 1, HIDDEN_DIM));
   input.dot(W1, hidden, false, false);
   hidden.add_i(b1);
   hidden.apply<float>([](float v) { return v > 0.f ? v : 0.f; }, hidden);
-
-  // Layer 2: output = hidden * W2 + b2
   hidden.dot(W2, output, false, false);
   output.add_i(b2);
 }
@@ -108,32 +101,27 @@ static void modeB_dequant_fp32(const Tensor &input,
                                const Tensor &b1,
                                const std::vector<int8_t> &W2q, QuantParams W2p,
                                const Tensor &b2, Tensor &output) {
-  // Dequantize W1 to FP32
-  Tensor W1_deq({1, 1, INPUT_DIM, HIDDEN_DIM});
+  Tensor W1_deq(TensorDim(1, 1, INPUT_DIM, HIDDEN_DIM));
   float *w1d = W1_deq.getData<float>();
   for (size_t i = 0; i < W1q.size(); ++i)
     w1d[i] = dequantize_val(W1q[i], W1p);
 
-  // Layer 1
-  Tensor hidden({BATCH, 1, 1, HIDDEN_DIM});
+  Tensor hidden(TensorDim(BATCH, 1, 1, HIDDEN_DIM));
   input.dot(W1_deq, hidden, false, false);
   hidden.add_i(b1);
   hidden.apply<float>([](float v) { return v > 0.f ? v : 0.f; }, hidden);
 
-  // Dequantize W2 to FP32
-  Tensor W2_deq({1, 1, HIDDEN_DIM, OUTPUT_DIM});
+  Tensor W2_deq(TensorDim(1, 1, HIDDEN_DIM, OUTPUT_DIM));
   float *w2d = W2_deq.getData<float>();
   for (size_t i = 0; i < W2q.size(); ++i)
     w2d[i] = dequantize_val(W2q[i], W2p);
 
-  // Layer 2
   hidden.dot(W2_deq, output, false, false);
   output.add_i(b2);
 }
 
 // ─── Mode C: INT8 × INT8 → INT32 (naive matmul) ────────────────────────────
 
-/// Naive INT8 matmul: C[M×N] = A[M×K] * B[K×N], all in int32 accumulator
 static void int8_matmul(const int8_t *A, const int8_t *B, int32_t *C,
                         unsigned M, unsigned K, unsigned N) {
   for (unsigned i = 0; i < M; ++i) {
@@ -157,42 +145,35 @@ static void modeC_int8(const Tensor &input, QuantParams act1_p,
   const float *in_fp = input.getData<float>();
   unsigned total1 = BATCH * INPUT_DIM;
 
-  // Quantize activations for layer 1
   std::vector<int8_t> act1_q(total1);
   for (unsigned i = 0; i < total1; ++i)
     act1_q[i] = quantize_val(in_fp[i], act1_p);
 
-  // INT8 matmul: act1_q[BATCH×INPUT_DIM] * W1q[INPUT_DIM×HIDDEN_DIM]
   std::vector<int32_t> acc1(BATCH * HIDDEN_DIM);
   int8_matmul(act1_q.data(), W1q.data(), acc1.data(),
               BATCH, INPUT_DIM, HIDDEN_DIM);
 
-  // Rescale to FP32 + bias + ReLU
   float combined_scale1 = act1_p.scale * W1p.scale;
-  Tensor hidden({BATCH, 1, 1, HIDDEN_DIM});
+  Tensor hidden(TensorDim(BATCH, 1, 1, HIDDEN_DIM));
   float *hid = hidden.getData<float>();
   const float *b1d = b1.getData<float>();
   for (unsigned i = 0; i < BATCH; ++i) {
     for (unsigned j = 0; j < HIDDEN_DIM; ++j) {
-      // Simplified: ignoring zero_point cross-terms for benchmark
       float val = static_cast<float>(acc1[i * HIDDEN_DIM + j]) *
                   combined_scale1 + b1d[j];
-      hid[i * HIDDEN_DIM + j] = val > 0.f ? val : 0.f; // ReLU
+      hid[i * HIDDEN_DIM + j] = val > 0.f ? val : 0.f;
     }
   }
 
-  // Quantize hidden activations for layer 2
   unsigned total2 = BATCH * HIDDEN_DIM;
   std::vector<int8_t> act2_q(total2);
   for (unsigned i = 0; i < total2; ++i)
     act2_q[i] = quantize_val(hid[i], act2_p);
 
-  // INT8 matmul: act2_q[BATCH×HIDDEN_DIM] * W2q[HIDDEN_DIM×OUTPUT_DIM]
   std::vector<int32_t> acc2(BATCH * OUTPUT_DIM);
   int8_matmul(act2_q.data(), W2q.data(), acc2.data(),
               BATCH, HIDDEN_DIM, OUTPUT_DIM);
 
-  // Rescale to FP32 + bias
   float combined_scale2 = act2_p.scale * W2p.scale;
   float *out = output.getData<float>();
   const float *b2d = b2.getData<float>();
@@ -229,12 +210,11 @@ int main() {
             << " output=" << OUTPUT_DIM << " batch=" << BATCH
             << " iters=" << NUM_ITERS << std::endl;
 
-  // ── Create random weights and input ──
-  Tensor W1({1, 1, INPUT_DIM, HIDDEN_DIM});
-  Tensor W2({1, 1, HIDDEN_DIM, OUTPUT_DIM});
-  Tensor b1({1, 1, 1, HIDDEN_DIM});
-  Tensor b2({1, 1, 1, OUTPUT_DIM});
-  Tensor input({BATCH, 1, 1, INPUT_DIM});
+  Tensor W1(TensorDim(1, 1, INPUT_DIM, HIDDEN_DIM));
+  Tensor W2(TensorDim(1, 1, HIDDEN_DIM, OUTPUT_DIM));
+  Tensor b1(TensorDim(1, 1, 1, HIDDEN_DIM));
+  Tensor b2(TensorDim(1, 1, 1, OUTPUT_DIM));
+  Tensor input(TensorDim(BATCH, 1, 1, INPUT_DIM));
 
   fillRandom(W1, 0.0f, 0.05f, 42);
   fillRandom(W2, 0.0f, 0.05f, 43);
@@ -242,18 +222,15 @@ int main() {
   fillRandom(b2, 0.0f, 0.01f, 45);
   fillRandom(input, 0.0f, 1.0f, 100);
 
-  // ── Compute quantization parameters (simulated QAT stats) ──
   float w1_min, w1_max, w2_min, w2_max;
   getMinMax(W1, w1_min, w1_max);
   getMinMax(W2, w2_min, w2_max);
   QuantParams W1p = computeQuantParams(w1_min, w1_max);
   QuantParams W2p = computeQuantParams(w2_min, w2_max);
 
-  // Activation stats (use input range for layer1, estimate for layer2)
   float in_min, in_max;
   getMinMax(input, in_min, in_max);
   QuantParams act1_p = computeQuantParams(in_min, in_max);
-  // For layer 2 activations (post-ReLU): min=0
   QuantParams act2_p = computeQuantParams(0.0f, 5.0f);
 
   std::cerr << "\n--- Quantization Parameters ---" << std::endl;
@@ -262,7 +239,6 @@ int main() {
   std::cerr << "  W2: scale=" << W2p.scale << " zp=" << W2p.zero_point
             << " range=[" << w2_min << ", " << w2_max << "]" << std::endl;
 
-  // ── Quantize weights to INT8 ──
   std::vector<int8_t> W1q(INPUT_DIM * HIDDEN_DIM);
   std::vector<int8_t> W2q(HIDDEN_DIM * OUTPUT_DIM);
   {
@@ -274,7 +250,6 @@ int main() {
       W2q[i] = quantize_val(w2f[i], W2p);
   }
 
-  // ── Memory comparison ──
   size_t fp32_bytes = (INPUT_DIM * HIDDEN_DIM + HIDDEN_DIM * OUTPUT_DIM) * 4;
   size_t int8_bytes = (INPUT_DIM * HIDDEN_DIM + HIDDEN_DIM * OUTPUT_DIM) * 1
                       + 2 * sizeof(QuantParams);
@@ -286,19 +261,17 @@ int main() {
   std::cerr << "  Mode C (INT8):  " << int8_bytes << " bytes — "
             << (float)fp32_bytes / int8_bytes << "x reduction" << std::endl;
 
-  // ── Compute baseline output (Mode A, single pass) for accuracy ──
-  Tensor out_A({BATCH, 1, 1, OUTPUT_DIM});
-  Tensor out_B({BATCH, 1, 1, OUTPUT_DIM});
-  Tensor out_C({BATCH, 1, 1, OUTPUT_DIM});
+  Tensor out_A(TensorDim(BATCH, 1, 1, OUTPUT_DIM));
+  Tensor out_B(TensorDim(BATCH, 1, 1, OUTPUT_DIM));
+  Tensor out_C(TensorDim(BATCH, 1, 1, OUTPUT_DIM));
   modeA_fp32(input, W1, b1, W2, b2, out_A);
 
-  // ── Benchmark Mode A ──
   std::cerr << "\n--- Latency (" << NUM_ITERS << " iterations) ---"
             << std::endl;
   {
     auto start = Clock::now();
     for (int i = 0; i < NUM_ITERS; ++i) {
-      Tensor tmp({BATCH, 1, 1, OUTPUT_DIM});
+      Tensor tmp(TensorDim(BATCH, 1, 1, OUTPUT_DIM));
       modeA_fp32(input, W1, b1, W2, b2, tmp);
     }
     auto end = Clock::now();
@@ -308,11 +281,10 @@ int main() {
               << ms << " ms)" << std::endl;
   }
 
-  // ── Benchmark Mode B ──
   {
     auto start = Clock::now();
     for (int i = 0; i < NUM_ITERS; ++i) {
-      Tensor tmp({BATCH, 1, 1, OUTPUT_DIM});
+      Tensor tmp(TensorDim(BATCH, 1, 1, OUTPUT_DIM));
       modeB_dequant_fp32(input, W1q, W1p, b1, W2q, W2p, b2, tmp);
     }
     auto end = Clock::now();
@@ -323,11 +295,10 @@ int main() {
     modeB_dequant_fp32(input, W1q, W1p, b1, W2q, W2p, b2, out_B);
   }
 
-  // ── Benchmark Mode C ──
   {
     auto start = Clock::now();
     for (int i = 0; i < NUM_ITERS; ++i) {
-      Tensor tmp({BATCH, 1, 1, OUTPUT_DIM});
+      Tensor tmp(TensorDim(BATCH, 1, 1, OUTPUT_DIM));
       modeC_int8(input, act1_p, W1q, W1p, b1, act2_p, W2q, W2p, b2, tmp);
     }
     auto end = Clock::now();
@@ -338,7 +309,6 @@ int main() {
     modeC_int8(input, act1_p, W1q, W1p, b1, act2_p, W2q, W2p, b2, out_C);
   }
 
-  // ── Accuracy comparison ──
   std::cerr << "\n--- Accuracy vs FP32 Baseline ---" << std::endl;
   compareAccuracy(out_A, out_B, "Mode B (FP32xINT8)");
   compareAccuracy(out_A, out_C, "Mode C (INT8xINT8)");
