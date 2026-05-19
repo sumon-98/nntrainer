@@ -100,7 +100,7 @@ public:
   /**
    * @brief Save the weight to a file
    */
-  virtual void save_weight(const std::string &weight_path);
+  virtual void save_weight(const std::string &weight_path,  ml::train::ModelFormat format);
 
   // /**
   //  * @brief Save the weight to a file with type conversion

@@ -370,13 +370,30 @@ public:
       }
     } else {
       // @note shared weights are only be saved at the first access
+      bool lora_enabled = false;
       for (unsigned int i = 0; i < run_context.getNumWeights(); ++i) {
         if (run_context.isGradientFirstAccess(i)) {
           auto &weight = run_context.getWeight(i);
           if (dtype == TensorDim::DataType::NONE ||
-              weight.getDataType() == dtype)
-            weight.save(file);
-          else {
+              weight.getDataType() == dtype) {
+            if (weight.getName().find("lora") != std::string::npos) {
+              lora_enabled = true;
+              break;
+            }
+          }
+        }
+      }
+
+      for (unsigned int i = 0; i < run_context.getNumWeights(); ++i) {
+        if (run_context.isGradientFirstAccess(i)) {
+          auto &weight = run_context.getWeight(i);
+          if (dtype == TensorDim::DataType::NONE ||
+              weight.getDataType() == dtype) {
+            if (!lora_enabled ||
+                weight.getName().find("lora") != std::string::npos) {
+              weight.save(file);
+            }
+          } else {
             if (dtype == TensorDim::DataType::Q4_0) {
               NNTR_THROW_IF(weight.getDataType() != TensorDim::DataType::FP32,
                             std::runtime_error)

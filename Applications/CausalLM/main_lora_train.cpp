@@ -258,7 +258,7 @@
      std::cout << "\n=== Saving model weights AFTER training ===" << std::endl;
      model->exportWeightsToFile("model_weights_after_training_FULLTRAINING.txt");
 
-     model->save_weight(output_path);
+     model->save_weight(output_path,  ml::train::ModelFormat::MODEL_FORMAT_BIN);
      std::cout << "Weights saved to: " << output_path << std::endl;
  
      // Print memory profiling report (only produces output with -Denable-profile=true)

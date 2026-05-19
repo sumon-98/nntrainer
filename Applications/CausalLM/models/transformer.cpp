@@ -244,9 +244,7 @@ void Transformer::constructModel() {
     "name=embedding0", "in_dim=" + std::to_string(NUM_VOCAB),
     "weight_dtype=" + EMBEDDING_DTYPE, "out_dim=" + std::to_string(DIM),
     "scale=" + std::to_string(EMBEDDING_SCALE)};
-  if (LORA_RANK > 0) {
-    embed_params.push_back(withKey("trainable", "false"));
-  }
+  embed_params.push_back(withKey("trainable", "false"));
   layers.push_back(createLayer(embedding_type, embed_params));
 
   // create transformer layers
@@ -306,7 +304,7 @@ void Transformer::load_weight(const std::string &weight_path) {
   }
 };
 
-void Transformer::save_weight(const std::string &weight_path) {
+void Transformer::save_weight(const std::string &weight_path, ml::train::ModelFormat format) {
 
   if (!is_initialized) {
     throw std::runtime_error(
@@ -315,7 +313,7 @@ void Transformer::save_weight(const std::string &weight_path) {
   }
 
   try {
-    model->save(weight_path, ml::train::ModelFormat::MODEL_FORMAT_BIN);
+    model->save(weight_path, format);
   } catch (const std::exception &e) {
     throw std::runtime_error("Failed to save model weights: " +
                              std::string(e.what()));

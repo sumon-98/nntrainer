@@ -634,6 +634,7 @@ void NeuralNetwork::save(
   /// @todo this switch case should be delegating the function call only. It's
   /// not delegating for now as required logics are manageable for now.
   switch (format) {
+  case ml::train::ModelFormat::MODEL_FORMAT_LORA_BIN:
   case ml::train::ModelFormat::MODEL_FORMAT_BIN: {
     auto model_file = checkedOpenStream<std::ofstream>(
       file_path, std::ios::out | std::ios::binary | std::ios::trunc);
@@ -642,10 +643,24 @@ void NeuralNetwork::save(
       const auto &layer_node = *iter;
       auto it = layer_dtype_map.find(layer_node->getName());
       auto target_dtype = (it != layer_dtype_map.end()) ? it->second : dtype;
-      layer_node->save(model_file, false, exec_mode, target_dtype);
+      if(format == ml::train::ModelFormat::MODEL_FORMAT_LORA_BIN && layer_node->getType() == "fully_connected")
+      {
+        bool lora_enabled = false;
+        for(int i = 0; i < layer_node->getNumWeights(); i++) {
+          if(layer_node->getWeight(i).getName().find("lora") != std::string::npos){
+            lora_enabled = true;
+            break;
+          }
+        }
+        if(lora_enabled) {
+          layer_node->save(model_file, false, exec_mode, target_dtype);
+        }
+      }
+      else if(format != ml::train::ModelFormat::MODEL_FORMAT_LORA_BIN)
+        layer_node->save(model_file, false, exec_mode, target_dtype);
     }
 
-    if (opt && istrequal(opt->getType(), "adam")) {
+    if (opt && istrequal(opt->getType(), "adam")  && format != ml::train::ModelFormat::MODEL_FORMAT_LORA_BIN) {
       std::string adam = "adam";
       model_file.write(adam.c_str(), 4);
       for (auto iter = model_graph.cbegin(); iter != model_graph.cend();
@@ -654,7 +669,7 @@ void NeuralNetwork::save(
       }
     }
 
-    if (exec_mode == ml::train::ExecutionMode::TRAIN) {
+    if (exec_mode == ml::train::ExecutionMode::TRAIN && format != ml::train::ModelFormat::MODEL_FORMAT_LORA_BIN) {
       model_file.write((char *)&epoch_idx, sizeof(epoch_idx));
       model_file.write((char *)&iter, sizeof(iter));
     }
