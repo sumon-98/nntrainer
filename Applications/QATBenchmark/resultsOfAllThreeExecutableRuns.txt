@@ -1,0 +1,88 @@
+NOTE: THIS IS AFTER I CHANGED HIDDEN_DIM TO 256. And of course, had already changed 784 to 768. But output dimension was still 10, so trying to quantize W2 using Q4_0 lead to an error.
+
+root@4186db47585c:/nntrainerPranjal# ./build/Applications/QATBenchmark/nntrainer_qat_benchmark
+=== QAT Quantized Inference Benchmark (Modes A/B/C) ===
+Config: input=768 hidden=128 output=10 batch=64 iters=1000
+
+--- Quantization Parameters ---
+  W1: scale=0.00167645 zp=-3 range=[-0.209373, 0.218121]
+  W2: scale=0.00130187 zp=21 range=[-0.193594, 0.138382]
+
+--- Memory (weights only) ---
+  Mode A (FP32):  398336 bytes
+  Mode B (INT8):  99616 bytes — 4.00x reduction
+  Mode C (INT8):  99616 bytes — 4.00x reduction
+
+--- Latency (1000 iterations) ---
+  Mode A (FP32xFP32):   0.49 ms/iter  (total 485.85 ms)
+  Mode B (FP32xINT8):   1.65 ms/iter  (total 1652.35 ms)
+  Mode C (INT8xINT8):   25.17 ms/iter  (total 25173.89 ms)
+
+--- Accuracy vs FP32 Baseline ---
+    Mode B (FP32xINT8)  MSE=3.800362e-05  MaxErr=0.024630
+    Mode C (INT8xINT8)  MSE=3.988206e+01  MaxErr=8.643484
+
+=== Benchmark Complete ===
+root@4186db47585c:/nntrainerPranjal# ./build/Applications/QATBenchmark/nntrainer_qat_benchmark_ggml
+=== QAT Quantized Inference Benchmark (Modes D/E — GGML) ===
+Config: input=768 hidden=256 output=10 batch=64 iters=1000
+
+--- Quantizing weights ---
+  W1 -> Q6_K: 161280 bytes (was 786432 FP32, 4.9x compression)
+terminate called after throwing an instance of 'std::invalid_argument'
+  what():  Q4_0_Tensor must be 2 dimensional tensor with batch size 1 and width must be divisible by 32
+Aborted (core dumped)
+root@4186db47585c:/nntrainerPranjal# ./build/Applications/QATBenchmark/nntrainer_qat_benchmark_forced_scale
+=== Forced-Scale GGML Benchmark (Layer 1 only) ===
+Comparing: our per-tensor scale in Q6_K blocks vs GGML Q6_K
+
+--- Normal GGML Q6_K ---
+  Size: 161280 bytes
+
+--- Forced-Scale Q6_K (our per-tensor scale) ---
+  Forced global scale: d=6.36561e-05 (fp16 roundtrip=6.35982e-05), amax=0.250614
+  Size: 161280 bytes (same layout)
+
+--- Accuracy vs FP32 Baseline ---
+  GGML Q6_K (per-block)        MSE=1.857356e+00 MaxErr=5.345127
+  Forced Q6_K (per-tensor)     MSE=1.857422e+00 MaxErr=5.345127
+
+--- Latency (1000 iters, layer 1 only) ---
+  FP32 baseline:       0.21 ms/iter
+  GGML Q6_K normal:    0.08 ms/iter
+  GGML Q6_K forced:    0.08 ms/iter
+
+--- Key Insight ---
+  Forced and normal Q6_K should have SAME latency (same SIMD path).
+  But forced should have WORSE accuracy (per-tensor < per-block).
+
+=== Done ===
+
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+NOTE: THIS IS AFTER I CHANGED HIDDEN_DIM TO 256, AND CHANGED THE OUTPUT DIM TO 32 AS WELL (clearly incorrect, but this is just a POC). And of course, had already changed 784 to 768. So even W2 got successfully quantized and we were able to run Modes D and E as well.
+
+root@4186db47585c:/nntrainerPranjal# ./build/Applications/QATBenchmark/nntrainer_qat_benchmark_ggml
+=== QAT Quantized Inference Benchmark (Modes D/E — GGML) ===
+Config: input=768 hidden=256 output=32 batch=64 iters=1000
+
+--- Quantizing weights ---
+  W1 -> Q6_K: 161280 bytes (was 786432 FP32, 4.9x compression)
+  W2 -> Q4_0: 4608 bytes (was 32768 FP32, 7.1x compression)
+  W1 -> Q4_0: 110592 bytes (was 786432 FP32, 7.1x compression)
+
+--- Memory (weights only) ---
+  Mode A (FP32):       819200 bytes
+  Mode D (Q6K+Q4_0):   165888 bytes — 4.94x reduction
+  Mode E (Q4_0+Q4_0):  115200 bytes — 7.11x reduction
+
+--- Latency (1000 iterations) ---
+  Mode A (FP32, baseline): 8.37 ms/iter
+  Mode D (Q6K SIMD):       0.75 ms/iter
+  Mode E (Q4_0 SIMD):      0.59 ms/iter
+
+--- Accuracy vs FP32 Baseline ---
+    Mode D (Q6K+Q4_0 SIMD)  MSE=7.786695e-01  MaxErr=3.061755
+   Mode E (Q4_0+Q4_0 SIMD)  MSE=7.786695e-01  MaxErr=3.061755
+
+=== GGML Benchmark Complete ===

@@ -29,7 +29,6 @@ using namespace nntrainer;
 using Clock = std::chrono::high_resolution_clock;
 
 // ─── Local block_q6_K definition (matches nntr_ggml_impl_common.h) ─────────
-// We define it locally to avoid internal header dependencies.
 #define QK_K_LOCAL 256
 #pragma pack(push, 1)
 struct block_q6_K_local {
@@ -57,16 +56,26 @@ static float fp16_to_fp32(uint16_t h) {
   uint32_t sign = (h & 0x8000) << 16;
   int exp = (h >> 10) & 0x1F;
   uint32_t mant = h & 0x3FF;
-  if (exp == 0) { if (mant == 0) { float r; uint32_t z = sign; memcpy(&r, &z, 4); return r; }
-    exp = 1; while (!(mant & 0x400)) { mant <<= 1; exp--; } mant &= 0x3FF; }
-  else if (exp == 31) { uint32_t r = sign | 0x7F800000 | (mant << 13); float f; memcpy(&f, &r, 4); return f; }
+  if (exp == 0) {
+    if (mant == 0) { float r; uint32_t z = sign; memcpy(&r, &z, 4); return r; }
+    exp = 1;
+    while (!(mant & 0x400)) { mant <<= 1; exp--; }
+    mant &= 0x3FF;
+  } else if (exp == 31) {
+    uint32_t r = sign | 0x7F800000 | (mant << 13);
+    float f;
+    memcpy(&f, &r, 4);
+    return f;
+  }
   uint32_t result = sign | ((exp + 112) << 23) | (mant << 13);
-  float f; memcpy(&f, &result, 4); return f;
+  float f;
+  memcpy(&f, &result, 4);
+  return f;
 }
 
 // ─── Configuration ──────────────────────────────────────────────────────────
 static constexpr unsigned int INPUT_DIM = 768;
-static constexpr unsigned int HIDDEN_DIM = 128;
+static constexpr unsigned int HIDDEN_DIM = 256;
 static constexpr unsigned int BATCH = 64;
 static constexpr int NUM_ITERS = 1000;
 
@@ -78,7 +87,6 @@ static void fillRandom(Tensor &t, float mean, float stddev, unsigned seed) {
 }
 
 // ─── Pack 256 quantized values into Q6_K block ql/qh fields ────────────────
-// L[i] is unsigned offset value in [0, 63] (original range [-32, 31] + 32)
 static void pack_q6k_block(block_q6_K_local *block, const uint8_t *L) {
   uint8_t *ql = block->ql;
   uint8_t *qh = block->qh;
@@ -99,9 +107,6 @@ static void pack_q6k_block(block_q6_K_local *block, const uint8_t *L) {
 }
 
 // ─── Build forced-scale Q6_K tensor ─────────────────────────────────────────
-// Takes FP32 weight [INPUT_DIM x HIDDEN_DIM], transposes it (same as
-// GgmlQuantizer::quantize), then packs into Q6_K blocks with a single
-// forced global scale instead of per-block scales.
 static Tensor buildForcedQ6K(const Tensor &W_fp32) {
   unsigned int K = W_fp32.getDim().height();  // INPUT_DIM = 768
   unsigned int N = W_fp32.getDim().width();   // HIDDEN_DIM = 128
@@ -109,7 +114,7 @@ static Tensor buildForcedQ6K(const Tensor &W_fp32) {
   // Transpose (same as GgmlQuantizer does)
   Tensor W_t = W_fp32.transpose("0:2:1"); // [N x K] = [128 x 768]
   const float *src = W_t.getData<float>();
-  size_t total = K * N; // 98304
+  size_t total = K * N;
 
   // Compute global symmetric scale
   float amax = 0.0f;
@@ -117,44 +122,37 @@ static Tensor buildForcedQ6K(const Tensor &W_fp32) {
     float ax = std::abs(src[i]);
     if (ax > amax) amax = ax;
   }
-  // Q6_K values are 6-bit signed [-32, 31]. Scale maps amax -> 31.
-  // But Q6_K uses two-level scaling: d * scales[k] * quant.
-  // For forced uniform: set all scales[k] = 127, d = amax / (31 * 127)
+  // Q6_K: d * scales[k] * quant. For forced: scales[k]=127, quant range [-32,31]
   float forced_d = amax / (31.0f * 127.0f);
   if (forced_d < 1e-10f) forced_d = 1e-10f;
   uint16_t forced_d_fp16 = fp32_to_fp16(forced_d);
-  float forced_d_actual = fp16_to_fp32(forced_d_fp16); // round-tripped
+  float forced_d_actual = fp16_to_fp32(forced_d_fp16);
 
   std::cerr << "  Forced global scale: d=" << forced_d
             << " (fp16 roundtrip=" << forced_d_actual
             << "), amax=" << amax << std::endl;
 
-  // Allocate normal Q6_K tensor via Quantizer (to get correct size/layout)
-  auto quantizer = Quantizer::createQuantizer(QScheme::Q6_K);
+  // Create normal Q6_K tensor via Quantizer (to get correct size/layout)
+  auto quantizer = Quantization::createQuantizer(QScheme::Q6_K);
   Tensor q6k_tensor = quantizer->quantize(W_fp32, Tdatatype::Q6_K);
 
   // Overwrite block contents with forced scale
   uint8_t *raw = q6k_tensor.getData<uint8_t>();
   size_t block_size = sizeof(block_q6_K_local); // 210
-  size_t num_rows = N; // 128 rows in transposed weight
   size_t blocks_per_row = K / QK_K_LOCAL; // 768 / 256 = 3
 
-  for (size_t row = 0; row < num_rows; ++row) {
+  for (size_t row = 0; row < N; ++row) {
     for (size_t b = 0; b < blocks_per_row; ++b) {
       block_q6_K_local *block = reinterpret_cast<block_q6_K_local *>(
         raw + (row * blocks_per_row + b) * block_size);
 
-      // Set forced d
       block->d = forced_d_fp16;
-
-      // Set all sub-scales to 127 (max int8)
       for (int s = 0; s < 16; ++s) block->scales[s] = 127;
 
-      // Re-quantize 256 values using forced scale
       const float *x = src + row * K + b * QK_K_LOCAL;
       uint8_t L[QK_K_LOCAL];
+      float effective_scale = forced_d_actual * 127.0f;
       for (int i = 0; i < QK_K_LOCAL; ++i) {
-        float effective_scale = forced_d_actual * 127.0f; // d * scales[k]
         if (effective_scale < 1e-10f) { L[i] = 32; continue; }
         int q = static_cast<int>(std::round(x[i] / effective_scale));
         q = std::max(-32, std::min(31, q));
@@ -190,14 +188,14 @@ int main() {
   std::cerr << "Comparing: our per-tensor scale in Q6_K blocks vs GGML Q6_K\n"
             << std::endl;
 
-  Tensor W1({1, 1, INPUT_DIM, HIDDEN_DIM});
-  Tensor input({BATCH, 1, 1, INPUT_DIM});
+  Tensor W1(TensorDim(1, 1, INPUT_DIM, HIDDEN_DIM));
+  Tensor input(TensorDim(BATCH, 1, 1, INPUT_DIM));
   fillRandom(W1, 0.0f, 0.05f, 42);
   fillRandom(input, 0.0f, 1.0f, 100);
 
   // ── Normal GGML Q6_K ──
   std::cerr << "--- Normal GGML Q6_K ---" << std::endl;
-  auto quantizer = Quantizer::createQuantizer(QScheme::Q6_K);
+  auto quantizer = Quantization::createQuantizer(QScheme::Q6_K);
   Tensor W1_q6k_normal = quantizer->quantize(W1, Tdatatype::Q6_K);
   std::cerr << "  Size: " << W1_q6k_normal.bytes() << " bytes" << std::endl;
 
@@ -208,15 +206,15 @@ int main() {
             << std::endl;
 
   // ── FP32 baseline ──
-  Tensor out_fp32({BATCH, 1, 1, HIDDEN_DIM});
+  Tensor out_fp32(TensorDim(BATCH, 1, 1, HIDDEN_DIM));
   input.dot(W1, out_fp32, false, false);
 
   // ── GGML normal ──
-  Tensor out_normal({BATCH, 1, 1, HIDDEN_DIM});
+  Tensor out_normal(TensorDim(BATCH, 1, 1, HIDDEN_DIM));
   input.dot(W1_q6k_normal, out_normal, false, false);
 
   // ── GGML forced ──
-  Tensor out_forced({BATCH, 1, 1, HIDDEN_DIM});
+  Tensor out_forced(TensorDim(BATCH, 1, 1, HIDDEN_DIM));
   input.dot(W1_q6k_forced, out_forced, false, false);
 
   // ── Accuracy ──
@@ -228,30 +226,30 @@ int main() {
   std::cerr << "\n--- Latency (" << NUM_ITERS << " iters, layer 1 only) ---"
             << std::endl;
 
-  { // FP32
+  {
     auto s = Clock::now();
     for (int i = 0; i < NUM_ITERS; ++i) {
-      Tensor tmp({BATCH, 1, 1, HIDDEN_DIM});
+      Tensor tmp(TensorDim(BATCH, 1, 1, HIDDEN_DIM));
       input.dot(W1, tmp, false, false);
     }
     double ms = std::chrono::duration<double, std::milli>(Clock::now() - s).count();
     std::cerr << "  FP32 baseline:       " << std::fixed << std::setprecision(2)
               << ms / NUM_ITERS << " ms/iter" << std::endl;
   }
-  { // Normal Q6_K
+  {
     auto s = Clock::now();
     for (int i = 0; i < NUM_ITERS; ++i) {
-      Tensor tmp({BATCH, 1, 1, HIDDEN_DIM});
+      Tensor tmp(TensorDim(BATCH, 1, 1, HIDDEN_DIM));
       input.dot(W1_q6k_normal, tmp, false, false);
     }
     double ms = std::chrono::duration<double, std::milli>(Clock::now() - s).count();
     std::cerr << "  GGML Q6_K normal:    " << std::fixed << std::setprecision(2)
               << ms / NUM_ITERS << " ms/iter" << std::endl;
   }
-  { // Forced Q6_K
+  {
     auto s = Clock::now();
     for (int i = 0; i < NUM_ITERS; ++i) {
-      Tensor tmp({BATCH, 1, 1, HIDDEN_DIM});
+      Tensor tmp(TensorDim(BATCH, 1, 1, HIDDEN_DIM));
       input.dot(W1_q6k_forced, tmp, false, false);
     }
     double ms = std::chrono::duration<double, std::milli>(Clock::now() - s).count();
