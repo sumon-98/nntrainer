@@ -24,3 +24,12 @@ executable('nntrainer_qat_benchmark_forced_scale',
   install: true,
   install_dir: application_install_dir
 )
+
+# Comprehensive MNIST POC: 5-mode comparison (FP32, Q6_K, QAT, QAT+Q6_K, forced)
+executable('nntrainer_qat_mnist_poc',
+  ['qat_mnist_full_poc.cpp'],
+  dependencies: [nntrainer_dep, nntrainer_ccapi_dep, qat_layer_dep],
+  include_directories: [qat_inc],
+  install: true,
+  install_dir: application_install_dir
+)

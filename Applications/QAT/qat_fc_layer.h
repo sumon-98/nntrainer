@@ -64,6 +64,11 @@ public:
    */
   void printQATStats() const;
 
+  /** @brief Get weight running min (Mode 1 only) */
+  float getWeightRunningMin() const { return weight_running_min.getValue<float>(0); }
+  /** @brief Get weight running max (Mode 1 only) */
+  float getWeightRunningMax() const { return weight_running_max.getValue<float>(0); }
+
 private:
   // Layer properties: unit, lora_rank, lora_alpha
   float lora_scaling;
