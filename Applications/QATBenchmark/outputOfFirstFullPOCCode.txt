@@ -1,0 +1,72 @@
+[16/46] Compiling C++ object Applications/QATBenchmark/nntrainer_qat_mnist_poc.p/qat_mnist_full_poc.cpp.o
+FAILED: Applications/QATBenchmark/nntrainer_qat_mnist_poc.p/qat_mnist_full_poc.cpp.o 
+c++ -IApplications/QATBenchmark/nntrainer_qat_mnist_poc.p -IApplications/QATBenchmark -I../Applications/QATBenchmark -IApplications/QAT -I../Applications/QAT -Inntrainer -I../nntrainer -Iapi -I../api -I../api/ccapi/include -Inntrainer/compiler -I../nntrainer/compiler -Inntrainer/schema -I../nntrainer/schema -Inntrainer/dataset -I../nntrainer/dataset -Inntrainer/layers/loss -I../nntrainer/layers/loss -Inntrainer/layers -I../nntrainer/layers -Inntrainer/models -I../nntrainer/models -Inntrainer/optimizers -I../nntrainer/optimizers -Inntrainer/tensor/cpu_backend/fallback -I../nntrainer/tensor/cpu_backend/fallback -Inntrainer/tensor/cpu_backend/ggml_interface/nntr_ggml_impl -I../nntrainer/tensor/cpu_backend/ggml_interface/nntr_ggml_impl -Inntrainer/tensor/cpu_backend/ggml_interface -I../nntrainer/tensor/cpu_backend/ggml_interface -Inntrainer/tensor/cpu_backend/cblas_interface -I../nntrainer/tensor/cpu_backend/cblas_interface -Inntrainer/tensor/cpu_backend/x86 -I../nntrainer/tensor/cpu_backend/x86 -Inntrainer/tensor/cpu_backend -I../nntrainer/tensor/cpu_backend -Inntrainer/tensor -I../nntrainer/tensor -Inntrainer/utils -I../nntrainer/utils -Inntrainer/graph -I../nntrainer/graph -I/usr/include/x86_64-linux-gnu/openblas-pthread/ -I/usr/include/nnstreamer -I/usr/include/tensorflow2/ -fdiagnostics-color=always -D_FILE_OFFSET_BITS=64 -Wall -Winvalid-pch -Wnon-virtual-dtor -Werror -std=c++17 -g '-DVERSION="0.6.0"' -DVERSION_MAJOR=0 -DVERSION_MINOR=6 -DVERSION_MICRO=0 -DENABLE_TRANSFORMER=1 -march=native -mavx2 -mfma -Wredundant-decls -Wwrite-strings -Wformat -Wformat-nonliteral -Wformat-security -Winit-self -Waddress -Wvla -Wpointer-arith -Wno-error=varargs -Wno-error=ignored-attributes -Wno-error=sign-compare -ftree-vectorize -Wno-unused-variable -Wno-comment -Wno-ignored-attributes -Wno-sign-compare -Wno-maybe-uninitialized -DMIN_CPP_VERSION=201703L -DMMAP_READ=1 -DKERNEL_CACHE=0 -DUSE_MMAP=1 -DOPENCL_KERNEL_PATH=nntrainer_opencl_kernels -DML_API_COMMON=1 -DNNSTREAMER_AVAILABLE=1 -DUSE_BLAS=1 -DHGEMM_EXPERIMENTAL_KERNEL=false -DNNTR_NUM_THREADS=1 -DOMP_NUM_THREADS=6 -DDEBUG=1 -D__LOGGING__=1 -DENABLE_TEST=1 -DREDUCE_TOLERANCE=1 -DENABLE_TFLITE_BACKBONE=1 -DENABLE_TFLITE_INTERPRETER=1 '-DNNTRAINER_CONF_PATH="/usr/local/etc/nntrainer.ini"' -pthread -fopenmp -MD -MQ Applications/QATBenchmark/nntrainer_qat_mnist_poc.p/qat_mnist_full_poc.cpp.o -MF Applications/QATBenchmark/nntrainer_qat_mnist_poc.p/qat_mnist_full_poc.cpp.o.d -o Applications/QATBenchmark/nntrainer_qat_mnist_poc.p/qat_mnist_full_poc.cpp.o -c ../Applications/QATBenchmark/qat_mnist_full_poc.cpp
+../Applications/QATBenchmark/qat_mnist_full_poc.cpp: In function 'LayerWeights extractLayer(std::unique_ptr<ml::train::Model>&, const char*, unsigned int, unsigned int)':
+../Applications/QATBenchmark/qat_mnist_full_poc.cpp:152:24: error: template argument 1 is invalid
+  152 |   std::shared_ptr<Layer> layer;
+      |                        ^
+../Applications/QATBenchmark/qat_mnist_full_poc.cpp:153:35: error: cannot convert 'int*' to 'std::shared_ptr<ml::train::Layer>*'
+  153 |   int ret = model->getLayer(name, &layer);
+      |                                   ^~~~~~
+      |                                   |
+      |                                   int*
+In file included from ../Applications/QATBenchmark/qat_mnist_full_poc.cpp:29:
+../api/ccapi/include/model.h:294:66: note:   initializing argument 2 of 'virtual int ml::train::Model::getLayer(const char*, std::shared_ptr<ml::train::Layer>*)'
+  294 |   virtual int getLayer(const char *name, std::shared_ptr<Layer> *layer) = 0;
+      |                                          ~~~~~~~~~~~~~~~~~~~~~~~~^~~~~
+../Applications/QATBenchmark/qat_mnist_full_poc.cpp:161:8: error: base operand of '->' is not a pointer
+  161 |   layer->getWeights(wptrs, wdims);
+      |        ^~
+../Applications/QATBenchmark/qat_mnist_full_poc.cpp: In function 'ModelWeights trainFP32(const string&)':
+../Applications/QATBenchmark/qat_mnist_full_poc.cpp:218:50: error: cannot convert 'std::unique_ptr<ml::train::Dataset>' to 'std::shared_ptr<ml::train::Dataset>'
+  218 |   model->setDataset(DatasetModeType::MODE_TRAIN, dataset_train);
+      |                                                  ^~~~~~~~~~~~~
+      |                                                  |
+      |                                                  std::unique_ptr<ml::train::Dataset>
+In file included from ../Applications/QATBenchmark/qat_mnist_full_poc.cpp:29:
+../api/ccapi/include/model.h:225:51: note:   initializing argument 2 of 'virtual int ml::train::Model::setDataset(const ml::train::DatasetModeType&, std::shared_ptr<ml::train::Dataset>)'
+  225 |                          std::shared_ptr<Dataset> dataset) = 0;
+      |                          ~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~
+../Applications/QATBenchmark/qat_mnist_full_poc.cpp:219:50: error: cannot convert 'std::unique_ptr<ml::train::Dataset>' to 'std::shared_ptr<ml::train::Dataset>'
+  219 |   model->setDataset(DatasetModeType::MODE_VALID, dataset_val);
+      |                                                  ^~~~~~~~~~~
+      |                                                  |
+      |                                                  std::unique_ptr<ml::train::Dataset>
+In file included from ../Applications/QATBenchmark/qat_mnist_full_poc.cpp:29:
+../api/ccapi/include/model.h:225:51: note:   initializing argument 2 of 'virtual int ml::train::Model::setDataset(const ml::train::DatasetModeType&, std::shared_ptr<ml::train::Dataset>)'
+  225 |                          std::shared_ptr<Dataset> dataset) = 0;
+      |                          ~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~
+../Applications/QATBenchmark/qat_mnist_full_poc.cpp: In function 'ModelWeights trainQAT(const string&)':
+../Applications/QATBenchmark/qat_mnist_full_poc.cpp:283:50: error: cannot convert 'std::unique_ptr<ml::train::Dataset>' to 'std::shared_ptr<ml::train::Dataset>'
+  283 |   model->setDataset(DatasetModeType::MODE_TRAIN, dataset_train);
+      |                                                  ^~~~~~~~~~~~~
+      |                                                  |
+      |                                                  std::unique_ptr<ml::train::Dataset>
+In file included from ../Applications/QATBenchmark/qat_mnist_full_poc.cpp:29:
+../api/ccapi/include/model.h:225:51: note:   initializing argument 2 of 'virtual int ml::train::Model::setDataset(const ml::train::DatasetModeType&, std::shared_ptr<ml::train::Dataset>)'
+  225 |                          std::shared_ptr<Dataset> dataset) = 0;
+      |                          ~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~
+../Applications/QATBenchmark/qat_mnist_full_poc.cpp:284:50: error: cannot convert 'std::unique_ptr<ml::train::Dataset>' to 'std::shared_ptr<ml::train::Dataset>'
+  284 |   model->setDataset(DatasetModeType::MODE_VALID, dataset_val);
+      |                                                  ^~~~~~~~~~~
+      |                                                  |
+      |                                                  std::unique_ptr<ml::train::Dataset>
+In file included from ../Applications/QATBenchmark/qat_mnist_full_poc.cpp:29:
+../api/ccapi/include/model.h:225:51: note:   initializing argument 2 of 'virtual int ml::train::Model::setDataset(const ml::train::DatasetModeType&, std::shared_ptr<ml::train::Dataset>)'
+  225 |                          std::shared_ptr<Dataset> dataset) = 0;
+      |                          ~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~
+../Applications/QATBenchmark/qat_mnist_full_poc.cpp:302:26: error: template argument 1 is invalid
+  302 |     std::shared_ptr<Layer> layer;
+      |                          ^
+../Applications/QATBenchmark/qat_mnist_full_poc.cpp:303:35: error: cannot convert 'int*' to 'std::shared_ptr<ml::train::Layer>*'
+  303 |     model->getLayer(qat_names[i], &layer);
+      |                                   ^~~~~~
+      |                                   |
+      |                                   int*
+In file included from ../Applications/QATBenchmark/qat_mnist_full_poc.cpp:29:
+../api/ccapi/include/model.h:294:66: note:   initializing argument 2 of 'virtual int ml::train::Model::getLayer(const char*, std::shared_ptr<ml::train::Layer>*)'
+  294 |   virtual int getLayer(const char *name, std::shared_ptr<Layer> *layer) = 0;
+      |                                          ~~~~~~~~~~~~~~~~~~~~~~~~^~~~~
+[35/46] Compiling C++ object Applications/CausalLM/libcausallm.so.p/_nntrainerPranjal_Applications_CausalLM_models_sentence_transformer.cpp.o
+ninja: build stopped: subcommand failed.
+root@4186db47585c:/nntrainerPranjal# 
