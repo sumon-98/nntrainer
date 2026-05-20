@@ -145,7 +145,7 @@ public:
             ml::train::ExecutionMode mode, bool trainable,
             TensorDim::DataType definedWeightDataType, bool fsu = false,
             size_t start_offset = 0, bool read_from_offset = false,
-            int file_fd = -1) override;
+            int file_fd = -1, const std::string &lora_path = "") override;
 
   /**
    * @copydoc Layer::read(ReadSource src, RunLayerContext &context, bool
@@ -155,7 +155,7 @@ public:
   void read(ReadSource src, RunLayerContext &context, bool opt_var,
             ml::train::ExecutionMode mode, bool trainable,
             TensorDim::DataType definedWeightDataType, bool fsu = false,
-            size_t start_offset = 0, bool read_from_offset = false) override;
+            size_t start_offset = 0, bool read_from_offset = false, const std::string &lora_path = "") override;
 
 private:
   float divider; /**< size of the axes of the reduced */

@@ -98,6 +98,12 @@ public:
   virtual void load_weight(const std::string &weight_path);
 
   /**
+   * @brief Load the model weights along with lora weights
+   */
+  virtual void load_weight_lora(const std::string &weight_path, const std::string &lora_path);
+
+
+  /**
    * @brief Save the weight to a file
    */
   virtual void save_weight(const std::string &weight_path,  ml::train::ModelFormat format);

@@ -24,7 +24,7 @@ int main(int argc, char *argv[]) {
   if (argc < 3) {
     std::cerr << "Usage: " << argv[0]
               << " <model_dir> <train_data.txt> [--lr <float>] [--epochs <int>]"
-                 " [--output <path>] [--max_samples <int>] [--skip_weights]"
+                 " [--output <path>] [--lora_path <path>] [--max_samples <int>] [--skip_weights]"
               << std::endl;
     return 1;
   }
@@ -34,6 +34,7 @@ int main(int argc, char *argv[]) {
   float lr = 1e-4f;
   unsigned int epochs = 1;
   std::string output_path = "model_weights.bin";
+  std::string lora_path = "";  // path to LoRA weights file
   int max_samples = -1;       // -1 = use all samples
   bool skip_weights = false;  // skip loading pre-trained weights
 
@@ -45,6 +46,8 @@ int main(int argc, char *argv[]) {
       epochs = std::atoi(argv[++i]);
     } else if (arg == "--output" && i + 1 < argc) {
       output_path = argv[++i];
+    } else if (arg == "--lora_path" && i + 1 < argc) {
+      lora_path = argv[++i];
     } else if (arg == "--max_samples" && i + 1 < argc) {
       max_samples = std::atoi(argv[++i]);
     } else if (arg == "--skip_weights") {
@@ -100,7 +103,12 @@ int main(int argc, char *argv[]) {
     if (!skip_weights && nntr_cfg.contains("model_file_name")) {
       std::string weight_path = model_dir + "/" + nntr_cfg["model_file_name"].get<std::string>();
       std::cout << "Loading initial weights from: " << weight_path << std::endl;
-      model->load_weight(weight_path);
+      if (!lora_path.empty()) {
+        std::cout << "Loading LoRA weights from: " << lora_path << std::endl;
+        model->load_weight_lora(weight_path, lora_path);
+      } else {
+        model->load_weight(weight_path);
+      }
     } else {
       std::cout << "Skipping weight loading (using random initialization)." << std::endl;
     }
