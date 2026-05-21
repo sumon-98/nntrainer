@@ -274,7 +274,7 @@ static ModelWeights trainQAT(const std::string &data_file) {
   model->addLayer(createLayer("fully_connected",
                   {"name=output", "unit=10", "activation=softmax"}));
 
-  auto optimizer = createOptimizer("sgd", {"learning_rate=0.01"});
+  auto optimizer = createOptimizer("sgd", {"learning_rate=0.001"});
   model->setOptimizer(std::move(optimizer));
   model->setProperty({"epochs=" + std::to_string(EPOCHS), "loss=cross"});
 
