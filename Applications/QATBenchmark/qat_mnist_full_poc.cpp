@@ -51,7 +51,7 @@ static constexpr unsigned int BATCH_SIZE = 32;
 static constexpr unsigned int NUM_TRAIN = 100;
 static constexpr unsigned int NUM_VAL = 100;
 static constexpr unsigned int NUM_TEST = 100;
-static constexpr unsigned int EPOCHS = 5;
+static constexpr unsigned int EPOCHS = 50;
 static constexpr int BENCH_ITERS = 500;
 constexpr unsigned int SEED = 42;
 
@@ -149,7 +149,7 @@ static LayerWeights extractLayer(std::unique_ptr<Model> &model,
   lw.in_dim = in_d;
   lw.out_dim = out_d;
 
-  std::shared_ptr<Layer> layer;
+  std::shared_ptr<ml::train::Layer> layer;
   int ret = model->getLayer(name, &layer);
   if (ret != 0) {
     std::cerr << "ERROR: getLayer(" << name << ") failed" << std::endl;
@@ -187,10 +187,10 @@ static ModelWeights trainFP32(const std::string &data_file) {
   auto train_data = std::make_unique<DataInformation>(NUM_TRAIN, data_file, 0);
   auto val_data = std::make_unique<DataInformation>(NUM_VAL, data_file, NUM_TRAIN);
 
-  auto dataset_train = createDataset(DatasetType::GENERATOR, getSample_train,
-                                     train_data.get());
-  auto dataset_val = createDataset(DatasetType::GENERATOR, getSample_train,
-                                   val_data.get());
+  std::shared_ptr<ml::train::Dataset> dataset_train =
+    createDataset(DatasetType::GENERATOR, getSample_train, train_data.get());
+  std::shared_ptr<ml::train::Dataset> dataset_val =
+    createDataset(DatasetType::GENERATOR, getSample_train, val_data.get());
 
   auto model = createModel(ModelType::NEURAL_NET,
                            {"batch_size=" + std::to_string(BATCH_SIZE)});
@@ -250,10 +250,10 @@ static ModelWeights trainQAT(const std::string &data_file) {
   auto train_data = std::make_unique<DataInformation>(NUM_TRAIN, data_file, 0);
   auto val_data = std::make_unique<DataInformation>(NUM_VAL, data_file, NUM_TRAIN);
 
-  auto dataset_train = createDataset(DatasetType::GENERATOR, getSample_train,
-                                     train_data.get());
-  auto dataset_val = createDataset(DatasetType::GENERATOR, getSample_train,
-                                   val_data.get());
+  std::shared_ptr<ml::train::Dataset> dataset_train =
+    createDataset(DatasetType::GENERATOR, getSample_train, train_data.get());
+  std::shared_ptr<ml::train::Dataset> dataset_val =
+    createDataset(DatasetType::GENERATOR, getSample_train, val_data.get());
 
   auto model = createModel(ModelType::NEURAL_NET,
                            {"batch_size=" + std::to_string(BATCH_SIZE)});
@@ -299,8 +299,6 @@ static ModelWeights trainQAT(const std::string &data_file) {
   // We access the internal layer via dynamic_cast
   const char *qat_names[] = {"qfc1", "qfc2", "qfc3"};
   for (int i = 0; i < 3; ++i) {
-    std::shared_ptr<Layer> layer;
-    model->getLayer(qat_names[i], &layer);
     // The Layer wrapper doesn't expose QAT getters directly.
     // Instead, compute stats from weight min/max (same formula as QAT layer)
     float w_min = *std::min_element(mw.layers[i].weight.begin(),

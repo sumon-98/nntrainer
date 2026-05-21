@@ -1,0 +1,61 @@
+root@4186db47585c:/nntrainerPranjal# ./build/Applications/QAT/nntrainer_qat ./Applications/MNIST/res/mnist_trainingSet.dat
+=== QAT MNIST Training ===
+Batch size: 32
+Train samples: 100
+Val samples: 100
+
+=== TEST A: Built-in FC layers only ===
+[A] Data loaded from: ./Applications/MNIST/res/mnist_trainingSet.dat
+[A] Model created
+[A] Input layer added
+[A] FC1 layer added
+[A] ReLU layer added
+[A] FC2 layer added
+[A] Optimizer set
+[A] Properties set
+[A] Dataset set
+[A] Compiled OK
+[A] Initialized OK
+[A] Calling train()...
+#1/5 - Training Loss: 35.1224 >> [ Accuracy: 51.0417% - Validation Loss : 19.5866 ]
+#2/5 - Training Loss: 16.4418 >> [ Accuracy: 80.2083% - Validation Loss : 6.85555 ]
+#3/5 - Training Loss: 4.81425 >> [ Accuracy: 88.5417% - Validation Loss : 3.90067 ]
+#4/5 - Training Loss: 3.36926 >> [ Accuracy: 97.9167% - Validation Loss : 0.420035 ]
+#5/5 - Training Loss: 0.698981 >> [ Accuracy: 100% - Validation Loss : 7.4881e-07 ]
+[A] Training COMPLETED successfully!
+[A] Training Loss: 0.698981
+[A] Validation Loss: 7.4881e-07
+
+Test A result: PASS
+
+=== TEST B: Custom QAT FC layers ===
+[B] Custom layer registered
+[B] Data loaded from: ./Applications/MNIST/res/mnist_trainingSet.dat
+[B] Model created
+[B] Input layer added
+[B] QAT_FC1 layer added
+[B] ReLU layer added
+[B] QAT_FC2 layer added
+[B] Optimizer set
+[B] Properties set
+[B] Dataset set
+[B] Compiled OK
+[B] Initialized OK
+[B] Calling train()...
+#1/5 - Training Loss: 38.6189 >> [ Accuracy: 29.1667% - Validation Loss : 29.3213 ]
+#2/5 - Training Loss: 24.9473 >> [ Accuracy: 71.875% - Validation Loss : 10.0242 ]
+#3/5 - Training Loss: 8.93818 >> [ Accuracy: 85.4167% - Validation Loss : 4.23519 ]
+#4/5 - Training Loss: 2.4723 >> [ Accuracy: 92.7083% - Validation Loss : 1.34577 ]
+#5/5 - Training Loss: 1.45014 >> [ Accuracy: 97.9167% - Validation Loss : 0.529209 ]
+[B] Training COMPLETED successfully!
+[B] Training Loss: 1.45014
+[B] Validation Loss: 0.529209
+--- qat_fully_connected QAT Stats (Base Weight) ---
+Weight running min: -0.0868754, max: 0.0865139
+Weight Scale: 0.000679958, Weight ZP: 0
+--- qat_fully_connected QAT Stats (Base Weight) ---
+Weight running min: -0.210968, max: 0.212014
+Weight Scale: 0.00165875, Weight ZP: -1
+
+Test B result: PASS
+root@4186db47585c:/nntrainerPranjal# 
