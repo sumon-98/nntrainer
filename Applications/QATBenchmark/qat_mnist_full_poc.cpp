@@ -390,6 +390,13 @@ static void pack_q6k_block(block_q6_K_local *block, const uint8_t *L) {
 }
 
 // ─── Build forced-scale Q6_K from weight + QAT stats ────────────────────────
+// Q6_K dequant formula: val = d * scales[k] * (quant - 32)
+// quant range: [0, 63] → effective [-32, 31]
+// We force ALL sub-blocks to use the same global scale.
+//
+// KEY: We must keep d within FP16 normal range (>= ~6e-5).
+// Old bug: d = amax/(31*127) with scales[]=127 → d ≈ 2e-5 → FP16 subnormal!
+// Fix: d = amax/31 with scales[]=1 → d ≈ 2.7e-3 → safely in FP16 range.
 static Tensor buildForcedQ6K(const Tensor &W_fp32, float qat_min, float qat_max) {
   unsigned int K = W_fp32.getDim().height();
   unsigned int N = W_fp32.getDim().width();
@@ -398,10 +405,17 @@ static Tensor buildForcedQ6K(const Tensor &W_fp32, float qat_min, float qat_max)
 
   // Symmetric scale from QAT stats
   float amax = std::max(std::abs(qat_min), std::abs(qat_max));
-  float forced_d = amax / (31.0f * 127.0f);
+
+  // d * scales[k] * quant = weight_value
+  // With scales[k]=1, quant range [-32,31]: d = amax / 31
+  float forced_d = amax / 31.0f;
   if (forced_d < 1e-10f) forced_d = 1e-10f;
   uint16_t forced_d_fp16 = fp32_to_fp16(forced_d);
   float forced_d_actual = fp16_to_fp32(forced_d_fp16);
+
+  std::cerr << "  buildForcedQ6K: amax=" << amax
+            << " d=" << forced_d << " d_fp16=" << forced_d_actual
+            << " (scales[k]=1)" << std::endl;
 
   auto quantizer = Quantization::createQuantizer(QScheme::Q6_K);
   Tensor q6k = quantizer->quantize(W_fp32, Tdatatype::Q6_K);
@@ -415,10 +429,11 @@ static Tensor buildForcedQ6K(const Tensor &W_fp32, float qat_min, float qat_max)
       auto *block = reinterpret_cast<block_q6_K_local *>(
         raw + (row * blocks_per_row + b) * block_size);
       block->d = forced_d_fp16;
-      for (int s = 0; s < 16; ++s) block->scales[s] = 127;
+      for (int s = 0; s < 16; ++s) block->scales[s] = 1;  // was 127
       const float *x = src + row * K + b * QK_K_LOCAL;
       uint8_t L[QK_K_LOCAL];
-      float eff = forced_d_actual * 127.0f;
+      // effective_scale = d * scales[k] = forced_d_actual * 1
+      float eff = forced_d_actual;
       for (int i = 0; i < QK_K_LOCAL; ++i) {
         if (eff < 1e-10f) { L[i] = 32; continue; }
         int q = static_cast<int>(std::round(x[i] / eff));
@@ -428,6 +443,7 @@ static Tensor buildForcedQ6K(const Tensor &W_fp32, float qat_min, float qat_max)
       pack_q6k_block(block, L);
     }
   }
+
   return q6k;
 }
 

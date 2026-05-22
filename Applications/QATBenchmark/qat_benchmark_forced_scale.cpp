@@ -75,7 +75,7 @@ static float fp16_to_fp32(uint16_t h) {
 
 // ─── Configuration ──────────────────────────────────────────────────────────
 static constexpr unsigned int INPUT_DIM = 768;
-static constexpr unsigned int HIDDEN_DIM = 256;
+static constexpr unsigned int HIDDEN_DIM = 128;
 static constexpr unsigned int BATCH = 64;
 static constexpr int NUM_ITERS = 1000;
 
@@ -122,8 +122,11 @@ static Tensor buildForcedQ6K(const Tensor &W_fp32) {
     float ax = std::abs(src[i]);
     if (ax > amax) amax = ax;
   }
-  // Q6_K: d * scales[k] * quant. For forced: scales[k]=127, quant range [-32,31]
-  float forced_d = amax / (31.0f * 127.0f);
+  // Q6_K dequant: val = d * scales[k] * (quant - 32)
+  // With scales[k]=1, quant range [-32,31]: d = amax / 31
+  // KEY: d must stay in FP16 normal range (>= ~6e-5). Old formula
+  // d=amax/(31*127) would underflow to subnormal for small weights.
+  float forced_d = amax / 31.0f;
   if (forced_d < 1e-10f) forced_d = 1e-10f;
   uint16_t forced_d_fp16 = fp32_to_fp16(forced_d);
   float forced_d_actual = fp16_to_fp32(forced_d_fp16);
@@ -147,11 +150,11 @@ static Tensor buildForcedQ6K(const Tensor &W_fp32) {
         raw + (row * blocks_per_row + b) * block_size);
 
       block->d = forced_d_fp16;
-      for (int s = 0; s < 16; ++s) block->scales[s] = 127;
+      for (int s = 0; s < 16; ++s) block->scales[s] = 1;  // was 127
 
       const float *x = src + row * K + b * QK_K_LOCAL;
       uint8_t L[QK_K_LOCAL];
-      float effective_scale = forced_d_actual * 127.0f;
+      float effective_scale = forced_d_actual;  // d * scales[k] = d * 1
       for (int i = 0; i < QK_K_LOCAL; ++i) {
         if (effective_scale < 1e-10f) { L[i] = 32; continue; }
         int q = static_cast<int>(std::round(x[i] / effective_scale));
