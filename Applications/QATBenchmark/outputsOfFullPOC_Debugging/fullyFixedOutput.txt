@@ -1,0 +1,214 @@
+root@3fae36706ee3:/nntrainerPranjal# ./build/Applications/QATBenchmark/nntrainer_qat_mnist_poc ./Applications/MNIST/res/mnist_trainingSet.dat 
+=== Comprehensive MNIST Quantization POC ===
+Architecture: 768->256->256->256->10
+
+=== Phase 1: Normal FP32 Training ===
+#1/5 - Training Loss: 32.3303 >> [ Accuracy: 19.7917% - Validation Loss : 32.4561 ]
+#2/5 - Training Loss: 25.3251 >> [ Accuracy: 33.3333% - Validation Loss : 19.9834 ]
+#3/5 - Training Loss: 3.37462 >> [ Accuracy: 48.9583% - Validation Loss : 8.50883 ]
+#4/5 - Training Loss: 0.399833 >> [ Accuracy: 56.25% - Validation Loss : 7.87824 ]
+#5/5 - Training Loss: 0.0939194 >> [ Accuracy: 51.0417% - Validation Loss : 7.79605 ]
+FP32 training loss: 0.0939194
+Extracting FP32 weights...
+  Extracted fc1: W[196608] b[256]
+  Extracted fc2: W[65536] b[256]
+  Extracted fc3: W[65536] b[256]
+  Extracted output: W[2560] b[10]
+
+=== Phase 2: QAT Training ===
+#1/5 - Training Loss: 33.4243 >> [ Accuracy: 31.25% - Validation Loss : 23.7284 ]
+#2/5 - Training Loss: 13.4156 >> [ Accuracy: 51.0417% - Validation Loss : 8.98924 ]
+#3/5 - Training Loss: 1.97841 >> [ Accuracy: 54.1667% - Validation Loss : 8.38853 ]
+#4/5 - Training Loss: 0.137283 >> [ Accuracy: 57.2917% - Validation Loss : 7.92385 ]
+#5/5 - Training Loss: 0.000219306 >> [ Accuracy: 56.25% - Validation Loss : 8.03592 ]
+QAT training loss: 0.000219306
+Extracting QAT weights...
+  Extracted qfc1: W[196608] b[256]
+  Extracted qfc2: W[65536] b[256]
+  Extracted qfc3: W[65536] b[256]
+  Extracted output: W[2560] b[10]
+  qfc1 stats: min=-0.0844178 max=0.0826715 scale=0.000655252 zp=1
+  qfc2 stats: min=-0.117729 max=0.114313 scale=0.000909972 zp=1
+  qfc3 stats: min=-0.117321 max=0.112856 scale=0.000902658 zp=2
+--- qat_fully_connected QAT Stats (Base Weight) ---
+Weight running min: -0.0826094, max: 0.0810945
+Weight Scale: 0.000641976, Weight ZP: 1
+--- qat_fully_connected QAT Stats (Base Weight) ---
+Weight running min: -0.115638, max: 0.112993
+Weight Scale: 0.000896594, Weight ZP: 1
+--- qat_fully_connected QAT Stats (Base Weight) ---
+Weight running min: -0.115066, max: 0.112259
+Weight Scale: 0.000891471, Weight ZP: 1
+  buildForcedQ6K: amax=0.0844178 d=0.00272316 d_fp16=0.00272179 (scales[k]=1)
+  buildForcedQ6K: amax=0.117729 d=0.00379773 d_fp16=0.00379753 (scales[k]=1)
+  buildForcedQ6K: amax=0.117321 d=0.00378456 d_fp16=0.00378418 (scales[k]=1)
+
+=== Phase 3: Inference Benchmark ===
+
+╔══════════════════════════════════════════════════════════════════╗
+║              MNIST Quantization POC — Results                   ║
+╠══════════════════════════╦══════════╦════════════╦═══════════════╣
+║ Mode                     ║ Accuracy ║ Latency    ║ Hidden W Mem  ║
+╠══════════════════════════╬══════════╬════════════╬═══════════════╣
+║ 1. FP32 Baseline         ║ 48.0  % ║ 1.30     ms ║ 1280     KB    ║
+║ 2. Post-Train Q6_K       ║ 48.0  % ║ 0.89     ms ║ 262      KB    ║
+║ 3. QAT -> FP32           ║ 53.0  % ║ 1.30     ms ║ 1280     KB    ║
+║ 4. QAT -> Q6_K           ║ 51.0  % ║ 0.90     ms ║ 262      KB    ║
+║ 5. QAT -> Forced Q6_K    ║ 51.0  % ║ 0.86     ms ║ 262      KB    ║
+╠══════════════════════════╩══════════╩════════════╩═══════════════╣
+║ Compression: FP32=1280 KB, Q6_K=262 KB (4.9x reduction)              ║
+╚═════════════════════════════════════════════════════════════════╝
+root@3fae36706ee3:/nntrainerPranjal# ninja -C build
+ninja: Entering directory `build'
+[2/2] Linking target Applications/QATBenchmark/nntrainer_qat_mnist_poc
+root@3fae36706ee3:/nntrainerPranjal# ./build/Applications/QATBenchmark/nntrainer_qat_mnist_poc ./Applications/MNIST/res/mnist_trainingSet.dat 
+=== Comprehensive MNIST Quantization POC ===
+Architecture: 768->256->256->256->10
+
+=== Phase 1: Normal FP32 Training ===
+#1/50 - Training Loss: 32.3303 >> [ Accuracy: 19.7917% - Validation Loss : 32.4561 ]
+#2/50 - Training Loss: 25.3251 >> [ Accuracy: 33.3333% - Validation Loss : 19.9834 ]
+#3/50 - Training Loss: 3.37462 >> [ Accuracy: 48.9583% - Validation Loss : 8.50883 ]
+#4/50 - Training Loss: 0.399833 >> [ Accuracy: 56.25% - Validation Loss : 7.87824 ]
+#5/50 - Training Loss: 0.0939194 >> [ Accuracy: 51.0417% - Validation Loss : 7.79605 ]
+#6/50 - Training Loss: 0.000630882 >> [ Accuracy: 51.0417% - Validation Loss : 8.1116 ]
+#7/50 - Training Loss: 0.000386393 >> [ Accuracy: 50% - Validation Loss : 8.05434 ]
+#8/50 - Training Loss: 0.000273261 >> [ Accuracy: 51.0417% - Validation Loss : 7.97692 ]
+#9/50 - Training Loss: 0.000196004 >> [ Accuracy: 50% - Validation Loss : 7.88618 ]
+#10/50 - Training Loss: 0.000193583 >> [ Accuracy: 48.9583% - Validation Loss : 8.20038 ]
+#11/50 - Training Loss: 0.000192406 >> [ Accuracy: 48.9583% - Validation Loss : 8.38219 ]
+#12/50 - Training Loss: 0.000171823 >> [ Accuracy: 48.9583% - Validation Loss : 8.39805 ]
+#13/50 - Training Loss: 0.000156286 >> [ Accuracy: 47.9167% - Validation Loss : 8.42005 ]
+#14/50 - Training Loss: 0.000127939 >> [ Accuracy: 51.0417% - Validation Loss : 7.77922 ]
+#15/50 - Training Loss: 0.000134918 >> [ Accuracy: 50% - Validation Loss : 8.0353 ]
+#16/50 - Training Loss: 0.000125477 >> [ Accuracy: 51.0417% - Validation Loss : 8.01894 ]
+#17/50 - Training Loss: 0.000118141 >> [ Accuracy: 52.0833% - Validation Loss : 7.97225 ]
+#18/50 - Training Loss: 0.000111568 >> [ Accuracy: 50% - Validation Loss : 8.18974 ]
+#19/50 - Training Loss: 9.09916e-05 >> [ Accuracy: 50% - Validation Loss : 8.39395 ]
+#20/50 - Training Loss: 0.000101849 >> [ Accuracy: 53.125% - Validation Loss : 7.84268 ]
+#21/50 - Training Loss: 9.68624e-05 >> [ Accuracy: 52.0833% - Validation Loss : 7.84029 ]
+#22/50 - Training Loss: 9.31836e-05 >> [ Accuracy: 50% - Validation Loss : 8.31119 ]
+#23/50 - Training Loss: 8.95457e-05 >> [ Accuracy: 50% - Validation Loss : 8.09431 ]
+#24/50 - Training Loss: 8.49515e-05 >> [ Accuracy: 52.0833% - Validation Loss : 7.63466 ]
+#25/50 - Training Loss: 8.30723e-05 >> [ Accuracy: 51.0417% - Validation Loss : 8.18033 ]
+#26/50 - Training Loss: 7.98697e-05 >> [ Accuracy: 51.0417% - Validation Loss : 8.06279 ]
+#27/50 - Training Loss: 7.77473e-05 >> [ Accuracy: 50% - Validation Loss : 8.37233 ]
+#28/50 - Training Loss: 7.5353e-05 >> [ Accuracy: 50% - Validation Loss : 8.1395 ]
+#29/50 - Training Loss: 7.30955e-05 >> [ Accuracy: 50% - Validation Loss : 8.11832 ]
+#30/50 - Training Loss: 7.11022e-05 >> [ Accuracy: 53.125% - Validation Loss : 7.57281 ]
+#31/50 - Training Loss: 6.90972e-05 >> [ Accuracy: 52.0833% - Validation Loss : 7.64851 ]
+#32/50 - Training Loss: 6.50748e-05 >> [ Accuracy: 50% - Validation Loss : 8.08586 ]
+#33/50 - Training Loss: 5.34586e-05 >> [ Accuracy: 52.0833% - Validation Loss : 8.12787 ]
+#34/50 - Training Loss: 5.6889e-05 >> [ Accuracy: 51.0417% - Validation Loss : 7.94863 ]
+#35/50 - Training Loss: 6.30444e-05 >> [ Accuracy: 53.125% - Validation Loss : 7.38543 ]
+#36/50 - Training Loss: 5.56458e-05 >> [ Accuracy: 51.0417% - Validation Loss : 8.28796 ]
+#37/50 - Training Loss: 6.03686e-05 >> [ Accuracy: 52.0833% - Validation Loss : 7.69478 ]
+#38/50 - Training Loss: 5.39186e-05 >> [ Accuracy: 52.0833% - Validation Loss : 8.13146 ]
+#39/50 - Training Loss: 5.12958e-05 >> [ Accuracy: 50% - Validation Loss : 8.01702 ]
+#40/50 - Training Loss: 5.48069e-05 >> [ Accuracy: 51.0417% - Validation Loss : 8.09852 ]
+#41/50 - Training Loss: 5.56093e-05 >> [ Accuracy: 50% - Validation Loss : 8.01889 ]
+#42/50 - Training Loss: 5.45898e-05 >> [ Accuracy: 48.9583% - Validation Loss : 8.38209 ]
+#43/50 - Training Loss: 4.52972e-05 >> [ Accuracy: 50% - Validation Loss : 8.19651 ]
+#44/50 - Training Loss: 5.27622e-05 >> [ Accuracy: 52.0833% - Validation Loss : 7.89105 ]
+#45/50 - Training Loss: 4.72274e-05 >> [ Accuracy: 52.0833% - Validation Loss : 7.98158 ]
+#46/50 - Training Loss: 4.90035e-05 >> [ Accuracy: 52.0833% - Validation Loss : 8.17839 ]
+#47/50 - Training Loss: 4.5585e-05 >> [ Accuracy: 52.0833% - Validation Loss : 8.10629 ]
+#48/50 - Training Loss: 4.92879e-05 >> [ Accuracy: 52.0833% - Validation Loss : 7.83837 ]
+#49/50 - Training Loss: 4.83425e-05 >> [ Accuracy: 52.0833% - Validation Loss : 7.97734 ]
+#50/50 - Training Loss: 4.76088e-05 >> [ Accuracy: 51.0417% - Validation Loss : 8.25441 ]
+FP32 training loss: 4.76088e-05
+Extracting FP32 weights...
+  Extracted fc1: W[196608] b[256]
+  Extracted fc2: W[65536] b[256]
+  Extracted fc3: W[65536] b[256]
+  Extracted output: W[2560] b[10]
+
+=== Phase 2: QAT Training ===
+#1/50 - Training Loss: 33.4243 >> [ Accuracy: 31.25% - Validation Loss : 23.7284 ]
+#2/50 - Training Loss: 13.4156 >> [ Accuracy: 51.0417% - Validation Loss : 8.98924 ]
+#3/50 - Training Loss: 1.97841 >> [ Accuracy: 54.1667% - Validation Loss : 8.38853 ]
+#4/50 - Training Loss: 0.137283 >> [ Accuracy: 57.2917% - Validation Loss : 7.92385 ]
+#5/50 - Training Loss: 0.000219306 >> [ Accuracy: 56.25% - Validation Loss : 8.03592 ]
+#6/50 - Training Loss: 0.000112226 >> [ Accuracy: 56.25% - Validation Loss : 8.07701 ]
+#7/50 - Training Loss: 0.000124209 >> [ Accuracy: 54.1667% - Validation Loss : 8.04398 ]
+#8/50 - Training Loss: 0.000103693 >> [ Accuracy: 55.2083% - Validation Loss : 7.97706 ]
+#9/50 - Training Loss: 0.000111509 >> [ Accuracy: 55.2083% - Validation Loss : 7.88915 ]
+#10/50 - Training Loss: 0.000100039 >> [ Accuracy: 54.1667% - Validation Loss : 8.19406 ]
+#11/50 - Training Loss: 8.81855e-05 >> [ Accuracy: 53.125% - Validation Loss : 8.34264 ]
+#12/50 - Training Loss: 7.52807e-05 >> [ Accuracy: 54.1667% - Validation Loss : 8.27044 ]
+#13/50 - Training Loss: 6.06628e-05 >> [ Accuracy: 55.2083% - Validation Loss : 8.22746 ]
+#14/50 - Training Loss: 5.19712e-05 >> [ Accuracy: 55.2083% - Validation Loss : 7.73525 ]
+#15/50 - Training Loss: 4.67729e-05 >> [ Accuracy: 54.1667% - Validation Loss : 8.31923 ]
+#16/50 - Training Loss: 4.58221e-05 >> [ Accuracy: 54.1667% - Validation Loss : 8.09015 ]
+#17/50 - Training Loss: 4.20611e-05 >> [ Accuracy: 55.2083% - Validation Loss : 7.95282 ]
+#18/50 - Training Loss: 4.11507e-05 >> [ Accuracy: 58.3333% - Validation Loss : 7.54133 ]
+#19/50 - Training Loss: 3.94001e-05 >> [ Accuracy: 55.2083% - Validation Loss : 8.28024 ]
+#20/50 - Training Loss: 3.94035e-05 >> [ Accuracy: 57.2917% - Validation Loss : 7.88933 ]
+#21/50 - Training Loss: 3.82852e-05 >> [ Accuracy: 57.2917% - Validation Loss : 7.64556 ]
+#22/50 - Training Loss: 2.99234e-05 >> [ Accuracy: 55.2083% - Validation Loss : 8.38666 ]
+#23/50 - Training Loss: 3.72637e-05 >> [ Accuracy: 55.2083% - Validation Loss : 8.06196 ]
+#24/50 - Training Loss: 3.67728e-05 >> [ Accuracy: 58.3333% - Validation Loss : 7.85206 ]
+#25/50 - Training Loss: 3.54623e-05 >> [ Accuracy: 56.25% - Validation Loss : 8.04227 ]
+#26/50 - Training Loss: 3.31825e-05 >> [ Accuracy: 57.2917% - Validation Loss : 7.77048 ]
+#27/50 - Training Loss: 3.46036e-05 >> [ Accuracy: 56.25% - Validation Loss : 8.1073 ]
+#28/50 - Training Loss: 3.39594e-05 >> [ Accuracy: 57.2917% - Validation Loss : 8.05375 ]
+#29/50 - Training Loss: 3.31119e-05 >> [ Accuracy: 58.3333% - Validation Loss : 7.94329 ]
+#30/50 - Training Loss: 2.21749e-05 >> [ Accuracy: 57.2917% - Validation Loss : 7.99287 ]
+#31/50 - Training Loss: 3.14108e-05 >> [ Accuracy: 58.3333% - Validation Loss : 7.8317 ]
+#32/50 - Training Loss: 3.09181e-05 >> [ Accuracy: 57.2917% - Validation Loss : 7.66058 ]
+#33/50 - Training Loss: 2.37805e-05 >> [ Accuracy: 56.25% - Validation Loss : 8.20944 ]
+#34/50 - Training Loss: 2.96296e-05 >> [ Accuracy: 56.25% - Validation Loss : 8.06963 ]
+#35/50 - Training Loss: 2.88848e-05 >> [ Accuracy: 58.3333% - Validation Loss : 7.59214 ]
+#36/50 - Training Loss: 2.82375e-05 >> [ Accuracy: 56.25% - Validation Loss : 8.37567 ]
+#37/50 - Training Loss: 2.81952e-05 >> [ Accuracy: 57.2917% - Validation Loss : 8.05869 ]
+#38/50 - Training Loss: 2.73653e-05 >> [ Accuracy: 57.2917% - Validation Loss : 7.74108 ]
+#39/50 - Training Loss: 2.72311e-05 >> [ Accuracy: 57.2917% - Validation Loss : 8.30462 ]
+#40/50 - Training Loss: 2.68714e-05 >> [ Accuracy: 56.25% - Validation Loss : 8.28761 ]
+#41/50 - Training Loss: 2.59241e-05 >> [ Accuracy: 56.25% - Validation Loss : 8.16785 ]
+#42/50 - Training Loss: 2.55681e-05 >> [ Accuracy: 55.2083% - Validation Loss : 8.38176 ]
+#43/50 - Training Loss: 2.49718e-05 >> [ Accuracy: 56.25% - Validation Loss : 8.09273 ]
+#44/50 - Training Loss: 2.4673e-05 >> [ Accuracy: 57.2917% - Validation Loss : 7.87809 ]
+#45/50 - Training Loss: 2.41364e-05 >> [ Accuracy: 56.25% - Validation Loss : 8.34339 ]
+#46/50 - Training Loss: 2.38686e-05 >> [ Accuracy: 57.2917% - Validation Loss : 8.05891 ]
+#47/50 - Training Loss: 2.36754e-05 >> [ Accuracy: 57.2917% - Validation Loss : 8.29662 ]
+#48/50 - Training Loss: 2.32579e-05 >> [ Accuracy: 56.25% - Validation Loss : 8.23369 ]
+#49/50 - Training Loss: 2.2781e-05 >> [ Accuracy: 56.25% - Validation Loss : 8.17273 ]
+#50/50 - Training Loss: 2.20586e-05 >> [ Accuracy: 57.2917% - Validation Loss : 7.90727 ]
+QAT training loss: 2.20586e-05
+Extracting QAT weights...
+  Extracted qfc1: W[196608] b[256]
+  Extracted qfc2: W[65536] b[256]
+  Extracted qfc3: W[65536] b[256]
+  Extracted output: W[2560] b[10]
+  qfc1 stats: min=-0.0844054 max=0.0826661 scale=0.000655183 zp=1
+  qfc2 stats: min=-0.117735 max=0.11429 scale=0.000909899 zp=1
+  qfc3 stats: min=-0.117307 max=0.112862 scale=0.000902624 zp=2
+--- qat_fully_connected QAT Stats (Base Weight) ---
+Weight running min: -0.0844057, max: 0.0826664
+Weight Scale: 0.000655185, Weight ZP: 1
+--- qat_fully_connected QAT Stats (Base Weight) ---
+Weight running min: -0.117734, max: 0.11429
+Weight Scale: 0.000909901, Weight ZP: 1
+--- qat_fully_connected QAT Stats (Base Weight) ---
+Weight running min: -0.117308, max: 0.112862
+Weight Scale: 0.000902625, Weight ZP: 2
+  buildForcedQ6K: amax=0.0844054 d=0.00272276 d_fp16=0.00272179 (scales[k]=1)
+  buildForcedQ6K: amax=0.117735 d=0.00379789 d_fp16=0.00379753 (scales[k]=1)
+  buildForcedQ6K: amax=0.117307 d=0.0037841 d_fp16=0.00378227 (scales[k]=1)
+
+=== Phase 3: Inference Benchmark ===
+
+╔══════════════════════════════════════════════════════════════════╗
+║              MNIST Quantization POC — Results                   ║
+╠══════════════════════════╦══════════╦════════════╦═══════════════╣
+║ Mode                     ║ Accuracy ║ Latency    ║ Hidden W Mem  ║
+╠══════════════════════════╬══════════╬════════════╬═══════════════╣
+║ 1. FP32 Baseline         ║ 48.0  % ║ 1.18     ms ║ 1280     KB    ║
+║ 2. Post-Train Q6_K       ║ 47.0  % ║ 0.87     ms ║ 262      KB    ║
+║ 3. QAT -> FP32           ║ 53.0  % ║ 1.11     ms ║ 1280     KB    ║
+║ 4. QAT -> Q6_K           ║ 53.0  % ║ 0.87     ms ║ 262      KB    ║
+║ 5. QAT -> Forced Q6_K    ║ 52.0  % ║ 0.85     ms ║ 262      KB    ║
+╠══════════════════════════╩══════════╩════════════╩═══════════════╣
+║ Compression: FP32=1280 KB, Q6_K=262 KB (4.9x reduction)              ║
+╚═════════════════════════════════════════════════════════════════╝
+root@3fae36706ee3:/nntrainerPranjal# 
