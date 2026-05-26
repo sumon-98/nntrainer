@@ -1,0 +1,83 @@
+[Pranjal Thapliyal] 04-29-2026 16:00
+With MNIST, the stats are like this:
+
+Normal training (with FC layers):
+
+#1/5 - Training Loss: 35.1224 >> [ Accuracy: 51.0417% - Validation Loss : 19.5866 ]             
+#2/5 - Training Loss: 16.4418 >> [ Accuracy: 80.2083% - Validation Loss : 6.85555 ]                  
+#3/5 - Training Loss: 4.81425 >> [ Accuracy: 88.5417% - Validation Loss : 3.90067 ]        
+#4/5 - Training Loss: 3.36926 >> [ Accuracy: 97.9167% - Validation Loss : 0.420035 ]       
+#5/5 - Training Loss: 0.698981 >> [ Accuracy: 100% - Validation Loss : 7.4881e-07 ]  
+
+Training Loss: 0.698981                                   
+Validation Loss: 7.4881e-07  
+
+With QAT (using QAT FC layers):
+
+#1/5 - Training Loss: 38.6253 >> [ Accuracy: 29.1667% - Validation Loss : 29.2807 ]  
+#2/5 - Training Loss: 24.8015 >> [ Accuracy: 72.9167% - Validation Loss : 9.94372 ]
+#3/5 - Training Loss: 8.9516 >> [ Accuracy: 85.4167% - Validation Loss : 4.24665 ]
+#4/5 - Training Loss: 2.24486 >> [ Accuracy: 93.75% - Validation Loss : 1.23918 ]   
+#5/5 - Training Loss: 1.40401 >> [ Accuracy: 96.875% - Validation Loss : 0.656728 ]
+
+Training Loss: 1.40401
+Validation Loss: 0.656728
+
+[Pranjal Thapliyal] 04-29-2026 16:02
+Ran both for 5 epochs each, 100 images each for training data and validation data. Optimizer used was adam and learning rate was 0.001 for both.
+
+[Pranjal Thapliyal] 04-29-2026 16:03
+And model used is a simple 2 layer FC model
+
+[Prateek Keserwani] 04-29-2026 16:06
+how much bit quantization is used in above trainng ?
+
+[Prateek Keserwani] 04-29-2026 16:06
+W8A32?
+
+[Pranjal Thapliyal] 04-29-2026 16:09
+W8A8, i quantized both
+
+[Prateek Keserwani] 04-29-2026 16:09
+okay got it
+
+[Pranjal Thapliyal] 04-29-2026 16:09
+q_min_act(0.0f),
+  q_max_act(255.0f),
+  q_min_weight(-128.0f),
+  q_max_weight(127.0f),
+
+[Prateek Keserwani] 04-29-2026 16:09
+one symmetric and one assymetric ?
+
+[Pranjal Thapliyal] 04-29-2026 16:11
+i think since it is -128 and not -127, it should also be called assymetric only, but not much difference will be there. Also i am not forcing the zero point to be zero only
+
+[Pranjal Thapliyal] 04-29-2026 16:11
+so should be assymetric only for both
+
+
+EXTRA PART ADDED LATER:
+Using only weights quantization (and activation not quantized), the stats are as follows:
+
+Normal training (with FC layers):
+
+#1/5 - Training Loss: 35.1224 >> [ Accuracy: 51.0417% - Validation Loss : 19.5866 ]                                                                                                                                                                      
+#2/5 - Training Loss: 16.4418 >> [ Accuracy: 80.2083% - Validation Loss : 6.85555 ]                                                                                                                                                                      
+#3/5 - Training Loss: 4.81425 >> [ Accuracy: 88.5417% - Validation Loss : 3.90067 ]                                                                                                                                                                      
+#4/5 - Training Loss: 3.36926 >> [ Accuracy: 97.9167% - Validation Loss : 0.420035 ]                                                                                                                                                                     
+#5/5 - Training Loss: 0.698981 >> [ Accuracy: 100% - Validation Loss : 7.4881e-07 ]  
+                                                                                                                                                                                                                   
+Training Loss: 0.698981                                                                                                                                                                                                                              
+Validation Loss: 7.4881e-07   
+
+With QAT (using QAT FC layers):
+
+#1/5 - Training Loss: 38.6189 >> [ Accuracy: 29.1667% - Validation Loss : 29.3213 ]
+#2/5 - Training Loss: 24.9473 >> [ Accuracy: 71.875% - Validation Loss : 10.0242 ]
+#3/5 - Training Loss: 8.93818 >> [ Accuracy: 85.4167% - Validation Loss : 4.23519 ]
+#4/5 - Training Loss: 2.4723 >> [ Accuracy: 92.7083% - Validation Loss : 1.34577 ]
+#5/5 - Training Loss: 1.45014 >> [ Accuracy: 97.9167% - Validation Loss : 0.529209 ]
+
+Training Loss: 1.45014
+Validation Loss: 0.529209

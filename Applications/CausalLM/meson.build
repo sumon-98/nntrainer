@@ -115,3 +115,9 @@ test_api = executable('test_api',
     build_by_default: true,
     install: false,
 )
+
+e_qwen3_quant_infer = executable('nntr_qwen3_quant_infer',
+    ['qwen3_quantized_inference.cpp'],
+    include_directories: causallm_inc,
+    dependencies: [nntrainer_dep, nntrainer_ccapi_dep, causallm_layer_dependencies, causallm_dep],
+)
