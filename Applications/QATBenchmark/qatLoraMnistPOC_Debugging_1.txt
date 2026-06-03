@@ -1,0 +1,233 @@
+ ninja -C build
+ninja: Entering directory `build'
+[0/1] Regenerating build files.
+The Meson build system
+Version: 0.61.2
+Source dir: /nntrainerPranjal
+Build dir: /nntrainerPranjal/build
+Build type: native build
+Project name: nntrainer
+Project version: 0.6.0
+C compiler for the host machine: cc (gcc 11.4.0 "cc (Ubuntu 11.4.0-1ubuntu1~22.04.3) 11.4.0")
+C linker for the host machine: cc ld.bfd 2.38
+C++ compiler for the host machine: c++ (gcc 11.4.0 "c++ (Ubuntu 11.4.0-1ubuntu1~22.04.3) 11.4.0")
+C++ linker for the host machine: c++ ld.bfd 2.38
+Host machine cpu family: x86_64
+Host machine cpu: x86_64
+Program powershell found: NO
+Program nproc found: YES (/usr/bin/nproc)
+Program cmd.exe found: NO
+Message: Build for X86 architecture
+Message: -march=native added for AVX hardware acceleration.
+Message: MMAP enabled
+Message: OpenCL kernel path set to: nntrainer_opencl_kernels
+Compiler for C supports arguments -Wredundant-decls: YES (cached)
+Compiler for C++ supports arguments -Wredundant-decls: YES (cached)
+Compiler for C supports arguments -Wwrite-strings: YES (cached)
+Compiler for C++ supports arguments -Wwrite-strings: YES (cached)
+Compiler for C supports arguments -Wformat: YES (cached)
+Compiler for C++ supports arguments -Wformat: YES (cached)
+Compiler for C supports arguments -Wformat-nonliteral: YES (cached)
+Compiler for C++ supports arguments -Wformat-nonliteral: YES (cached)
+Compiler for C supports arguments -Wformat-security: YES (cached)
+Compiler for C++ supports arguments -Wformat-security: YES (cached)
+Compiler for C supports arguments -Winit-self: YES (cached)
+Compiler for C++ supports arguments -Winit-self: YES (cached)
+Compiler for C supports arguments -Waddress: YES (cached)
+Compiler for C++ supports arguments -Waddress: YES (cached)
+Compiler for C supports arguments -Wvla: YES (cached)
+Compiler for C++ supports arguments -Wvla: YES (cached)
+Compiler for C supports arguments -Wpointer-arith: YES (cached)
+Compiler for C++ supports arguments -Wpointer-arith: YES (cached)
+Compiler for C supports arguments -Wno-error=varargs: YES (cached)
+Compiler for C++ supports arguments -Wno-error=varargs: YES (cached)
+Compiler for C supports arguments -Wno-error=ignored-attributes: YES (cached)
+Compiler for C++ supports arguments -Wno-error=ignored-attributes: YES (cached)
+Compiler for C supports arguments -Wno-error=sign-compare: YES (cached)
+Compiler for C++ supports arguments -Wno-error=sign-compare: YES (cached)
+Compiler for C supports arguments -Wdefaulted-function-deleted: NO (cached)
+Compiler for C++ supports arguments -Wdefaulted-function-deleted: NO (cached)
+Compiler for C supports arguments -ftree-vectorize: YES (cached)
+Compiler for C++ supports arguments -ftree-vectorize: YES (cached)
+Compiler for C supports arguments -Wno-unused-variable: YES (cached)
+Compiler for C++ supports arguments -Wno-unused-variable: YES (cached)
+Compiler for C supports arguments -Wno-comment: YES (cached)
+Compiler for C++ supports arguments -Wno-comment: YES (cached)
+Compiler for C supports arguments -Wno-ignored-attributes: YES (cached)
+Compiler for C++ supports arguments -Wno-ignored-attributes: YES (cached)
+Compiler for C supports arguments -Wno-sign-compare: YES (cached)
+Compiler for C++ supports arguments -Wno-sign-compare: YES (cached)
+Compiler for C supports arguments -Wno-maybe-uninitialized: YES (cached)
+Compiler for C++ supports arguments -Wno-maybe-uninitialized: YES (cached)
+Compiler for C supports arguments -Wmissing-declarations: YES (cached)
+Compiler for C supports arguments -Wmissing-include-dirs: YES (cached)
+Compiler for C supports arguments -Wmissing-prototypes: YES (cached)
+Compiler for C supports arguments -Wnested-externs: YES (cached)
+Compiler for C supports arguments -Waggregate-return: YES (cached)
+Compiler for C supports arguments -Wold-style-definition: YES (cached)
+Compiler for C supports arguments -Wdeclaration-after-statement: YES (cached)
+Compiler for C supports arguments -Wno-error=varargs: YES (cached)
+Dependency capi-ml-common found: YES 1.8.8 (cached)
+Dependency capi-ml-inference found: YES 1.8.8 (cached)
+Dependency openblas found: YES 0.3.20 (cached)
+Message: OpenBLAS dependency found in system
+Message: set nntrainer num threads=1
+Dependency openmp found: YES 4.5 (cached)
+Message: set nntrainer omp threads=6
+Dependency gmock found: YES unknown (cached)
+Dependency gtest found: YES 1.11.0 (cached)
+Dependency gtest found: YES 1.11.0 (cached)
+Library m found: YES
+Library dl found: YES
+Dependency threads found: YES unknown (cached)
+Dependency iniparser found: YES 3.2 (cached)
+Dependency tensorflow2-lite found: YES 2.15.0 (cached)
+Found pkg-config: /usr/bin/pkg-config (0.29.2)
+Found CMake: /usr/bin/cmake (3.22.1)
+Run-time dependency opencv found: NO (tried pkgconfig and cmake)
+Run-time dependency opencv4 found: NO (tried pkgconfig and cmake)
+Run-time dependency opencv3 found: NO (tried pkgconfig and cmake)
+Program flatc found: YES (/usr/bin/flatc)
+Configuring nntrainer.pc using configuration
+Configuring nntrainer.ini using configuration
+../meson.build:733: WARNING: The variable(s) 'FLASH_STORAGE_UTILIZATION_LOOKAHEAD' in the input file 'nntrainer.ini.in' are not present in the given configuration data.
+Message: NNTRAINER_CONF_PATH=/usr/local/etc/nntrainer.ini
+Message: extra defines are:-DMIN_CPP_VERSION=201703L -DMMAP_READ=1 -DKERNEL_CACHE=0 -DUSE_MMAP=1 -DOPENCL_KERNEL_PATH=nntrainer_opencl_kernels -DML_API_COMMON=1 -DNNSTREAMER_AVAILABLE=1 -DUSE_BLAS=1 -DHGEMM_EXPERIMENTAL_KERNEL=false -DNNTR_NUM_THREADS=1 -DOMP_NUM_THREADS=6 -DDEBUG=1 -D__LOGGING__=1 -DENABLE_TEST=1 -DREDUCE_TOLERANCE=1 -DENABLE_TFLITE_BACKBONE=1 -DENABLE_TFLITE_INTERPRETER=1 -DNNTRAINER_CONF_PATH="/usr/local/etc/nntrainer.ini"
+Message: arm_arch_opt : none
+Configuring ccapi-ml-training.pc using configuration
+Configuring capi-ml-training.pc using configuration
+Run-time dependency nnstreamer-test-devel found: NO (tried pkgconfig and cmake)
+Dependency jsoncpp found: YES 1.9.5 (cached)
+Dependency libcurl found: YES 7.81.0 (cached)
+Dependency openmp found: YES 4.5 (cached)
+../meson.build:789: WARNING: android nnstreamer-filter and nnstreamer-trainer are not yet supported, building them is skipped
+Build targets in project: 113
+NOTICE: Future-deprecated features used:
+ * 0.56.0: {'meson.build_root', 'meson.source_root'}
+
+nntrainer 0.6.0
+
+  User defined options
+    backend           : ninja
+    buildtype         : debug
+    enable-debug      : true
+    enable-transformer: true
+
+Found ninja-1.10.1 at /usr/bin/ninja
+Cleaning... 0 files.
+[1/46] Compiling C++ object Applications/QATBenchmark/nntrainer_qat_lora_mnist_poc.p/qat_lora_mnist_poc.cpp.o
+FAILED: Applications/QATBenchmark/nntrainer_qat_lora_mnist_poc.p/qat_lora_mnist_poc.cpp.o 
+c++ -IApplications/QATBenchmark/nntrainer_qat_lora_mnist_poc.p -IApplications/QATBenchmark -I../Applications/QATBenchmark -IApplications/QAT -I../Applications/QAT -Inntrainer -I../nntrainer -Iapi -I../api -I../api/ccapi/include -Inntrainer/compiler -I../nntrainer/compiler -Inntrainer/schema -I../nntrainer/schema -Inntrainer/dataset -I../nntrainer/dataset -Inntrainer/layers/loss -I../nntrainer/layers/loss -Inntrainer/layers -I../nntrainer/layers -Inntrainer/models -I../nntrainer/models -Inntrainer/optimizers -I../nntrainer/optimizers -Inntrainer/tensor/cpu_backend/fallback -I../nntrainer/tensor/cpu_backend/fallback -Inntrainer/tensor/cpu_backend/ggml_interface/nntr_ggml_impl -I../nntrainer/tensor/cpu_backend/ggml_interface/nntr_ggml_impl -Inntrainer/tensor/cpu_backend/ggml_interface -I../nntrainer/tensor/cpu_backend/ggml_interface -Inntrainer/tensor/cpu_backend/cblas_interface -I../nntrainer/tensor/cpu_backend/cblas_interface -Inntrainer/tensor/cpu_backend/x86 -I../nntrainer/tensor/cpu_backend/x86 -Inntrainer/tensor/cpu_backend -I../nntrainer/tensor/cpu_backend -Inntrainer/tensor -I../nntrainer/tensor -Inntrainer/utils -I../nntrainer/utils -Inntrainer/graph -I../nntrainer/graph -I/usr/include/x86_64-linux-gnu/openblas-pthread/ -I/usr/include/nnstreamer -I/usr/include/tensorflow2/ -fdiagnostics-color=always -D_FILE_OFFSET_BITS=64 -Wall -Winvalid-pch -Wnon-virtual-dtor -Werror -std=c++17 -g '-DVERSION="0.6.0"' -DVERSION_MAJOR=0 -DVERSION_MINOR=6 -DVERSION_MICRO=0 -DENABLE_TRANSFORMER=1 -march=native -mavx2 -mfma -Wredundant-decls -Wwrite-strings -Wformat -Wformat-nonliteral -Wformat-security -Winit-self -Waddress -Wvla -Wpointer-arith -Wno-error=varargs -Wno-error=ignored-attributes -Wno-error=sign-compare -ftree-vectorize -Wno-unused-variable -Wno-comment -Wno-ignored-attributes -Wno-sign-compare -Wno-maybe-uninitialized -DMIN_CPP_VERSION=201703L -DMMAP_READ=1 -DKERNEL_CACHE=0 -DUSE_MMAP=1 -DOPENCL_KERNEL_PATH=nntrainer_opencl_kernels -DML_API_COMMON=1 -DNNSTREAMER_AVAILABLE=1 -DUSE_BLAS=1 -DHGEMM_EXPERIMENTAL_KERNEL=false -DNNTR_NUM_THREADS=1 -DOMP_NUM_THREADS=6 -DDEBUG=1 -D__LOGGING__=1 -DENABLE_TEST=1 -DREDUCE_TOLERANCE=1 -DENABLE_TFLITE_BACKBONE=1 -DENABLE_TFLITE_INTERPRETER=1 '-DNNTRAINER_CONF_PATH="/usr/local/etc/nntrainer.ini"' -pthread -fopenmp -MD -MQ Applications/QATBenchmark/nntrainer_qat_lora_mnist_poc.p/qat_lora_mnist_poc.cpp.o -MF Applications/QATBenchmark/nntrainer_qat_lora_mnist_poc.p/qat_lora_mnist_poc.cpp.o.d -o Applications/QATBenchmark/nntrainer_qat_lora_mnist_poc.p/qat_lora_mnist_poc.cpp.o -c ../Applications/QATBenchmark/qat_lora_mnist_poc.cpp
+../Applications/QATBenchmark/qat_lora_mnist_poc.cpp:18:10: fatal error: nntrainer_engine.h: No such file or directory
+   18 | #include <nntrainer_engine.h>
+      |          ^~~~~~~~~~~~~~~~~~~~
+compilation terminated.
+[36/46] Compiling C++ object Applications/CausalLM/libcausallm.so.p/_nntrainerPranjal_Applications_CausalLM_models_sentence_transformer.cpp.o
+ninja: build stopped: subcommand failed.
+root@e1cd52067346:/nntrainerPranjal# ninja -C build
+ninja: Entering directory `build'
+[2/11] Compiling C++ object Applications/QATBenchmark/nntrainer_qat_lora_mnist_poc.p/qat_lora_mnist_poc.cpp.o
+FAILED: Applications/QATBenchmark/nntrainer_qat_lora_mnist_poc.p/qat_lora_mnist_poc.cpp.o 
+c++ -IApplications/QATBenchmark/nntrainer_qat_lora_mnist_poc.p -IApplications/QATBenchmark -I../Applications/QATBenchmark -IApplications/QAT -I../Applications/QAT -Inntrainer -I../nntrainer -Iapi -I../api -I../api/ccapi/include -Inntrainer/compiler -I../nntrainer/compiler -Inntrainer/schema -I../nntrainer/schema -Inntrainer/dataset -I../nntrainer/dataset -Inntrainer/layers/loss -I../nntrainer/layers/loss -Inntrainer/layers -I../nntrainer/layers -Inntrainer/models -I../nntrainer/models -Inntrainer/optimizers -I../nntrainer/optimizers -Inntrainer/tensor/cpu_backend/fallback -I../nntrainer/tensor/cpu_backend/fallback -Inntrainer/tensor/cpu_backend/ggml_interface/nntr_ggml_impl -I../nntrainer/tensor/cpu_backend/ggml_interface/nntr_ggml_impl -Inntrainer/tensor/cpu_backend/ggml_interface -I../nntrainer/tensor/cpu_backend/ggml_interface -Inntrainer/tensor/cpu_backend/cblas_interface -I../nntrainer/tensor/cpu_backend/cblas_interface -Inntrainer/tensor/cpu_backend/x86 -I../nntrainer/tensor/cpu_backend/x86 -Inntrainer/tensor/cpu_backend -I../nntrainer/tensor/cpu_backend -Inntrainer/tensor -I../nntrainer/tensor -Inntrainer/utils -I../nntrainer/utils -Inntrainer/graph -I../nntrainer/graph -I/usr/include/x86_64-linux-gnu/openblas-pthread/ -I/usr/include/nnstreamer -I/usr/include/tensorflow2/ -fdiagnostics-color=always -D_FILE_OFFSET_BITS=64 -Wall -Winvalid-pch -Wnon-virtual-dtor -Werror -std=c++17 -g '-DVERSION="0.6.0"' -DVERSION_MAJOR=0 -DVERSION_MINOR=6 -DVERSION_MICRO=0 -DENABLE_TRANSFORMER=1 -march=native -mavx2 -mfma -Wredundant-decls -Wwrite-strings -Wformat -Wformat-nonliteral -Wformat-security -Winit-self -Waddress -Wvla -Wpointer-arith -Wno-error=varargs -Wno-error=ignored-attributes -Wno-error=sign-compare -ftree-vectorize -Wno-unused-variable -Wno-comment -Wno-ignored-attributes -Wno-sign-compare -Wno-maybe-uninitialized -DMIN_CPP_VERSION=201703L -DMMAP_READ=1 -DKERNEL_CACHE=0 -DUSE_MMAP=1 -DOPENCL_KERNEL_PATH=nntrainer_opencl_kernels -DML_API_COMMON=1 -DNNSTREAMER_AVAILABLE=1 -DUSE_BLAS=1 -DHGEMM_EXPERIMENTAL_KERNEL=false -DNNTR_NUM_THREADS=1 -DOMP_NUM_THREADS=6 -DDEBUG=1 -D__LOGGING__=1 -DENABLE_TEST=1 -DREDUCE_TOLERANCE=1 -DENABLE_TFLITE_BACKBONE=1 -DENABLE_TFLITE_INTERPRETER=1 '-DNNTRAINER_CONF_PATH="/usr/local/etc/nntrainer.ini"' -pthread -fopenmp -MD -MQ Applications/QATBenchmark/nntrainer_qat_lora_mnist_poc.p/qat_lora_mnist_poc.cpp.o -MF Applications/QATBenchmark/nntrainer_qat_lora_mnist_poc.p/qat_lora_mnist_poc.cpp.o.d -o Applications/QATBenchmark/nntrainer_qat_lora_mnist_poc.p/qat_lora_mnist_poc.cpp.o -c ../Applications/QATBenchmark/qat_lora_mnist_poc.cpp
+../Applications/QATBenchmark/qat_lora_mnist_poc.cpp: In function 'ExtractedWeights extractWeights(std::shared_ptr<ml::train::Model>, const string&)':
+../Applications/QATBenchmark/qat_lora_mnist_poc.cpp:111:23: error: cannot convert 'const string' {aka 'const std::__cxx11::basic_string<char>'} to 'const char*'
+  111 |   if (model->getLayer(name, &layer) != 0) {
+      |                       ^~~~
+      |                       |
+      |                       const string {aka const std::__cxx11::basic_string<char>}
+In file included from ../Applications/QATBenchmark/qat_lora_mnist_poc.cpp:17:
+../api/ccapi/include/model.h:294:36: note:   initializing argument 1 of 'virtual int ml::train::Model::getLayer(const char*, std::shared_ptr<ml::train::Layer>*)'
+  294 |   virtual int getLayer(const char *name, std::shared_ptr<Layer> *layer) = 0;
+      |                        ~~~~~~~~~~~~^~~~
+../Applications/QATBenchmark/qat_lora_mnist_poc.cpp: In function 'std::vector<ExtractedWeights> trainFP32(const string&)':
+../Applications/QATBenchmark/qat_lora_mnist_poc.cpp:172:31: error: could not convert 'model' from 'std::unique_ptr<ml::train::Model>' to 'std::shared_ptr<ml::train::Model>'
+  172 |   mw.push_back(extractWeights(model, "fc1"));
+      |                               ^~~~~
+      |                               |
+      |                               std::unique_ptr<ml::train::Model>
+../Applications/QATBenchmark/qat_lora_mnist_poc.cpp:173:31: error: could not convert 'model' from 'std::unique_ptr<ml::train::Model>' to 'std::shared_ptr<ml::train::Model>'
+  173 |   mw.push_back(extractWeights(model, "fc2"));
+      |                               ^~~~~
+      |                               |
+      |                               std::unique_ptr<ml::train::Model>
+../Applications/QATBenchmark/qat_lora_mnist_poc.cpp:174:31: error: could not convert 'model' from 'std::unique_ptr<ml::train::Model>' to 'std::shared_ptr<ml::train::Model>'
+  174 |   mw.push_back(extractWeights(model, "fc3"));
+      |                               ^~~~~
+      |                               |
+      |                               std::unique_ptr<ml::train::Model>
+../Applications/QATBenchmark/qat_lora_mnist_poc.cpp:175:31: error: could not convert 'model' from 'std::unique_ptr<ml::train::Model>' to 'std::shared_ptr<ml::train::Model>'
+  175 |   mw.push_back(extractWeights(model, "output"));
+      |                               ^~~~~
+      |                               |
+      |                               std::unique_ptr<ml::train::Model>
+../Applications/QATBenchmark/qat_lora_mnist_poc.cpp: In function 'int main(int, char**)':
+../Applications/QATBenchmark/qat_lora_mnist_poc.cpp:191:32: error: 'nntrainer::Engine' has not been declared
+  191 |   auto &ct_engine = nntrainer::Engine::Global();
+      |                                ^~~~~~
+../Applications/QATBenchmark/qat_lora_mnist_poc.cpp:192:45: error: 'AppContext' in namespace 'nntrainer' does not name a type
+  192 |   auto app_context = static_cast<nntrainer::AppContext *>(
+      |                                             ^~~~~~~~~~
+../Applications/QATBenchmark/qat_lora_mnist_poc.cpp:192:56: error: expected '>' before '*' token
+  192 |   auto app_context = static_cast<nntrainer::AppContext *>(
+      |                                                        ^
+../Applications/QATBenchmark/qat_lora_mnist_poc.cpp:192:56: error: expected '(' before '*' token
+  192 |   auto app_context = static_cast<nntrainer::AppContext *>(
+      |                                                        ^
+      |                                                        (
+../Applications/QATBenchmark/qat_lora_mnist_poc.cpp:192:57: error: expected primary-expression before '>' token
+  192 |   auto app_context = static_cast<nntrainer::AppContext *>(
+      |                                                         ^
+../Applications/QATBenchmark/qat_lora_mnist_poc.cpp:193:43: error: expected ')' before ';' token
+  193 |     ct_engine.getRegisteredContext("cpu"));
+      |                                           ^
+      |                                           )
+../Applications/QATBenchmark/qat_lora_mnist_poc.cpp:210:67: error: cannot convert 'float*' to 'const nntrainer::Tensor&'
+  210 |   Tensor w1_fp32(dim_w1); w1_fp32.copy(fp32_weights[0].weight.data());
+      |                                        ~~~~~~~~~~~~~~~~~~~~~~~~~~~^~
+      |                                                                   |
+      |                                                                   float*
+In file included from ../Applications/QATBenchmark/qat_lora_mnist_poc.cpp:21:
+../nntrainer/tensor/tensor.h:1567:27: note:   initializing argument 1 of 'void nntrainer::Tensor::copy(const nntrainer::Tensor&)'
+ 1567 |   void copy(const Tensor &from);
+      |             ~~~~~~~~~~~~~~^~~~
+../Applications/QATBenchmark/qat_lora_mnist_poc.cpp:211:67: error: cannot convert 'float*' to 'const nntrainer::Tensor&'
+  211 |   Tensor w2_fp32(dim_w2); w2_fp32.copy(fp32_weights[1].weight.data());
+      |                                        ~~~~~~~~~~~~~~~~~~~~~~~~~~~^~
+      |                                                                   |
+      |                                                                   float*
+In file included from ../Applications/QATBenchmark/qat_lora_mnist_poc.cpp:21:
+../nntrainer/tensor/tensor.h:1567:27: note:   initializing argument 1 of 'void nntrainer::Tensor::copy(const nntrainer::Tensor&)'
+ 1567 |   void copy(const Tensor &from);
+      |             ~~~~~~~~~~~~~~^~~~
+../Applications/QATBenchmark/qat_lora_mnist_poc.cpp:212:67: error: cannot convert 'float*' to 'const nntrainer::Tensor&'
+  212 |   Tensor w3_fp32(dim_w3); w3_fp32.copy(fp32_weights[2].weight.data());
+      |                                        ~~~~~~~~~~~~~~~~~~~~~~~~~~~^~
+      |                                                                   |
+      |                                                                   float*
+In file included from ../Applications/QATBenchmark/qat_lora_mnist_poc.cpp:21:
+../nntrainer/tensor/tensor.h:1567:27: note:   initializing argument 1 of 'void nntrainer::Tensor::copy(const nntrainer::Tensor&)'
+ 1567 |   void copy(const Tensor &from);
+      |             ~~~~~~~~~~~~~~^~~~
+../Applications/QATBenchmark/qat_lora_mnist_poc.cpp: In lambda function:
+../Applications/QATBenchmark/qat_lora_mnist_poc.cpp:264:26: error: cannot convert 'const string' {aka 'const std::__cxx11::basic_string<char>'} to 'const char*'
+  264 |     lora_model->getLayer(name, &layer);
+      |                          ^~~~
+      |                          |
+      |                          const string {aka const std::__cxx11::basic_string<char>}
+In file included from ../Applications/QATBenchmark/qat_lora_mnist_poc.cpp:17:
+../api/ccapi/include/model.h:294:36: note:   initializing argument 1 of 'virtual int ml::train::Model::getLayer(const char*, std::shared_ptr<ml::train::Layer>*)'
+  294 |   virtual int getLayer(const char *name, std::shared_ptr<Layer> *layer) = 0;
+      |                        ~~~~~~~~~~~~^~~~
+../Applications/QATBenchmark/qat_lora_mnist_poc.cpp: In lambda function:
+../Applications/QATBenchmark/qat_lora_mnist_poc.cpp:281:26: error: cannot convert 'const string' {aka 'const std::__cxx11::basic_string<char>'} to 'const char*'
+  281 |     lora_model->getLayer(name, &layer);
+      |                          ^~~~
+      |                          |
+      |                          const string {aka const std::__cxx11::basic_string<char>}
+In file included from ../Applications/QATBenchmark/qat_lora_mnist_poc.cpp:17:
+../api/ccapi/include/model.h:294:36: note:   initializing argument 1 of 'virtual int ml::train::Model::getLayer(const char*, std::shared_ptr<ml::train::Layer>*)'
+  294 |   virtual int getLayer(const char *name, std::shared_ptr<Layer> *layer) = 0;
+      |                        ~~~~~~~~~~~~^~~~
+[3/11] Generating symbol file Applications/CausalLM/libcausallm.so.p/libcausallm.so.symbols
+ninja: build stopped: subcommand failed.
+root@e1cd52067346:/nntrainerPranjal#  
