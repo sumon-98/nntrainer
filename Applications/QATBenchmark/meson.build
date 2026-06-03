@@ -33,3 +33,12 @@ executable('nntrainer_qat_mnist_poc',
   install: true,
   install_dir: application_install_dir
 )
+
+# New POC: LoRA + QAT over Frozen GGML Base
+executable('nntrainer_qat_lora_mnist_poc',
+  ['qat_lora_mnist_poc.cpp'],
+  dependencies: [nntrainer_dep, nntrainer_ccapi_dep, qat_layer_dep],
+  include_directories: [qat_inc],
+  install: true,
+  install_dir: application_install_dir
+)
