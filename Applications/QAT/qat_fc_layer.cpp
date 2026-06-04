@@ -227,16 +227,31 @@ void QATFullyConnectedLayer::finalize(InitLayerContext &context) {
 
   // Create LoRA weights if lora_rank is specified
   if (lora_rank) {
+    // ─── Mixed-precision support ───────────────────────────────────────
+    // LoRA weights MUST always be FP32, even when the base model weight type
+    // is a quantized format (Q6_K, Q4_0, etc.).
+    //
+    // The forward path does:
+    //   base:  input(FP32) . weight(Q6_K)  → dotQnK kernel handles this
+    //   lora:  input(FP32) . loraA(FP32) . loraB(FP32) * scaling
+    //
+    // If we inherited context.getWeightDataType() here, LoRA A and B would
+    // be created as Q6_K tensors — which cannot be trained, cannot be
+    // fake-quantized, and would crash the backward pass.
+    //
+    // This is backward-compatible: when model_tensor_type=FP32-FP32,
+    // context.getWeightDataType() is already FP32, so nothing changes.
+    // ───────────────────────────────────────────────────────────────────
     TensorDim loraA_dim(
       1, is_nchw ? 1 : lora_rank, is_nchw ? in_dim.width() : 1,
       is_nchw ? lora_rank : in_dim.channel(),
-      TensorDim::TensorType(context.getFormat(), context.getWeightDataType()),
+      TensorDim::TensorType(context.getFormat(), ml::train::TensorDim::DataType::FP32),
       is_nchw ? 0b0011 : 0b0101);
 
     TensorDim loraB_dim(
       1, is_nchw ? 1 : unit, is_nchw ? lora_rank : 1,
       is_nchw ? unit : lora_rank,
-      TensorDim::TensorType(context.getFormat(), context.getWeightDataType()),
+      TensorDim::TensorType(context.getFormat(), ml::train::TensorDim::DataType::FP32),
       is_nchw ? 0b0011 : 0b0101);
 
     TensorDim loraTmp_dim(
@@ -351,9 +366,24 @@ void QATFullyConnectedLayer::calcDerivative(RunLayerContext &context) {
     // MODE 2: effective weight = W_frozen + fakeQuant(A) * fakeQuant(B) * scaling
     // dL/dx = dL/dy * [W + a_fq * b_fq * scaling]^T
     Tensor &weight = context.getWeight(weight_idx[FCParams::weight]);
-    ret_.dot_deriv_wrt_1(
-      weight.add(a_fq.dot(b_fq).multiply(lora_scaling)),
-      derivative_, false, false);
+    
+    // For Q6_K weights, we need to dequantize first before adding LoRA contribution
+    Tensor weight_fp32;
+    if (weight.getDataType() == ml::train::TensorDim::DataType::Q6_K) {
+      // Dequantize Q6_K to FP32 for the addition
+      auto dequantizer = Quantization::createQuantizer(QScheme::Q6_K);
+      weight_fp32 = dequantizer->dequantize(weight, ml::train::TensorDim::DataType::FP32);
+    } else {
+      weight_fp32 = weight;
+    }
+    
+    // Compute LoRA contribution
+    Tensor lora_contrib = a_fq.dot(b_fq).multiply(lora_scaling);
+    
+    // Effective weight = dequantized_base + lora_contribution
+    Tensor effective_weight = weight_fp32.add(lora_contrib);
+    
+    ret_.dot_deriv_wrt_1(effective_weight, derivative_, false, false);
   }
 }
 
