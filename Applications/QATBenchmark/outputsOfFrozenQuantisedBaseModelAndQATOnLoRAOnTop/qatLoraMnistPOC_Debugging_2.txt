@@ -1,0 +1,42 @@
+root@f6a938d35a32:/nntrainerPranjal# ./build/Applications/QATBenchmark/nntrainer_qat_lora_mnist_poc ./Applications/MNIST/res/mnist_trainingSet.dat
+
+══════════════════════════════════════════════════
+  Mixed-Precision LoRA-QAT MNIST POC
+  Frozen Q6_K Base + FP32 LoRA + QAT
+══════════════════════════════════════════════════
+
+╔══════════════════════════════════════════════╗
+║       Phase 1: Normal FP32 Training          ║
+╚══════════════════════════════════════════════╝
+#1/5 - Training Loss: 32.3303 >> [ Accuracy: 19.7917% - Validation Loss : 32.4561 ]
+#2/5 - Training Loss: 25.3251 >> [ Accuracy: 33.3333% - Validation Loss : 19.9834 ]
+#3/5 - Training Loss: 3.37462 >> [ Accuracy: 48.9583% - Validation Loss : 8.50883 ]
+#4/5 - Training Loss: 0.399833 >> [ Accuracy: 56.25% - Validation Loss : 7.87824 ]
+#5/5 - Training Loss: 0.0939194 >> [ Accuracy: 51.0417% - Validation Loss : 7.79605 ]
+FP32 training loss: 0.0939194
+Extracting FP32 weights...
+  Extracted fc1: W[196608] b[256]
+  Extracted fc2: W[65536] b[256]
+  Extracted fc3: W[65536] b[256]
+  Extracted output: W[2560] b[10]
+
+--- Evaluating FP32 baseline accuracy ---
+  FP32 baseline accuracy: 48%
+
+╔══════════════════════════════════════════════╗
+║   Phase 2: Q6_K Base + FP32 LoRA QAT        ║
+╚══════════════════════════════════════════════╝
+
+--- Step 2a: Quantizing base weights to GGML Q6_K ---
+  W1 FP32: 786432 bytes → Q6_K: 161280 bytes (79.5% reduction)
+  W2 FP32: 262144 bytes → Q6_K: 53760 bytes
+  W3 FP32: 262144 bytes → Q6_K: 53760 bytes
+
+--- Step 2b: Evaluating accuracy with Q6_K weights (no LoRA) ---
+  Q6_K (no LoRA) accuracy: 48.0%
+
+--- Step 2c: Building LoRA-QAT model ---
+terminate called after throwing an instance of 'std::invalid_argument'
+  what():  Q6_K_Tensor must be 2 dimensional tensor with batch size 1 and width must be divisible by 256
+Aborted (core dumped)
+root@f6a938d35a32:/nntrainerPranjal#
