@@ -43,7 +43,7 @@ QATFullyConnectedLayer::QATFullyConnectedLayer() :
   qat_fc_props(props::Unit(), props::LoraRank(), props::LoraAlpha()),
   q_min(-128.0f),
   q_max(127.0f),
-  momentum(0.1f),
+  momentum(0.01f),
   initialized(false) {
   weight_idx.fill(std::numeric_limits<unsigned>::max());
   lora_idx.fill(std::numeric_limits<unsigned>::max());
@@ -201,11 +201,17 @@ void QATFullyConnectedLayer::finalize(InitLayerContext &context) {
 
   context.setOutputDimensions(output_dims);
 
+  // Force Q6_K for base weights in LoRA mode for this POC
+  ml::train::TensorDim::DataType base_weight_type = context.getWeightDataType();
+  if (lora_rank > 0) {
+    base_weight_type = ml::train::TensorDim::DataType::Q6_K;
+  }
+
   // Weight dimension
   TensorDim weight_dim(
     1, is_nchw ? 1 : unit, is_nchw ? in_dim.width() : 1,
     is_nchw ? unit : in_dim.channel(),
-    TensorDim::TensorType(context.getFormat(), context.getWeightDataType()),
+    TensorDim::TensorType(context.getFormat(), base_weight_type),
     is_nchw ? 0b0011 : 0b0101);
 
   // When LoRA is active, base weight is NOT trainable (lora_rank == 0 → true)

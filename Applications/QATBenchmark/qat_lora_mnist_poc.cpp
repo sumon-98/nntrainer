@@ -68,8 +68,7 @@ using namespace nntrainer;
 static constexpr unsigned int FEATURE_SIZE_ORIG = 784;
 static constexpr unsigned int FEATURE_SIZE = 768;  // truncated for Q6_K compat
 static constexpr unsigned int HIDDEN_DIM = 256;    // Q6_K: 256 % 256 = 0
-static constexpr unsigned int NUM_ACTUAL_CLASSES = 10; // True classes in dataset
-static constexpr unsigned int NUM_CLASSES = 256;   // Padded to satisfy Q6_K (256 % 256 = 0)
+static constexpr unsigned int NUM_CLASSES = 10;
 
 static constexpr unsigned int BATCH_SIZE = 32;
 static constexpr unsigned int NUM_TRAIN = 100;
@@ -112,7 +111,7 @@ static bool getData(std::ifstream &F, float *input, float *label,
   F.clear();
   F.seekg(0, std::ios_base::end);
   uint64_t file_length = F.tellg();
-  uint64_t position = (uint64_t)((FEATURE_SIZE_ORIG + NUM_ACTUAL_CLASSES) *
+  uint64_t position = (uint64_t)((FEATURE_SIZE_ORIG + NUM_CLASSES) *
                                  (uint64_t)id * sizeof(float));
   if (position > file_length) return false;
   F.seekg(position, std::ios::beg);
@@ -122,9 +121,7 @@ static bool getData(std::ifstream &F, float *input, float *label,
   F.read((char *)tmp.data(), sizeof(float) * FEATURE_SIZE_ORIG);
   std::memcpy(input, tmp.data(), sizeof(float) * FEATURE_SIZE);
 
-  // Read actual labels (10) and pad the rest to 0
-  std::memset(label, 0, sizeof(float) * NUM_CLASSES);
-  F.read((char *)label, sizeof(float) * NUM_ACTUAL_CLASSES);
+  F.read((char *)label, sizeof(float) * NUM_CLASSES);
   return true;
 }
 
@@ -263,14 +260,14 @@ static float evaluateAccuracy(const std::string &data_file,
     Tensor logits(TensorDim(1, 1, 1, NUM_CLASSES));
     forward_pass(input, W1, b1, W2, b2, W3, b3, Wout, bout, logits);
 
-    // argmax over actual classes only
+    // argmax
     const float *lp = logits.getData<float>();
     int pred = 0;
-    for (unsigned j = 1; j < NUM_ACTUAL_CLASSES; ++j)
+    for (unsigned j = 1; j < NUM_CLASSES; ++j)
       if (lp[j] > lp[pred]) pred = j;
 
     int truth = 0;
-    for (unsigned j = 1; j < NUM_ACTUAL_CLASSES; ++j)
+    for (unsigned j = 1; j < NUM_CLASSES; ++j)
       if (label_buf[j] > label_buf[truth]) truth = j;
 
     if (pred == truth) correct++;
@@ -316,7 +313,7 @@ static std::vector<LayerWeights> trainFP32(const std::string &data_file) {
                   {"name=output", "unit=" + std::to_string(NUM_CLASSES), "activation=softmax"}));
 
   // ── Optimizer: uncomment whichever you prefer ──
-  auto optimizer = createOptimizer("sgd", {"learning_rate=0.01"});
+  auto optimizer = createOptimizer("sgd", {"learning_rate=0.001"});
   // auto optimizer = createOptimizer("adam", {"learning_rate=0.001"});
 
   model->setOptimizer(std::move(optimizer));
@@ -406,8 +403,7 @@ static void trainLoRAQAT(const std::string &data_file,
   // model_tensor_type=Q6_K-FP32 means: weights=Q6_K, activations=FP32
   // The QAT FC layer overrides LoRA weight types to FP32 internally.
   auto lora_model = createModel(ModelType::NEURAL_NET,
-                           {"batch_size=" + std::to_string(BATCH_SIZE),
-                            "model_tensor_type=Q6_K-FP32"});
+                           {"batch_size=" + std::to_string(BATCH_SIZE)});
 
   lora_model->addLayer(createLayer("input", {"name=input0",
                   "input_shape=1:1:" + std::to_string(FEATURE_SIZE)}));
