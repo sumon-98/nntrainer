@@ -43,7 +43,7 @@ QATFullyConnectedLayer::QATFullyConnectedLayer() :
   qat_fc_props(props::Unit(), props::LoraRank(), props::LoraAlpha()),
   q_min(-128.0f),
   q_max(127.0f),
-  momentum(0.01f),
+  momentum(0.1f),
   initialized(false) {
   weight_idx.fill(std::numeric_limits<unsigned>::max());
   lora_idx.fill(std::numeric_limits<unsigned>::max());
@@ -59,6 +59,9 @@ Tensor QATFullyConnectedLayer::fakeQuantize(
   Tensor &x, Tensor &running_min, Tensor &running_max,
   float q_min_val, float q_max_val, bool training) {
 
+  float min_val;
+  float max_val;
+
   if (training) {
     float current_min = x.minValue();
     float current_max = x.maxValue();
@@ -72,10 +75,14 @@ Tensor QATFullyConnectedLayer::fakeQuantize(
       running_min.setValue((1.0f - momentum) * r_min + momentum * current_min);
       running_max.setValue((1.0f - momentum) * r_max + momentum * current_max);
     }
+    
+    // Use exact min/max during training to prevent clipping weights
+    min_val = current_min;
+    max_val = current_max;
+  } else {
+    min_val = running_min.getValue<float>(0);
+    max_val = running_max.getValue<float>(0);
   }
-
-  float min_val = running_min.getValue<float>(0);
-  float max_val = running_max.getValue<float>(0);
 
   float range = max_val - min_val;
   if (range < 1e-8f)
