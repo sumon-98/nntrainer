@@ -119,7 +119,9 @@ static bool getData(std::ifstream &F, float *input, float *label,
   // Read full 784 features into temp, copy first 768
   std::vector<float> tmp(FEATURE_SIZE_ORIG);
   F.read((char *)tmp.data(), sizeof(float) * FEATURE_SIZE_ORIG);
-  std::memcpy(input, tmp.data(), sizeof(float) * FEATURE_SIZE);
+  for (unsigned int i = 0; i < FEATURE_SIZE; i++) {
+    input[i] = tmp[i] / 255.0f;
+  }
 
   F.read((char *)label, sizeof(float) * NUM_CLASSES);
   return true;
@@ -429,8 +431,8 @@ static void trainLoRAQAT(const std::string &data_file,
                   {"name=output", "unit=" + std::to_string(NUM_CLASSES), "activation=softmax", "trainable=false"}));
 
   // ── Optimizer: uncomment whichever you prefer ──
-  // auto lora_optimizer = createOptimizer("sgd", {"learning_rate=0.001"});
-  auto lora_optimizer = createOptimizer("adam", {"learning_rate=0.001"});
+  // auto lora_optimizer = createOptimizer("sgd", {"learning_rate=0.01"});
+  auto lora_optimizer = createOptimizer("adam", {"learning_rate=0.0001"});
 
   lora_model->setOptimizer(std::move(lora_optimizer));
   lora_model->setProperty({"epochs=" + std::to_string(EPOCHS_LORA), "loss=cross"});
