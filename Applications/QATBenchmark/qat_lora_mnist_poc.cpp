@@ -424,9 +424,9 @@ static void trainLoRAQAT(const std::string &data_file,
                   "lora_rank=" + std::to_string(LORA_RANK)}));
   lora_model->addLayer(createLayer("activation", {"name=relu3", "activation=relu"}));
 
-  // Output layer: plain fully_connected (always FP32, no LoRA)
+  // Output layer: plain fully_connected (always FP32, no LoRA, frozen)
   lora_model->addLayer(createLayer("fully_connected",
-                  {"name=output", "unit=" + std::to_string(NUM_CLASSES), "activation=softmax"}));
+                  {"name=output", "unit=" + std::to_string(NUM_CLASSES), "activation=softmax", "trainable=false"}));
 
   // ── Optimizer: uncomment whichever you prefer ──
   // auto lora_optimizer = createOptimizer("sgd", {"learning_rate=0.001"});
