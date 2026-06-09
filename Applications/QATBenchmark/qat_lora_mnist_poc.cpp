@@ -315,8 +315,8 @@ static std::vector<LayerWeights> trainFP32(const std::string &data_file) {
                   {"name=output", "unit=" + std::to_string(NUM_CLASSES), "activation=softmax"}));
 
   // ── Optimizer: uncomment whichever you prefer ──
-  auto optimizer = createOptimizer("sgd", {"learning_rate=0.001"});
-  // auto optimizer = createOptimizer("adam", {"learning_rate=0.001"});
+  // auto optimizer = createOptimizer("sgd", {"learning_rate=0.001"});
+  auto optimizer = createOptimizer("adam", {"learning_rate=0.001"});
 
   model->setOptimizer(std::move(optimizer));
   model->setProperty({"epochs=" + std::to_string(EPOCHS_FP32), "loss=cross"});
