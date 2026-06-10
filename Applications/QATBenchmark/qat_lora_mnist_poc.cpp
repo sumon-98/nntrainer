@@ -71,9 +71,9 @@ static constexpr unsigned int HIDDEN_DIM = 256;    // Q6_K: 256 % 256 = 0
 static constexpr unsigned int NUM_CLASSES = 10;
 
 static constexpr unsigned int BATCH_SIZE = 32;
-static constexpr unsigned int NUM_TRAIN = 100;
-static constexpr unsigned int NUM_VAL = 100;
-static constexpr unsigned int NUM_TEST = 100;
+static constexpr unsigned int NUM_TRAIN = 50000;
+static constexpr unsigned int NUM_VAL = 5000;
+static constexpr unsigned int NUM_TEST = 5000;
 static constexpr unsigned int EPOCHS_FP32 = 5;
 static constexpr unsigned int EPOCHS_LORA = 5;
 static constexpr unsigned int LORA_RANK = 4;

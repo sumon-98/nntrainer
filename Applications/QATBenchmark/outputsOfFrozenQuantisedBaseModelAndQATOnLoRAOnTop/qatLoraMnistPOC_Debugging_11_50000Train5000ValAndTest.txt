@@ -1,0 +1,88 @@
+root@f6a938d35a32:/nntrainerPranjal# ninja -C build
+ninja: Entering directory `build'
+[2/2] Linking target Applications/QATBenchmark/nntrainer_qat_lora_mnist_poc
+root@f6a938d35a32:/nntrainerPranjal# ./build/Applications/QATBenchmark/nntrainer_qat_lora_mnist_poc ./Applications/QATBenchmark/CompleteMNISTDataset/mnist_trainingSet.dat
+
+══════════════════════════════════════════════════
+  Mixed-Precision LoRA-QAT MNIST POC
+  Frozen Q6_K Base + FP32 LoRA + QAT
+══════════════════════════════════════════════════
+
+╔══════════════════════════════════════════════╗
+║       Phase 1: Normal FP32 Training          ║
+╚══════════════════════════════════════════════╝
+#1/5 - Training Loss: 0.222522 >> [ Accuracy: 96.1939% - Validation Loss : 0.125924 ]
+#2/5 - Training Loss: 0.096471 >> [ Accuracy: 96.7548% - Validation Loss : 0.11353 ]
+#3/5 - Training Loss: 0.0689308 >> [ Accuracy: 96.6546% - Validation Loss : 0.110689 ]
+#4/5 - Training Loss: 0.0532314 >> [ Accuracy: 97.4159% - Validation Loss : 0.0953299 ]
+#5/5 - Training Loss: 0.0426903 >> [ Accuracy: 97.2556% - Validation Loss : 0.0960336 ]
+FP32 training loss: 0.0426903
+Extracting FP32 weights...
+  Extracted fc1: W[196608] b[256]
+  Extracted fc2: W[65536] b[256]
+  Extracted fc3: W[65536] b[256]
+  Extracted output: W[2560] b[10]
+
+--- Evaluating FP32 baseline accuracy ---
+  FP32 baseline accuracy: 98.16%
+
+╔══════════════════════════════════════════════╗
+║   Phase 2: Q6_K Base + FP32 LoRA QAT        ║
+╚══════════════════════════════════════════════╝
+
+--- Step 2a: Quantizing base weights to GGML Q6_K ---
+  W1 FP32: 786432 bytes → Q6_K: 161280 bytes (79.5% reduction)
+  W2 FP32: 262144 bytes → Q6_K: 53760 bytes
+  W3 FP32: 262144 bytes → Q6_K: 53760 bytes
+
+--- Step 2b: Evaluating accuracy with Q6_K weights (no LoRA) ---
+  Q6_K (no LoRA) accuracy: 98.2%
+
+--- Step 2c: Building LoRA-QAT model ---
+
+--- Step 2d: Injecting Q6_K weights into frozen base ---
+  Injected Q6_K weights into lfc1 (161280 bytes)
+  Injected Q6_K weights into lfc2 (53760 bytes)
+  Injected Q6_K weights into lfc3 (53760 bytes)
+  Injected FP32 weights into output
+  Injected bias into lfc1
+  Injected bias into lfc2
+  Injected bias into lfc3
+
+--- Step 2e: Training LoRA layers with QAT ---
+  LoRA rank: 4, Epochs: 5
+  Base weights: frozen Q6_K
+  LoRA weights: trainable FP32 with fake-quantization
+#1/5 - Training Loss: 4.13633 >> [ Accuracy: 9.51522% - Validation Loss : 41.1373 ]
+#2/5 - Training Loss: 16.1528 >> [ Accuracy: 10.5569% - Validation Loss : 40.4565 ]
+#3/5 - Training Loss: 20.2288 >> [ Accuracy: 10.617% - Validation Loss : 40.741 ]
+#4/5 - Training Loss: 36.6226 >> [ Accuracy: 10.016% - Validation Loss : 41.3221 ]
+#5/5 - Training Loss: 30.3265 >> [ Accuracy: 9.63542% - Validation Loss : 41.5016 ]
+
+LoRA-QAT training loss: 30.3
+
+--- Step 2f: Evaluating accuracy after LoRA-QAT ---
+  (Extracting effective weights = Q6_K_base + LoRA_A * LoRA_B * scaling)
+  LoRA-QAT accuracy: 9.9%
+--- qat_fully_connected QAT Stats (LoRA Weights) ---
+LoRA rank: 4, scaling: 1.0
+LoraA running min: -0.7, max: 0.7, scale: 0.0
+LoraB running min: -2.0, max: 2.0, scale: 0.0
+--- qat_fully_connected QAT Stats (LoRA Weights) ---
+LoRA rank: 4, scaling: 1.0
+LoraA running min: -0.4, max: 0.4, scale: 0.0
+LoraB running min: -1.7, max: 1.6, scale: 0.0
+--- qat_fully_connected QAT Stats (LoRA Weights) ---
+LoRA rank: 4, scaling: 1.0
+LoraA running min: -0.2, max: 0.2, scale: 0.0
+LoraB running min: -1.8, max: 1.9, scale: 0.0
+
+══════════════════════════════════════════════════
+  SUMMARY
+══════════════════════════════════════════════════
+  FP32 baseline accuracy:       98.2%
+  (Q6_K and LoRA-QAT accuracies printed above)
+══════════════════════════════════════════════════
+
+=== Done! POC Successful ===
+root@f6a938d35a32:/nntrainerPranjal#
