@@ -70,7 +70,7 @@ static constexpr unsigned int FEATURE_SIZE = 768;  // truncated for Q6_K compat
 static constexpr unsigned int HIDDEN_DIM = 256;    // Q6_K: 256 % 256 = 0
 static constexpr unsigned int NUM_CLASSES = 10;
 
-static constexpr unsigned int BATCH_SIZE = 32;
+static constexpr unsigned int BATCH_SIZE = 1;
 static constexpr unsigned int NUM_TRAIN = 50000;
 static constexpr unsigned int NUM_VAL = 5000;
 static constexpr unsigned int NUM_TEST = 5000;
@@ -315,8 +315,8 @@ static std::vector<LayerWeights> trainFP32(const std::string &data_file) {
                   {"name=output", "unit=" + std::to_string(NUM_CLASSES), "activation=softmax"}));
 
   // ── Optimizer: uncomment whichever you prefer ──
-  // auto optimizer = createOptimizer("sgd", {"learning_rate=0.001"});
-  auto optimizer = createOptimizer("adam", {"learning_rate=0.001"});
+  auto optimizer = createOptimizer("sgd", {"learning_rate=0.001"});
+  // auto optimizer = createOptimizer("adam", {"learning_rate=0.001"});
 
   model->setOptimizer(std::move(optimizer));
   model->setProperty({"epochs=" + std::to_string(EPOCHS_FP32), "loss=cross"});

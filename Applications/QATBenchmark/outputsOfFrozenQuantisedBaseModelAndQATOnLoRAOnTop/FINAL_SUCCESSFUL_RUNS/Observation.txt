@@ -1,0 +1,15 @@
+I wrote code to get a new bigger MNIST dataset (earlier i was using 100 samples each for training, validation and testing). Now, with 50000 samples as training, and 5000 samples each for validation and testing, the accuracies for both the cases are much better.
+
+Using Adam optimizer for FP32 and QAT+LoRA both:
+FP32 baseline accuracy: 96.7%
+Q6_K (no LoRA) accuracy: 96.6% (PTQ)
+LoRA-QAT accuracy: 95.6%
+
+Using SGD for FP32 and Adam for QAT+LoRA:
+FP32 baseline accuracy: 97.74%
+Q6_K (no LoRA) accuracy: 97.8%
+LoRA-QAT accuracy: 94.7%
+
+
+It is perplexing as to how QAT + LoRA is performing worse. LoRA should be increasing the accuracy instead, let alone QAT + LoRA (although actual quantisation has still not happened at the end of QAT + LoRA).
+Also, why are the scales coming out to be 0.0 when printing stats for LoraA and LoraB?
