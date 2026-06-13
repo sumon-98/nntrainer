@@ -71,13 +71,33 @@ static constexpr unsigned int HIDDEN_DIM = 256;    // Q6_K: 256 % 256 = 0
 static constexpr unsigned int NUM_CLASSES = 10;
 
 static constexpr unsigned int BATCH_SIZE = 1;
-static constexpr unsigned int NUM_TRAIN = 50000;
-static constexpr unsigned int NUM_VAL = 5000;
-static constexpr unsigned int NUM_TEST = 5000;
 static constexpr unsigned int EPOCHS_FP32 = 5;
 static constexpr unsigned int EPOCHS_LORA = 5;
 static constexpr unsigned int LORA_RANK = 4;
 constexpr unsigned int SEED = 42;
+
+// ─── Dataset Splitting ──────────────────────────────────────────────────────
+// Non-overlapping splits to simulate real pre-train → fine-tune workflow:
+//   Phase 1 (FP32 pretraining):  samples [0, 40000)
+//   Phase 2 (LoRA fine-tuning):  samples [40000, 55000)
+//   Evaluation / Test:           samples [55000, 60000)
+//
+// This ensures LoRA has genuinely new data to learn from, just like in the
+// real Qwen3 scenario where the base model is pre-trained on a large corpus
+// and LoRA fine-tunes on a separate downstream task (e.g., SST-2).
+
+static constexpr unsigned int PRETRAIN_OFFSET    = 0;
+static constexpr unsigned int PRETRAIN_TRAIN     = 35000;
+static constexpr unsigned int PRETRAIN_VAL       = 5000;
+// Pretrain validation: [35000, 40000)
+
+static constexpr unsigned int FINETUNE_OFFSET    = 40000;
+static constexpr unsigned int FINETUNE_TRAIN     = 12000;
+static constexpr unsigned int FINETUNE_VAL       = 3000;
+// Finetune validation: [52000, 55000)
+
+static constexpr unsigned int TEST_OFFSET         = 55000;
+static constexpr unsigned int NUM_TEST            = 5000;
 
 // ─── MNIST Data Loading ─────────────────────────────────────────────────────
 
@@ -242,16 +262,17 @@ static float evaluateAccuracy(const std::string &data_file,
                                const Tensor &W1, const Tensor &b1,
                                const Tensor &W2, const Tensor &b2,
                                const Tensor &W3, const Tensor &b3,
-                               const Tensor &Wout, const Tensor &bout) {
+                               const Tensor &Wout, const Tensor &bout,
+                               unsigned int test_offset = TEST_OFFSET,
+                               unsigned int num_test = NUM_TEST) {
   unsigned int correct = 0;
   unsigned int total = 0;
-  unsigned int test_offset = NUM_TRAIN + NUM_VAL;
 
   std::ifstream file(data_file, std::ios::in | std::ios::binary);
   std::vector<float> input_buf(FEATURE_SIZE);
   std::vector<float> label_buf(NUM_CLASSES);
 
-  for (unsigned int i = 0; i < NUM_TEST; ++i) {
+  for (unsigned int i = 0; i < num_test; ++i) {
     if (!getData(file, input_buf.data(), label_buf.data(), test_offset + i))
       break;
 
@@ -289,8 +310,8 @@ static std::vector<LayerWeights> trainFP32(const std::string &data_file) {
             << "\n╚══════════════════════════════════════════════╝"
             << std::endl;
 
-  auto train_data = std::make_unique<DataInformation>(NUM_TRAIN, data_file, 0);
-  auto val_data = std::make_unique<DataInformation>(NUM_VAL, data_file, NUM_TRAIN);
+  auto train_data = std::make_unique<DataInformation>(PRETRAIN_TRAIN, data_file, PRETRAIN_OFFSET);
+  auto val_data = std::make_unique<DataInformation>(PRETRAIN_VAL, data_file, PRETRAIN_OFFSET + PRETRAIN_TRAIN);
 
   std::shared_ptr<ml::train::Dataset> dataset_train =
     createDataset(DatasetType::GENERATOR, getSample_train, train_data.get());
@@ -395,8 +416,8 @@ static void trainLoRAQAT(const std::string &data_file,
 
   std::cerr << "\n--- Step 2c: Building LoRA-QAT model ---" << std::endl;
 
-  auto train_data = std::make_unique<DataInformation>(NUM_TRAIN, data_file, 0);
-  auto val_data = std::make_unique<DataInformation>(NUM_VAL, data_file, NUM_TRAIN);
+  auto train_data = std::make_unique<DataInformation>(FINETUNE_TRAIN, data_file, FINETUNE_OFFSET);
+  auto val_data = std::make_unique<DataInformation>(FINETUNE_VAL, data_file, FINETUNE_OFFSET + FINETUNE_TRAIN);
   std::shared_ptr<ml::train::Dataset> dataset_train =
     createDataset(DatasetType::GENERATOR, getSample_train, train_data.get());
   std::shared_ptr<ml::train::Dataset> dataset_val =
@@ -649,6 +670,266 @@ static void trainLoRAQAT(const std::string &data_file,
 }
 
 // ═════════════════════════════════════════════════════════════════════════════
+// Phase 3: Untrained (Random) Frozen Q6_K Base + LoRA
+// ═════════════════════════════════════════════════════════════════════════════
+// Purpose: Prove that LoRA adapters can actually learn. If we freeze a RANDOM
+// Q6_K base model and train only LoRA on top, accuracy should rise from ~10%
+// (random chance) to a meaningful level (60%+). This confirms the LoRA forward
+// and backward paths are mathematically correct.
+
+static void trainLoRAUntrainedBase(const std::string &data_file) {
+  std::cerr << "\n╔══════════════════════════════════════════════╗"
+            << "\n║  Phase 3: UNTRAINED Q6_K Base + LoRA QAT    ║"
+            << "\n╚══════════════════════════════════════════════╝"
+            << std::endl;
+
+  // ── Step 3a: Create random FP32 weights and quantize to Q6_K ──
+
+  std::cerr << "\n--- Step 3a: Creating random FP32 weights & quantizing to Q6_K ---"
+            << std::endl;
+
+  // Create random weight tensors (Xavier/He-like initialization)
+  std::mt19937 rng(SEED + 999);  // different seed to ensure randomness
+  auto randomInit = [&](unsigned int in_d, unsigned int out_d) -> Tensor {
+    Tensor t(TensorDim(1, 1, in_d, out_d));
+    float *data = t.getData<float>();
+    float stddev = std::sqrt(2.0f / in_d);  // He init
+    std::normal_distribution<float> dist(0.0f, stddev);
+    for (unsigned int i = 0; i < in_d * out_d; ++i)
+      data[i] = dist(rng);
+    return t;
+  };
+
+  auto randomBias = [](unsigned int out_d) -> Tensor {
+    Tensor t(TensorDim(1, 1, 1, out_d));
+    t.setZero();
+    return t;
+  };
+
+  Tensor W1_fp32 = randomInit(FEATURE_SIZE, HIDDEN_DIM);
+  Tensor W2_fp32 = randomInit(HIDDEN_DIM, HIDDEN_DIM);
+  Tensor W3_fp32 = randomInit(HIDDEN_DIM, HIDDEN_DIM);
+  Tensor Wout_fp32 = randomInit(HIDDEN_DIM, NUM_CLASSES);
+
+  Tensor b1_rand = randomBias(HIDDEN_DIM);
+  Tensor b2_rand = randomBias(HIDDEN_DIM);
+  Tensor b3_rand = randomBias(HIDDEN_DIM);
+  Tensor bout_rand = randomBias(NUM_CLASSES);
+
+  // Quantize hidden layer weights to Q6_K
+  auto q6k_quantizer = Quantization::createQuantizer(QScheme::Q6_K);
+  Tensor W1_q6k = q6k_quantizer->quantize(W1_fp32, Tdatatype::Q6_K);
+  Tensor W2_q6k = q6k_quantizer->quantize(W2_fp32, Tdatatype::Q6_K);
+  Tensor W3_q6k = q6k_quantizer->quantize(W3_fp32, Tdatatype::Q6_K);
+
+  std::cerr << "  Random weights quantized to Q6_K" << std::endl;
+
+  // ── Step 3b: Evaluate random model (should be ~10%) ──
+
+  std::cerr << "\n--- Step 3b: Evaluating random Q6_K model (before LoRA training) ---"
+            << std::endl;
+
+  float random_acc = evaluateAccuracy(data_file,
+    W1_q6k, b1_rand, W2_q6k, b2_rand, W3_q6k, b3_rand,
+    Wout_fp32, bout_rand);
+  std::cerr << "  Random Q6_K base accuracy: " << random_acc << "%"
+            << " (expected ~10%)" << std::endl;
+
+  // ── Step 3c: Build LoRA-QAT model on the random frozen base ──
+
+  std::cerr << "\n--- Step 3c: Building LoRA-QAT model on random frozen base ---"
+            << std::endl;
+
+  // Use the fine-tuning data split for training LoRA
+  auto train_data = std::make_unique<DataInformation>(FINETUNE_TRAIN, data_file, FINETUNE_OFFSET);
+  auto val_data = std::make_unique<DataInformation>(FINETUNE_VAL, data_file, FINETUNE_OFFSET + FINETUNE_TRAIN);
+  std::shared_ptr<ml::train::Dataset> dataset_train =
+    createDataset(DatasetType::GENERATOR, getSample_train, train_data.get());
+  std::shared_ptr<ml::train::Dataset> dataset_val =
+    createDataset(DatasetType::GENERATOR, getSample_train, val_data.get());
+
+  auto lora_model = createModel(ModelType::NEURAL_NET,
+                           {"batch_size=" + std::to_string(BATCH_SIZE)});
+
+  lora_model->addLayer(createLayer("input", {"name=input0",
+                  "input_shape=1:1:" + std::to_string(FEATURE_SIZE)}));
+
+  lora_model->addLayer(createLayer("qat_fully_connected", {"name=lfc1",
+                  "unit=" + std::to_string(HIDDEN_DIM),
+                  "lora_rank=" + std::to_string(LORA_RANK)}));
+  lora_model->addLayer(createLayer("activation", {"name=relu1", "activation=relu"}));
+
+  lora_model->addLayer(createLayer("qat_fully_connected", {"name=lfc2",
+                  "unit=" + std::to_string(HIDDEN_DIM),
+                  "lora_rank=" + std::to_string(LORA_RANK)}));
+  lora_model->addLayer(createLayer("activation", {"name=relu2", "activation=relu"}));
+
+  lora_model->addLayer(createLayer("qat_fully_connected", {"name=lfc3",
+                  "unit=" + std::to_string(HIDDEN_DIM),
+                  "lora_rank=" + std::to_string(LORA_RANK)}));
+  lora_model->addLayer(createLayer("activation", {"name=relu3", "activation=relu"}));
+
+  // Output layer: trainable (since base is random, output needs to learn too)
+  lora_model->addLayer(createLayer("fully_connected",
+                  {"name=output", "unit=" + std::to_string(NUM_CLASSES),
+                   "activation=softmax", "trainable=true"}));
+
+  auto lora_optimizer = createOptimizer("adam", {"learning_rate=0.001"});
+
+  lora_model->setOptimizer(std::move(lora_optimizer));
+  lora_model->setProperty({"epochs=" + std::to_string(EPOCHS_LORA), "loss=cross"});
+
+  lora_model->compile();
+  lora_model->initialize();
+
+  // ── Step 3d: Inject random Q6_K weights into the frozen base ──
+
+  std::cerr << "\n--- Step 3d: Injecting random Q6_K weights into frozen base ---"
+            << std::endl;
+
+  auto injectQ6K = [&](const char *name, Tensor &q6k_tensor) {
+    std::shared_ptr<ml::train::Layer> layer;
+    lora_model->getLayer(name, &layer);
+    std::vector<float *> wptrs;
+    std::vector<TensorDim> wdims;
+    layer->getWeights(wptrs, wdims);
+    std::memcpy(wptrs[0], q6k_tensor.getData<uint8_t>(), q6k_tensor.bytes());
+    std::cerr << "  Injected random Q6_K weights into " << name << std::endl;
+  };
+
+  injectQ6K("lfc1", W1_q6k);
+  injectQ6K("lfc2", W2_q6k);
+  injectQ6K("lfc3", W3_q6k);
+
+  // Inject random output weights
+  {
+    std::shared_ptr<ml::train::Layer> layer;
+    lora_model->getLayer("output", &layer);
+    std::vector<float *> wptrs;
+    std::vector<TensorDim> wdims;
+    layer->getWeights(wptrs, wdims);
+    if (wptrs.size() >= 1)
+      std::memcpy(wptrs[0], Wout_fp32.getData<float>(),
+                  HIDDEN_DIM * NUM_CLASSES * sizeof(float));
+    if (wptrs.size() >= 2)
+      std::memcpy(wptrs[1], bout_rand.getData<float>(),
+                  NUM_CLASSES * sizeof(float));
+    std::cerr << "  Injected random FP32 weights into output" << std::endl;
+  }
+
+  // ── Step 3e: Train LoRA + output layer ──
+
+  lora_model->setDataset(DatasetModeType::MODE_TRAIN, dataset_train);
+  lora_model->setDataset(DatasetModeType::MODE_VALID, dataset_val);
+
+  std::cerr << "\n--- Step 3e: Training LoRA on random frozen Q6_K base ---"
+            << std::endl;
+  std::cerr << "  If LoRA learning is correct, accuracy should rise from ~10% to 60%+"
+            << std::endl;
+
+  lora_model->train();
+
+  std::cerr << "\nPhase 3 training loss: "
+            << lora_model->getTrainingLoss() << std::endl;
+
+  // ── Step 3f: Evaluate accuracy after LoRA training ──
+
+  std::cerr << "\n--- Step 3f: Evaluating accuracy after LoRA training on random base ---"
+            << std::endl;
+
+  auto extractLoRA = [&](const char *name, unsigned int in_d, unsigned int out_d)
+      -> std::pair<std::vector<float>, std::vector<float>> {
+    std::shared_ptr<ml::train::Layer> layer;
+    lora_model->getLayer(name, &layer);
+    std::vector<float *> wptrs;
+    std::vector<TensorDim> wdims;
+    layer->getWeights(wptrs, wdims);
+    std::vector<float> loraA_data, loraB_data;
+    if (wptrs.size() >= 4) {
+      size_t a_sz = in_d * LORA_RANK;
+      loraA_data.assign(wptrs[2], wptrs[2] + a_sz);
+      size_t b_sz = LORA_RANK * out_d;
+      loraB_data.assign(wptrs[3], wptrs[3] + b_sz);
+    }
+    return {loraA_data, loraB_data};
+  };
+
+  auto computeEffective = [&](const Tensor &q6k_weight,
+                               const std::vector<float> &loraA_data,
+                               const std::vector<float> &loraB_data,
+                               unsigned int in_d, unsigned int out_d) -> Tensor {
+    Tensor dequant(TensorDim(1, 1, in_d, out_d));
+    Tensor identity(TensorDim(1, 1, in_d, in_d));
+    float *id_data = identity.getData<float>();
+    std::memset(id_data, 0, in_d * in_d * sizeof(float));
+    for (unsigned int i = 0; i < in_d; ++i)
+      id_data[i * in_d + i] = 1.0f;
+    identity.dot(q6k_weight, dequant, false, false);
+
+    float scaling = 1.0f;
+    Tensor A(TensorDim(1, 1, in_d, LORA_RANK));
+    std::memcpy(A.getData<float>(), loraA_data.data(),
+                loraA_data.size() * sizeof(float));
+    Tensor B(TensorDim(1, 1, LORA_RANK, out_d));
+    std::memcpy(B.getData<float>(), loraB_data.data(),
+                loraB_data.size() * sizeof(float));
+    Tensor lora_contrib(TensorDim(1, 1, in_d, out_d));
+    A.dot(B, lora_contrib, false, false);
+    lora_contrib.multiply_i(scaling);
+    dequant.add_i(lora_contrib);
+    return dequant;
+  };
+
+  auto [a1, b1_lora] = extractLoRA("lfc1", FEATURE_SIZE, HIDDEN_DIM);
+  auto [a2, b2_lora] = extractLoRA("lfc2", HIDDEN_DIM, HIDDEN_DIM);
+  auto [a3, b3_lora] = extractLoRA("lfc3", HIDDEN_DIM, HIDDEN_DIM);
+
+  Tensor W1_eff = computeEffective(W1_q6k, a1, b1_lora, FEATURE_SIZE, HIDDEN_DIM);
+  Tensor W2_eff = computeEffective(W2_q6k, a2, b2_lora, HIDDEN_DIM, HIDDEN_DIM);
+  Tensor W3_eff = computeEffective(W3_q6k, a3, b3_lora, HIDDEN_DIM, HIDDEN_DIM);
+
+  // Extract trained output weights
+  Tensor Wout_final(TensorDim(1, 1, HIDDEN_DIM, NUM_CLASSES));
+  Tensor bout_final(TensorDim(1, 1, 1, NUM_CLASSES));
+  {
+    std::shared_ptr<ml::train::Layer> layer;
+    lora_model->getLayer("output", &layer);
+    std::vector<float *> wptrs;
+    std::vector<TensorDim> wdims;
+    layer->getWeights(wptrs, wdims);
+    if (wptrs.size() >= 1)
+      std::memcpy(Wout_final.getData<float>(), wptrs[0],
+                  HIDDEN_DIM * NUM_CLASSES * sizeof(float));
+    if (wptrs.size() >= 2)
+      std::memcpy(bout_final.getData<float>(), wptrs[1],
+                  NUM_CLASSES * sizeof(float));
+  }
+
+  // Extract trained biases from LoRA layers
+  auto extractBias = [&](const char *name, unsigned int out_d) -> Tensor {
+    std::shared_ptr<ml::train::Layer> layer;
+    lora_model->getLayer(name, &layer);
+    std::vector<float *> wptrs;
+    std::vector<TensorDim> wdims;
+    layer->getWeights(wptrs, wdims);
+    Tensor bias(TensorDim(1, 1, 1, out_d));
+    if (wptrs.size() >= 2)
+      std::memcpy(bias.getData<float>(), wptrs[1], out_d * sizeof(float));
+    return bias;
+  };
+
+  Tensor b1_final = extractBias("lfc1", HIDDEN_DIM);
+  Tensor b2_final = extractBias("lfc2", HIDDEN_DIM);
+  Tensor b3_final = extractBias("lfc3", HIDDEN_DIM);
+
+  float lora_acc = evaluateAccuracy(data_file,
+    W1_eff, b1_final, W2_eff, b2_final, W3_eff, b3_final,
+    Wout_final, bout_final);
+  std::cerr << "  Random base + LoRA accuracy: " << lora_acc << "%"
+            << " (started from " << random_acc << "%)" << std::endl;
+}
+
+// ═════════════════════════════════════════════════════════════════════════════
 // Main
 // ═════════════════════════════════════════════════════════════════════════════
 
@@ -665,6 +946,14 @@ int main(int argc, char *argv[]) {
             << "\n══════════════════════════════════════════════════"
             << std::endl;
 
+  std::cerr << "\n  Dataset splits:"
+            << "\n    Pretraining:  [" << PRETRAIN_OFFSET << ", " << PRETRAIN_OFFSET + PRETRAIN_TRAIN << ") train, ["
+            << PRETRAIN_OFFSET + PRETRAIN_TRAIN << ", " << PRETRAIN_OFFSET + PRETRAIN_TRAIN + PRETRAIN_VAL << ") val"
+            << "\n    Fine-tuning:  [" << FINETUNE_OFFSET << ", " << FINETUNE_OFFSET + FINETUNE_TRAIN << ") train, ["
+            << FINETUNE_OFFSET + FINETUNE_TRAIN << ", " << FINETUNE_OFFSET + FINETUNE_TRAIN + FINETUNE_VAL << ") val"
+            << "\n    Test:         [" << TEST_OFFSET << ", " << TEST_OFFSET + NUM_TEST << ")"
+            << std::endl;
+
   // Register custom QAT layer
   auto &ct_engine = nntrainer::Engine::Global();
   auto app_context = static_cast<nntrainer::AppContext *>(
@@ -679,8 +968,8 @@ int main(int argc, char *argv[]) {
   // Phase 1: Train FP32 baseline and extract weights
   auto fp32_weights = trainFP32(data_file);
 
-  // Evaluate FP32 baseline accuracy
-  std::cerr << "\n--- Evaluating FP32 baseline accuracy ---" << std::endl;
+  // Evaluate FP32 baseline accuracy on TEST set
+  std::cerr << "\n--- Evaluating FP32 baseline accuracy (test set) ---" << std::endl;
   Tensor W1 = makeWeightTensor(fp32_weights[0]);
   Tensor b1 = makeBiasTensor(fp32_weights[0]);
   Tensor W2 = makeWeightTensor(fp32_weights[1]);
@@ -694,15 +983,18 @@ int main(int argc, char *argv[]) {
     W1, b1, W2, b2, W3, b3, Wout, bout);
   std::cerr << "  FP32 baseline accuracy: " << fp32_acc << "%" << std::endl;
 
-  // Phase 2: Quantize + LoRA-QAT
+  // Phase 2: Quantize + LoRA-QAT (with non-overlapping fine-tuning data)
   trainLoRAQAT(data_file, fp32_weights);
+
+  // Phase 3: Untrained base + LoRA (sanity check that LoRA can learn)
+  trainLoRAUntrainedBase(data_file);
 
   // ── Summary ──
   std::cerr << "\n══════════════════════════════════════════════════"
             << "\n  SUMMARY"
             << "\n══════════════════════════════════════════════════"
             << "\n  FP32 baseline accuracy:       " << fp32_acc << "%"
-            << "\n  (Q6_K and LoRA-QAT accuracies printed above)"
+            << "\n  (Q6_K, LoRA-QAT, and Phase 3 accuracies printed above)"
             << "\n══════════════════════════════════════════════════"
             << std::endl;
 

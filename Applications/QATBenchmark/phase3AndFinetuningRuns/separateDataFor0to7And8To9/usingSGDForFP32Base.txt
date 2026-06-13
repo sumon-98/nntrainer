@@ -1,0 +1,88 @@
+root@ca03843ad35d:/nntrainerPranjal# ./build/Applications/QATBenchmark/nntrainer_qat_lora_digit_split_poc ./Applications/QATBenchmark/CompleteMNISTDataset/mnist_digits_0
+to7.dat ./Applications/QATBenchmark/CompleteMNISTDataset/mnist_all_digits.dat ./Applications/QATBenchmark/CompleteMNISTDataset/mnist_digits_8to9.dat
+
+
+══════════════════════════════════════════════════
+  Digit-Split LoRA-QAT MNIST POC
+  Base: trained on digits 0-7 only
+  LoRA: fine-tuned to learn ALL digits (0-9)
+══════════════════════════════════════════════════
+
+  Digits 0-7 dataset: 48200 samples
+
+╔══════════════════════════════════════════════╗
+║  Phase 1: FP32 Training on DIGITS 0-7 ONLY  ║
+╚══════════════════════════════════════════════╝
+#1/5 - Training Loss: 0.324482 >> [ Accuracy: 95.4979% - Validation Loss : 0.150501 ]
+#2/5 - Training Loss: 0.13075 >> [ Accuracy: 97.1681% - Validation Loss : 0.100225 ]
+#3/5 - Training Loss: 0.0911186 >> [ Accuracy: 97.5415% - Validation Loss : 0.085154 ]
+#4/5 - Training Loss: 0.0677978 >> [ Accuracy: 97.8112% - Validation Loss : 0.0735166 ]
+#5/5 - Training Loss: 0.0518753 >> [ Accuracy: 97.7075% - Validation Loss : 0.0766974 ]
+FP32 training loss: 0.0518753
+Extracting FP32 weights...
+
+  All-digits dataset: 60000 samples
+  Digits 8-9 dataset: 11800 samples
+
+--- Evaluating FP32 base (trained 0-7) on ALL digits ---
+  FP32 accuracy on ALL digits: 78.78%
+  FP32 accuracy on digits 8-9: 0%
+
+╔══════════════════════════════════════════════╗
+║  Phase 2: Q6_K Base (0-7) + LoRA on ALL     ║
+╚══════════════════════════════════════════════╝
+
+--- Step 2a: Quantizing base weights to Q6_K ---
+  Quantized to Q6_K
+
+--- Step 2b: Evaluating Q6_K base (trained on 0-7 only) ---
+  Q6_K accuracy on ALL digits: 78.78%
+  Q6_K accuracy on digits 8-9 ONLY: 0% (expected very poor — model never saw these!)
+
+--- Step 2c: Building LoRA-QAT model ---
+
+--- Step 2d: Injecting Q6_K weights ---
+  Injected all weights
+
+--- Step 2e: Training LoRA on ALL digits (0-9) ---
+  Base knows: digits 0-7 | LoRA must learn: digits 8-9
+#1/10 - Training Loss: 0.607237 >> [ Accuracy: 71.1333% - Validation Loss : 1.08517 ]
+#2/10 - Training Loss: 0.561132 >> [ Accuracy: 83.5333% - Validation Loss : 0.695261 ]
+#3/10 - Training Loss: 0.566923 >> [ Accuracy: 85.8333% - Validation Loss : 0.462653 ]
+#4/10 - Training Loss: 0.522829 >> [ Accuracy: 85.5333% - Validation Loss : 0.486156 ]
+#5/10 - Training Loss: 0.525192 >> [ Accuracy: 82.2333% - Validation Loss : 0.611528 ]
+#6/10 - Training Loss: 0.528286 >> [ Accuracy: 85.5333% - Validation Loss : 0.524464 ]
+#7/10 - Training Loss: 0.505252 >> [ Accuracy: 85.3% - Validation Loss : 0.565646 ]
+#8/10 - Training Loss: 0.492256 >> [ Accuracy: 87.1667% - Validation Loss : 0.448761 ]
+#9/10 - Training Loss: 0.545953 >> [ Accuracy: 82.5% - Validation Loss : 0.623837 ]
+#10/10 - Training Loss: 0.50936 >> [ Accuracy: 86.4667% - Validation Loss : 0.477157 ]
+
+--- Step 2f: Evaluating after LoRA-QAT ---
+  LoRA-QAT accuracy on ALL digits:  88.44%
+  LoRA-QAT accuracy on digits 8-9:  74.85%
+
+══════════════════════════════════════════════════
+  DIGIT-SPLIT SUMMARY
+══════════════════════════════════════════════════
+  Q6_K base (trained 0-7) on ALL digits:     78.78%
+  Q6_K base (trained 0-7) on digits 8-9:     0%
+  LoRA-QAT (fine-tuned 0-9) on ALL digits:   88.44%
+  LoRA-QAT (fine-tuned 0-9) on digits 8-9:   74.85%
+══════════════════════════════════════════════════
+
+  ✓ SUCCESS: LoRA learned digits 8-9 that base model never saw!
+--- qat_fully_connected QAT Stats (LoRA Weights) ---
+LoRA rank: 4, scaling: 1
+LoraA running min: -0.98716, max: 1.18822, scale: 0.00853091
+LoraB running min: -1.74988, max: 1.09785, scale: 0.0111676
+--- qat_fully_connected QAT Stats (LoRA Weights) ---
+LoRA rank: 4, scaling: 1
+LoraA running min: -1.79304, max: 1.37131, scale: 0.0124092
+LoraB running min: -1.33997, max: 1.70298, scale: 0.0119331
+--- qat_fully_connected QAT Stats (LoRA Weights) ---
+LoRA rank: 4, scaling: 1
+LoraA running min: -0.837481, max: 0.546141, scale: 0.00542597
+LoraB running min: -1.48761, max: 1.13479, scale: 0.0102839
+
+=== Done! Digit-Split POC Complete ===
+root@ca03843ad35d:/nntrainerPranjal#

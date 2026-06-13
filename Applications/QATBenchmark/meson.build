@@ -42,3 +42,12 @@ executable('nntrainer_qat_lora_mnist_poc',
   install: true,
   install_dir: application_install_dir
 )
+
+# Digit-split POC: Base trained on 0-7, LoRA fine-tunes for all digits
+executable('nntrainer_qat_lora_digit_split_poc',
+  ['qat_lora_mnist_digit_split_poc.cpp'],
+  dependencies: [nntrainer_dep, nntrainer_ccapi_dep, qat_layer_dep],
+  include_directories: [qat_inc],
+  install: true,
+  install_dir: application_install_dir
+)
