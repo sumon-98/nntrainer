@@ -43,6 +43,15 @@ executable('nntrainer_qat_lora_mnist_poc',
   install_dir: application_install_dir
 )
 
+# Fully quantized LoRA inference: PTQ Q6_K base + Forced Q6_K LoRA
+executable('nntrainer_qat_lora_q6k_inference_poc',
+  ['qat_lora_q6k_inference_poc.cpp'],
+  dependencies: [nntrainer_dep, nntrainer_ccapi_dep, qat_layer_dep],
+  include_directories: [qat_inc],
+  install: true,
+  install_dir: application_install_dir
+)
+
 # Digit-split POC: Base trained on 0-7, LoRA fine-tunes for all digits
 executable('nntrainer_qat_lora_digit_split_poc',
   ['qat_lora_mnist_digit_split_poc.cpp'],
