@@ -298,6 +298,27 @@ LOCAL_SHARED_LIBRARIES += nntrainer ccapi-nntrainer
 
 include $(BUILD_EXECUTABLE)
 
+# Tensor-level parity harness for a real Llama-3.2-1B-Instruct 128t1024c
+# .dla, hardcoded to that model's own 37-input/33-output shape (see the
+# file's own header comment) -- not a generic multi-model tool like
+# nntrainer_neuron_smoke above.
+include $(CLEAR_VARS)
+
+LOCAL_MODULE        := llama_prefill_parity_test
+LOCAL_SRC_FILES     := @MESON_NEURON_LLAMA_PARITY_SRCS@
+LOCAL_C_INCLUDES    := @MESON_NEURON_INCS@ @MESON_ML_API_COMMON_ROOT@/include @MESON_NNTRAINER_INCS@ @MESON_CCAPI_NNTRAINER_INCS@
+
+LOCAL_CFLAGS        += -pthread -fexceptions @MESON_CFLAGS@ @ML_API_COMMON@
+LOCAL_CXXFLAGS      += -std=c++17 -frtti -fexceptions @ML_API_COMMON@ @MESON_CXXFLAGS@ -DENABLE_NEURON=1
+LOCAL_MODULE_TAGS   := optional
+
+LOCAL_LDLIBS        := -llog -landroid
+LOCAL_LDFLAGS       += "-Wl,-z,max-page-size=16384"
+
+LOCAL_SHARED_LIBRARIES += nntrainer ccapi-nntrainer
+
+include $(BUILD_EXECUTABLE)
+
 endif # MESON_ENABLE_NEURON
 
 

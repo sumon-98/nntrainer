@@ -139,11 +139,14 @@ if get_option('enable-neuron')
   and_conf.set('MESON_NEURON_INCS', ' '.join(neuron_inc_abs))
   and_conf.set('MESON_NEURON_SMOKE_SRCS',
     meson.source_root() / 'Applications/CausalLM/neuron/nntrainer_neuron_smoke.cpp')
+  and_conf.set('MESON_NEURON_LLAMA_PARITY_SRCS',
+    meson.source_root() / 'Applications/CausalLM/neuron/llama_prefill_parity_test.cpp')
 else
   and_conf.set('MESON_ENABLE_NEURON', 0)
   and_conf.set('MESON_NEURON_SRCS', '')
   and_conf.set('MESON_NEURON_INCS', '')
   and_conf.set('MESON_NEURON_SMOKE_SRCS', '')
+  and_conf.set('MESON_NEURON_LLAMA_PARITY_SRCS', '')
 endif
 
 configure_file(input: 'Android.mk.in', output: 'Android.mk',

@@ -145,6 +145,15 @@ void usage(const char *argv0) {
     << "  --input=<file>       raw input bytes matching --in-dtype/--in-shape\n"
     << "                       (default: all zeros)\n"
     << "  --dump=<file>        write produced output to <file>\n"
+    << "  --second-path=<dla>  enable the multi-graph coexistence check: run\n"
+    << "                       a second neuron_graph layer (same in/out\n"
+    << "                       shape+dtype as the primary) bound to this\n"
+    << "                       second .dla, in the SAME model/process, and\n"
+    << "                       verify both run independently. Ignores\n"
+    << "                       [golden.bin]/--dump in this mode.\n"
+    << "  --second-input=<file> input for the second graph in --second-path\n"
+    << "                       mode (default: all zeros, or all-ones if\n"
+    << "                       --input was also left unset)\n"
     << "\nEnvironment variables:\n"
     << "  QUICK_DOT_AI_NEURON_LIB          override libneuron_runtime.so path\n"
     << "  QUICK_DOT_AI_NEURON_NULL_DEVICE  set to 1 for the no-hardware stub\n"
@@ -264,6 +273,144 @@ ParsedShape parse_shape(const std::string &shape) {
   return ParsedShape{static_cast<unsigned int>(fields[0]), elems};
 }
 
+/**
+ * @brief Validates that two neuron_graph layers, each bound to a distinct
+ * .dla path, coexist and run independently within one model/process, in a
+ * single forward pass. This is the multi-graph-per-model pattern an LLM
+ * prefill/decode split needs (see neuron_kv_cache_manager.h); unlike the
+ * rest of this file (one .dla per run), this exercises NeuronVar::rt_map
+ * (nntrainer/neuron/neuron_context_var.h) holding two concurrent per-path
+ * runtime entries at once, and confirms `model->inference()` feeds/returns
+ * each graph's tensor independently rather than one graph's runtime
+ * clobbering the other's.
+ *
+ * Builds two independent input->neuron_graph pairs in one model (not
+ * connected to each other), feeds each a different input, and checks the
+ * two outputs are NOT byte-identical -- if one runtime were aliasing the
+ * other, both graphs would echo whichever ran last regardless of input.
+ */
+int run_multi_graph_check(const std::string &dla_path_0,
+                          const std::string &dla_path_1,
+                          const std::string &in_shape,
+                          const std::string &out_shape,
+                          const std::string &in_dtype,
+                          const std::string &out_dtype,
+                          const std::string &input_file_0,
+                          const std::string &input_file_1) {
+  log_verbose("[multi-graph] dla[0]: %s", dla_path_0.c_str());
+  log_verbose("[multi-graph] dla[1]: %s", dla_path_1.c_str());
+
+  auto model = ml::train::createModel(ml::train::ModelType::NEURAL_NET);
+  if (model == nullptr) {
+    std::cerr << "ERROR: failed to create model" << std::endl;
+    return EXIT_FAILURE;
+  }
+
+  model->addLayer(
+    ml::train::createLayer("input", {"name=in0", "input_shape=" + in_shape}));
+  model->addLayer(ml::train::createLayer(
+    "neuron_graph", {"name=graph0", "input_layers=in0", "path=" + dla_path_0,
+                     "dim=" + out_shape, "tensor_dtype=" + out_dtype,
+                     "tensor_type=OUT_TENSOR", "engine=neuron"}));
+
+  model->addLayer(
+    ml::train::createLayer("input", {"name=in1", "input_shape=" + in_shape}));
+  model->addLayer(ml::train::createLayer(
+    "neuron_graph", {"name=graph1", "input_layers=in1", "path=" + dla_path_1,
+                     "dim=" + out_shape, "tensor_dtype=" + out_dtype,
+                     "tensor_type=OUT_TENSOR", "engine=neuron"}));
+
+  model->setProperty({"batch_size=1", "epochs=1",
+                      "model_tensor_type=" + in_dtype + "-" + in_dtype});
+
+  int ret = model->compile(ml::train::ExecutionMode::INFERENCE);
+  if (ret != ML_ERROR_NONE) {
+    std::cerr << "ERROR: failed to compile multi-graph model, error code: "
+              << ret << std::endl;
+    return EXIT_FAILURE;
+  }
+  ret = model->initialize(ml::train::ExecutionMode::INFERENCE);
+  if (ret != ML_ERROR_NONE) {
+    std::cerr << "ERROR: failed to initialize multi-graph model, error code: "
+              << ret << std::endl;
+    return EXIT_FAILURE;
+  }
+  log_verbose("[multi-graph] two-graph model compiled+initialized");
+
+  const ParsedShape parsed_in = parse_shape(in_shape);
+  const ParsedShape parsed_out = parse_shape(out_shape);
+  const size_t in_elem_bytes = dtype_bytes(in_dtype);
+  const size_t out_elem_bytes = dtype_bytes(out_dtype);
+  const size_t in_file_bytes = parsed_in.elems * in_elem_bytes;
+  const size_t out_bytes = parsed_out.elems * out_elem_bytes;
+
+  auto load_input = [&](const std::string &path, std::vector<float> &storage) {
+    storage.assign(parsed_in.elems, 0.0f);
+    if (path.empty())
+      return;
+    std::vector<uint8_t> raw = read_binary_file(path);
+    if (raw.size() != in_file_bytes) {
+      throw std::invalid_argument(
+        "--second-input size mismatch: file has " +
+        std::to_string(raw.size()) + " bytes, expected " +
+        std::to_string(in_file_bytes) + " bytes");
+    }
+    widen_to_float(in_dtype, raw, storage);
+  };
+
+  std::vector<float> in0_storage, in1_storage;
+  load_input(input_file_0, in0_storage);
+  load_input(input_file_1, in1_storage);
+
+  // Force the two inputs to differ even if neither --input nor
+  // --second-input was given: "same output on both graphs" must then mean
+  // one graph's result leaked into the other, not that both simply happened
+  // to be fed the same (e.g. all-zero) input.
+  if (input_file_0.empty() && input_file_1.empty()) {
+    for (auto &v : in1_storage)
+      v = 1.0f;
+  }
+
+  log_verbose("[multi-graph] running a single inference() call across both "
+              "graphs...");
+  std::vector<float *> outputs = model->inference(
+    parsed_in.batch, {in0_storage.data(), in1_storage.data()}, {});
+
+  if (outputs.size() != 2 || outputs[0] == nullptr || outputs[1] == nullptr) {
+    std::cerr << "ERROR: expected 2 outputs (one per graph), got "
+              << outputs.size() << std::endl;
+    return EXIT_FAILURE;
+  }
+
+  const auto *out0 = reinterpret_cast<const uint8_t *>(outputs[0]);
+  const auto *out1 = reinterpret_cast<const uint8_t *>(outputs[1]);
+  const bool identical = std::memcmp(out0, out1, out_bytes) == 0;
+
+  if (g_verbose) {
+    const size_t n = out_bytes < 16 ? out_bytes : 16;
+    fprintf(stderr, "[multi-graph] graph0 first %zu byte(s):", n);
+    for (size_t i = 0; i < n; ++i)
+      fprintf(stderr, " %02x", out0[i]);
+    fprintf(stderr, "\n[multi-graph] graph1 first %zu byte(s):", n);
+    for (size_t i = 0; i < n; ++i)
+      fprintf(stderr, " %02x", out1[i]);
+    fprintf(stderr, "\n");
+  }
+
+  if (identical) {
+    std::cerr << "ERROR: graph0 and graph1 outputs are byte-identical despite "
+                 "different inputs -- one runtime is likely aliasing the "
+                 "other (NeuronVar::rt_map not keeping them independent)"
+              << std::endl;
+    return EXIT_FAILURE;
+  }
+
+  std::cout << "PASS (two neuron_graph layers with distinct .dla paths ran "
+               "independently in the same model/process)"
+            << std::endl;
+  return EXIT_SUCCESS;
+}
+
 } // namespace
 
 int main(int argc, char **argv) {
@@ -280,6 +427,17 @@ int main(int argc, char **argv) {
   std::string out_dtype = "FP32";
   std::string input_file;
   std::string dump_file;
+  // --second-path enables the multi-graph coexistence check (see
+  // run_multi_graph_check() below): a second neuron_graph layer, bound to a
+  // second .dla, in the SAME model/process as the first -- this is
+  // otherwise unexercised by the rest of this file, which only ever loads
+  // one .dla per run. Assumes the same in/out shape+dtype as the primary
+  // graph; that's enough to validate NeuronVar::rt_map (nntrainer/neuron/
+  // neuron_context_var.h) correctly keeps two concurrent per-path runtime
+  // entries without cross-talk -- the actual DLA content doesn't matter for
+  // that, only that two distinct paths are loaded and run independently.
+  std::string second_dla_path;
+  std::string second_input_file;
 
   // positional: <model.dla> then optional <golden.bin>; the rest are --opts
   for (int i = 1; i < argc; ++i) {
@@ -297,6 +455,10 @@ int main(int argc, char **argv) {
       input_file = val;
     } else if (match_opt(arg, "dump", val)) {
       dump_file = val;
+    } else if (match_opt(arg, "second-path", val)) {
+      second_dla_path = val;
+    } else if (match_opt(arg, "second-input", val)) {
+      second_input_file = val;
     } else if (arg == "-h" || arg == "--help") {
       usage(argv[0]);
       return EXIT_SUCCESS;
@@ -376,6 +538,12 @@ int main(int argc, char **argv) {
       return EXIT_FAILURE;
     }
     log_verbose("[smoke] neuron context registered");
+
+    if (!second_dla_path.empty()) {
+      return run_multi_graph_check(dla_path, second_dla_path, in_shape,
+                                   out_shape, in_dtype, out_dtype, input_file,
+                                   second_input_file);
+    }
 
     // ---------------------------------------------------------------------
     // Step 2: build input -> neuron_graph programmatically.

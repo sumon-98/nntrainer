@@ -238,10 +238,83 @@ after inspecting the values by hand.
 ## Next Steps (Phase 2+)
 
 - **Layer properties:** Integrate quant params (input_quant_param / output_quant_param) into the layer config so the app layer can access scale/offset for de/requantization.
-- **Multi-layer models:** Test models with multiple neuron_graph layers or mixed CPU/NPU execution.
+- ~~**Multi-layer models:** Test models with multiple neuron_graph layers or mixed CPU/NPU execution.~~
+  Confirmed on real mt6993 hardware: two `neuron_graph` layers bound to two
+  distinct `.dla` paths coexist in one model/process and run independently
+  within a single `model->inference()` call, with no cross-talk between
+  their runtimes (`NeuronVar::rt_map` in `nntrainer/neuron/neuron_context_var.h`
+  already keyed the runtime map by path; this was previously unexercised by
+  more than one concurrent `.dla`). See `run_multi_graph_check()` in
+  `nntrainer_neuron_smoke.cpp`, invoked via `--second-path=<dla>`
+  (`--second-input=<file>` optional). Mixed CPU/NPU execution in one model
+  is still untested.
 - **Dynamic shapes:** Support `NeuronRuntime_setInputShape` for models with variable input dimensions.
 - **Zero-copy I/O:** Wire up true ION/DMA-BUF buffers (currently all buffers are non-ION for simplicity).
 - **Integration with CausalLM:** Plug the neuron_graph layer into the full app for LLM inference benchmarks.
+  A first host-side building block for this landed:
+  `neuron_kv_cache_manager.h` (`NeuronKvCacheManager`) is a minimal,
+  QNN-KV-cache-manager-equivalent host-side buffer manager for per-layer
+  K/V caches, sized for a straightforward prefill-then-decode loop (no
+  speculative decoding / ring-buffer / DDTree support, unlike
+  `qnn_kv_cache_manager.h` -- add that later if/when needed). It has no
+  device dependency (pure buffer bookkeeping) and is covered by
+  `neuron_kv_cache_manager_test.cpp`, runnable as a plain host binary
+  (`g++ -std=c++17 neuron_kv_cache_manager_test.cpp && ./a.out`) or via
+  `meson test` in a desktop build with `-Denable-neuron=true
+  -Denable-transformer=true` (the latter is required only because this
+  file lives in the same `meson.build` as `nntrainer_neuron_smoke`, which
+  depends on `ccapi_dep` defined by `CausalLM/meson.build` -- a pre-existing
+  coupling worth decoupling if this grows).
+
+  **Confirmed on real mt6993 hardware:** `neuron_graph` can wire a
+  real LLM `.dla`'s full I/O -- `llama_prefill_parity_test.cpp` feeds all
+  37 real inputs (`input_embeds`, `mask`, `split_mask`, `cos`, `sin`, 16x
+  `past_keys`/`past_values`) and 33 real outputs (`hidden_states_16`
+  logits + 16x `curr_keys`/`curr_values`) of a real
+  Llama-3.2-1B-Instruct 128t1024c prefill `.dla` through one `neuron_graph`
+  layer, and matches MediaTek's own dumped reference tensors **bit-exact,
+  every element, including the full 16.4M-element logits tensor** (not a
+  tolerance/approximate check).
+
+  Getting there surfaced a real, easy-to-repeat bug worth documenting
+  precisely, since it will bite anyone else feeding non-FP32 `neuron_graph`
+  I/O through `ml::train::Model::inference()`:
+  **`NeuralNetwork::inference()`'s `std::vector<float *>` input/output
+  parameters are NOT arrays of widened float *values* for a non-FP32
+  `model_tensor_type` -- they are the tensor's raw native-dtype bytes
+  (e.g. `int16_t`), reinterpreted as `float *` purely as the vector's
+  generic element type.** Concretely:
+    - `mapExternalTensor()` (`nntrainer/models/neuralnet.cpp`) maps a
+      non-FP32 input via `Tensor::Map<uint16_t/uint8_t/...>(reinterpret_cast<...>(buf), ...)`
+      -- a zero-copy byte-for-byte alias (`Tensor::Map`'s own doc: "This
+      will not copy buffer to a new tensor but directly uses it"), not a
+      value-converting cast.
+    - The returned output pointer (`out_t.getData()`) is the same: the
+      tensor's real native-dtype storage, reinterpreted as `float *`.
+  `nntrainer_neuron_smoke.cpp` already treats its own (single) output this
+  way (`reinterpret_cast<const uint8_t *>(outputs[0])`, never as widened
+  floats) -- but its `--input` path goes through `widen_to_float()` first,
+  building a genuine widened-value `float` array. That path's only
+  real-hardware validation is the single-tensor UINT8 MobileNetV2 case,
+  which happened to still pass bit-exact; given the mechanism found here,
+  that success is not fully explained and is worth re-verifying rather
+  than trusted by precedent -- do not copy nntrainer_neuron_smoke.cpp's
+  `--input` convention into new code without checking. See
+  `llama_prefill_parity_test.cpp`'s own file-header comment for the full
+  writeup (including the debugging trail: raw memory-pool trace ruled out
+  allocation/overlap bugs, and the `time_dist.cpp`-only usage of
+  `EffDimFlag`/`DynDimFlag` ruled out `NeuronGraph::finalize()`'s
+  index-0-only dimension-flag calls, before the actual mapExternalTensor
+  byte-layout mechanism was found).
+
+  Still needed before this can actually run a full LLM generate loop: a
+  `Quick_Dot_AI_Neuron` app class (mirroring
+  `Applications/CausalLM/qnn/quick_dot_ai_qnn.{h,cpp}`) to wire the now
+  bit-exact-proven I/O path, `NeuronKvCacheManager`, the tokenizer/chat-
+  template/sampling machinery already in `Applications/CausalLM/`, and
+  per-tensor quant metadata together into an actual `generate()` loop
+  spanning prefill -> decode with real KV-cache threading between calls
+  (this parity test only exercises a single, cache-empty prefill step).
 
 ## Support
 

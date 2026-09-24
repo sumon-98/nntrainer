@@ -13,3 +13,13 @@ neuron_smoke_exe = executable(
   install: true,
   install_dir: nntrainer_bindir,
 )
+
+# Host-side unit test for NeuronKvCacheManager: pure bookkeeping logic, no
+# NPU/.dla/device involved, so this builds and runs as a plain native
+# executable (unlike nntrainer_neuron_smoke, which needs an Android target).
+neuron_kv_cache_manager_test_exe = executable(
+  'neuron_kv_cache_manager_test',
+  ['neuron_kv_cache_manager_test.cpp'],
+  install: false,
+)
+test('neuron_kv_cache_manager_test', neuron_kv_cache_manager_test_exe)
